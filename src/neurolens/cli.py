@@ -58,6 +58,43 @@ def _generate_demo_edf(out_path: Path) -> Path:
     return mod.make_synthetic_edf(out_path)
 
 
+def _monitor(args) -> int:
+    from .outputs.json_out import save_json
+    from .pipeline.config_loader import load_configs
+    from .realtime.monitor import RealtimeMonitor
+    from .realtime.stream import EdfReplaySource
+
+    cfg = load_configs()
+    if args.window is not None:
+        cfg.realtime.window_s = args.window
+    if args.step is not None:
+        cfg.realtime.step_s = args.step
+    source = EdfReplaySource(args.file, chunk_s=cfg.realtime.step_s, realtime=args.realtime)
+    monitor = RealtimeMonitor(config=cfg, montage_name=args.montage, out_dir=args.out)
+    summary = monitor.run(source)
+
+    print(f"=== cEEG мониторинг / cEEG monitoring: {summary.source} ===")
+    print(f"Окон/Oynalar: {summary.n_windows}  окно/step: {summary.window_s}/{summary.step_s}с")
+    print(f"Тревоги/Alarms: {summary.n_alarms_raised} (подавлено/suppressed: {summary.n_alarms_suppressed})"
+          f"  {summary.alarms_per_hour}/час (бюджет {summary.false_alarm_budget_per_hour})"
+          f"  в пределах бюджета: {summary.within_budget}")
+    print(f"Латентность/окно: mean {summary.latency_ms_mean} мс, p95 {summary.latency_ms_p95} мс"
+          f"  real-time осуществимо: {summary.realtime_feasible}")
+    if summary.seizure_burden:
+        sb = summary.seizure_burden
+        print(f"Судорожная нагрузка: {sb.n_seizures} эп., {sb.total_seizure_time_s}с "
+              f"({sb.seizure_fraction*100:.0f}%), статус: {sb.status_epilepticus_suspected}")
+    for al in summary.alarms:
+        frag = f"  фрагмент: {al.fragment_path}" if al.fragment_path else ""
+        print(f"  ⚠ [{al.type.value}] t={al.t_start:.0f}–{al.t_end:.0f}с "
+              f"conf={al.confidence} — {al.message.ru}{frag}")
+
+    if args.out:
+        path = save_json(summary.model_dump(mode="json"), Path(args.out) / "monitor_summary.json")
+        print(f"\nСводка/Xulosa: {path}")
+    return 0
+
+
 def _export_schemas(args) -> int:
     from .contracts.export_schemas import main as export_main
 
@@ -83,6 +120,15 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--out", default="out_demo")
     d.add_argument("--provider", default="auto", choices=["auto", "anthropic", "deterministic"])
     d.set_defaults(func=_demo)
+
+    m = sub.add_parser("monitor", help="Stream an EDF as real-time cEEG with alarms.")
+    m.add_argument("file")
+    m.add_argument("--montage", default="double_banana")
+    m.add_argument("--window", type=float, default=None, help="Analysis window (s).")
+    m.add_argument("--step", type=float, default=None, help="Advance between analyses (s).")
+    m.add_argument("--out", default=None, help="Output dir for alarm fragments + summary.")
+    m.add_argument("--realtime", action="store_true", help="Pace replay to wall-clock.")
+    m.set_defaults(func=_monitor)
 
     s = sub.add_parser("export-schemas", help="Export JSON Schemas from contracts.")
     s.add_argument("dir", nargs="?", default=None)

@@ -32,8 +32,16 @@ class IctalRhythmDetector(Detector):
         conc = features.epoch_band_conc
         domf = features.epoch_domfreq
 
+        # Optional external (rolling) baseline for streaming: when a seizure fills
+        # the analysis window there is no quiet reference, so the monitor supplies
+        # a baseline from stream history aligned to features.eeg_channels.
+        ext_baseline = getattr(self, "external_baseline", None)
+
         for ci, chan in enumerate(features.eeg_channels):
-            baseline = float(np.median(rms[:, ci])) + 1e-9
+            if ext_baseline is not None and ci < len(ext_baseline):
+                baseline = float(ext_baseline[ci]) + 1e-9
+            else:
+                baseline = float(np.median(rms[:, ci])) + 1e-9
             active = (conc[:, ci] >= thresholds.ictal_rhythmicity) & (
                 rms[:, ci] >= thresholds.ictal_amplitude_factor * baseline
             )

@@ -142,3 +142,42 @@ class RuleBase(BaseModel):
 
     version: str = "0.1.0"
     chains: list[RuleChain] = Field(default_factory=list)
+
+
+class AlarmRule(BaseModel):
+    """Per-alarm-type gating for real-time monitoring (TZ §2, §16)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    min_confidence: float = Field(default=0.6, ge=0, le=1)
+    persistence_windows: int = Field(
+        default=2, ge=1, description="Consecutive windows the finding must persist before alarming."
+    )
+    refractory_s: float = Field(
+        default=30.0, ge=0, description="Do not re-fire the same type within this interval."
+    )
+    max_per_hour: float = Field(
+        default=6.0, ge=0, description="Cap on alarms of this type per hour (FA/h control)."
+    )
+    critical: bool = Field(
+        default=True, description="Hard-safety type — never suppressed by FA/h control (TZ §10)."
+    )
+
+
+class RealtimeConfig(BaseModel):
+    """Streaming cEEG monitor configuration (TZ §2 sub-mode, §4, §16)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    window_s: float = Field(default=30.0, gt=0, description="Rolling analysis window length.")
+    step_s: float = Field(default=5.0, gt=0, description="Advance between analyses.")
+    latency_budget_ms: float = Field(
+        default=5000.0, gt=0, description="Per-window processing budget (must be << step)."
+    )
+    max_false_alarms_per_hour: float = Field(default=10.0, ge=0)
+    alarms: dict[str, AlarmRule] = Field(
+        default_factory=dict, description="Per-alarm-type rules keyed by AlarmType value."
+    )
+
+    def rule_for(self, alarm_type: str) -> AlarmRule:
+        return self.alarms.get(alarm_type, AlarmRule())

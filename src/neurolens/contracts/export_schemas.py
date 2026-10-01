@@ -13,8 +13,9 @@ import json
 import sys
 from pathlib import Path
 
+from .alarms import Alarm, MonitorSummary
 from .causal import CausalGraph
-from .config import MontageConfig, RuleBase, Thresholds
+from .config import MontageConfig, RealtimeConfig, RuleBase, Thresholds
 from .events import DetectionResult, Event
 from .report import LLMReport
 from .signal import UnifiedSignal
@@ -29,6 +30,9 @@ SCHEMAS = {
     "detection_result": DetectionResult,
     "causal_graph": CausalGraph,
     "llm_report": LLMReport,
+    "realtime_config": RealtimeConfig,
+    "alarm": Alarm,
+    "monitor_summary": MonitorSummary,
 }
 
 

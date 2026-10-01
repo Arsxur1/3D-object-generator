@@ -13,7 +13,13 @@ from typing import Any
 
 import yaml
 
-from ..contracts.config import FilterConfig, MontageConfig, RuleBase, Thresholds
+from ..contracts.config import (
+    FilterConfig,
+    MontageConfig,
+    RealtimeConfig,
+    RuleBase,
+    Thresholds,
+)
 
 
 def configs_dir(explicit: str | Path | None = None) -> Path:
@@ -41,6 +47,7 @@ class ConfigBundle:
     norms: dict[str, Any]
     acns: dict[str, Any]
     electrode_coords: dict[str, tuple[float, float]] = field(default_factory=dict)
+    realtime: RealtimeConfig = field(default_factory=RealtimeConfig)
     root: Path | None = None
 
     def montage(self, name: str) -> MontageConfig:
@@ -70,6 +77,9 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
     coords_raw = _read_yaml(cfg / "electrodes" / "coords_10_20.yaml").get("positions", {})
     coords = {k: (float(v[0]), float(v[1])) for k, v in coords_raw.items()}
 
+    rt_file = cfg / "realtime.yaml"
+    realtime = RealtimeConfig(**_read_yaml(rt_file)) if rt_file.exists() else RealtimeConfig()
+
     return ConfigBundle(
         filters=filters,
         thresholds=thresholds,
@@ -78,5 +88,6 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
         norms=norms,
         acns=acns,
         electrode_coords=coords,
+        realtime=realtime,
         root=cfg,
     )

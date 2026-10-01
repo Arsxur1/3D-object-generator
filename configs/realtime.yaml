@@ -1,0 +1,39 @@
+# Streaming cEEG monitor configuration (TZ §2 real-time sub-mode, §4, §16).
+window_s: 30.0                 # rolling analysis window
+step_s: 5.0                    # advance between analyses (near-real-time cadence)
+latency_budget_ms: 5000.0     # per-window processing budget (must be << step*1000)
+max_false_alarms_per_hour: 10.0  # ICU alarm-fatigue guardrail (TZ §16)
+
+# Per-alarm-type gating: sensitivity first, but with persistence + refractory +
+# per-hour caps to control false alarms. Critical types are never suppressed (§10).
+alarms:
+  seizure:
+    min_confidence: 0.6
+    persistence_windows: 2      # must persist across >=2 windows before alarming
+    refractory_s: 60.0          # one reminder per minute of ongoing seizure
+    max_per_hour: 12.0
+    critical: true
+  status_epilepticus:
+    min_confidence: 0.6
+    persistence_windows: 1
+    refractory_s: 300.0         # declare once; re-remind every 5 min
+    max_per_hour: 6.0
+    critical: true
+  iic:
+    min_confidence: 0.55
+    persistence_windows: 2
+    refractory_s: 120.0
+    max_per_hour: 4.0
+    critical: true
+  burst_suppression:
+    min_confidence: 0.5
+    persistence_windows: 2
+    refractory_s: 120.0
+    max_per_hour: 3.0
+    critical: true
+  suppression:
+    min_confidence: 0.5
+    persistence_windows: 2
+    refractory_s: 120.0
+    max_per_hour: 3.0
+    critical: false
