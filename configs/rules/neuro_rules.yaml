@@ -1,0 +1,112 @@
+# Neurophysiological rule base (TZ §8.1, §18.3). NOT hardcoded — this YAML is
+# the configurable knowledge graph consumed by Layer 5 (rules_engine).
+#
+# Each chain maps a condition (events present/absent + clinical context) to a
+# cause -> effect edge with a physiology label and confidence. Artifact-vs-real
+# discrimination is expressed as a chain that "resolves_artifact_for" an event.
+version: "0.1.0"
+chains:
+  # 1) Diffuse slowing -> encephalopathy (with metabolic/toxic/hypoxic differential)
+  - id: diffuse_slowing_encephalopathy
+    description_ru: >-
+      Диффузное замедление фона указывает на энцефалопатию; дифференциал —
+      метаболическая/токсическая/гипоксическая (уточняется контекстом).
+    when:
+      any_event: [diffuse_slowing]
+    cause_ru: Диффузное замедление фоновой активности
+    cause_uz: Fon faolligining diffuz sekinlashuvi
+    effect_ru: Энцефалопатия (метаболическая/токсическая/гипоксическая — по контексту)
+    effect_uz: Ensefalopatiya (kontekstga ko‘ra metabolik/toksik/gipoksik)
+    physiology: pathologic
+    confidence: 0.7
+
+  # 2) Triphasic waves + hepatic/renal failure -> metabolic encephalopathy
+  - id: triphasic_metabolic
+    description_ru: >-
+      Трифазные волны на фоне печёночной/почечной недостаточности —
+      метаболическая (часто печёночная) энцефалопатия.
+    when:
+      any_event: [triphasic_waves]
+    cause_ru: Трифазные волны
+    cause_uz: Uch fazali to‘lqinlar
+    effect_ru: Метаболическая энцефалопатия (напр. печёночная/почечная)
+    effect_uz: Metabolik ensefalopatiya (masalan, jigar/buyrak)
+    physiology: pathologic
+    confidence: 0.6
+
+  # 3) LPDs -> acute structural process (on the IIC)
+  - id: lpds_structural
+    description_ru: >-
+      Латерализованные периодические разряды (LPDs) — острый структурный
+      процесс (инсульт, герпетический энцефалит) на фоне ИИК.
+    when:
+      any_event: [lpds]
+    cause_ru: Латерализованные периодические разряды (LPDs)
+    cause_uz: Lateralizatsiyalangan davriy razryadlar (LPDs)
+    effect_ru: Острый структурный очаг; положение на иктально-интериктальном континууме
+    effect_uz: O‘tkir strukturaviy o‘choq; iktal-interiktal kontinuumdagi holat
+    physiology: pathologic
+    confidence: 0.65
+    critical: true
+
+  # 4) ECG artifact vs IED — resolves a candidate epileptiform transient as artifact
+  - id: ecg_artifact_vs_ied
+    description_ru: >-
+      Острый транзиент, совпадающий с QRS ЭКГ и периодичный с ЧСС, объясняется
+      ЭКГ-артефактом, а не эпилептиформным разрядом (IED).
+    when:
+      any_event: [ecg_artifact]
+    cause_ru: ЭКГ-артефакт (совпадение с QRS, периодичность по ЧСС)
+    cause_uz: EKG artefakti (QRS bilan mos, yurak urishi davriyligi)
+    effect_ru: Псевдо-эпилептиформный транзиент — не истинный IED
+    effect_uz: Soxta-epileptiform tranzient — haqiqiy IED emas
+    physiology: artifact
+    confidence: 0.8
+    resolves_artifact_for: [spike, sharp_wave, ied]
+
+  # 5) Burst-suppression: severe injury vs deep sedation/hypothermia (context split)
+  - id: burst_suppression_context
+    description_ru: >-
+      Burst-suppression разводится по контексту: тяжёлое повреждение против
+      глубокой седации/гипотермии (учёт препаратов и температуры).
+    when:
+      any_event: [burst_suppression]
+    cause_ru: Паттерн «вспышка-подавление» (burst-suppression)
+    cause_uz: “Portlash-bostirish” patterni (burst-suppression)
+    effect_ru: >-
+      Тяжёлое диффузное повреждение ИЛИ глубокая седация/гипотермия
+      (разводится по контексту: седативы, температура)
+    effect_uz: >-
+      Og‘ir diffuz shikast YOKI chuqur sedatsiya/gipotermiya
+      (kontekst bo‘yicha: sedativlar, harorat)
+    physiology: pathologic
+    confidence: 0.6
+    critical: true
+
+  # 6) Focal slowing / asymmetry -> lateralized structural lesion
+  - id: focal_slowing_structural
+    description_ru: >-
+      Очаговое замедление / устойчивая асимметрия указывают на структурный
+      очаг в соответствующей области с латерализацией поражения.
+    when:
+      any_event: [focal_slowing]
+    cause_ru: Очаговое замедление / межполушарная асимметрия
+    cause_uz: O‘choqli sekinlashuv / yarim sharlararo assimetriya
+    effect_ru: Структурный очаг в соответствующей области (латерализация поражения)
+    effect_uz: Tegishli sohada strukturaviy o‘choq (shikast lateralizatsiyasi)
+    physiology: pathologic
+    confidence: 0.6
+
+  # 7) Physiologic response: slowing on hyperventilation/drowsiness is NOT pathology
+  - id: physiologic_slowing_activation
+    description_ru: >-
+      Замедление при гипервентиляции/сонливости — физиологический ответ,
+      а не патология (если не выходит за возрастные нормы).
+    when:
+      any_event: [drowsiness_slowing]
+    cause_ru: Замедление при гипервентиляции/сонливости
+    cause_uz: Giperventilyatsiya/uyquchanlikdagi sekinlashuv
+    effect_ru: Физиологический ответ (норма для активационной пробы/сонливости)
+    effect_uz: Fiziologik javob (aktivatsion sinov/uyquchanlik uchun norma)
+    physiology: physiologic
+    confidence: 0.6

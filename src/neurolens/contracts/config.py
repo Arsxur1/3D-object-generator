@@ -1,0 +1,126 @@
+"""Config contracts — montages, filters, thresholds, and the neuro rule base.
+
+These models validate the YAML files under ``configs/`` (TZ §0: nothing
+hardcoded where a config belongs — mains frequency, montages, thresholds,
+norms, the physiological rule base, ACNS terminology).
+"""
+
+from __future__ import annotations
+
+from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class MontageType(str, Enum):
+    REFERENTIAL = "referential"
+    BIPOLAR = "bipolar"
+    LAPLACIAN = "laplacian"  # interface reserved; not computed in the skeleton
+
+
+class MontagePair(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str  # derivation label, e.g. "Fp1-F7"
+    anode: str  # channel measured
+    cathode: Optional[str] = None  # subtracted channel (None for referential)
+
+
+class MontageConfig(BaseModel):
+    """A montage definition (TZ §5: montage engine is first-class)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    type: MontageType
+    description_ru: str = ""
+    reference: Optional[str] = Field(
+        default=None, description="For referential montages: the reference label."
+    )
+    pairs: list[MontagePair] = Field(default_factory=list)
+
+
+class FilterConfig(BaseModel):
+    """Preprocessing filter settings (TZ §5)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    highpass_hz: float = Field(default=0.5, ge=0)
+    lowpass_hz: float = Field(default=70.0, gt=0)
+    notch_hz: float = Field(default=50.0, description="Mains: 50 (UZ) switchable to 60.")
+    notch_enabled: bool = True
+    filter_order: int = Field(default=4, ge=1, le=10)
+
+
+class ModeBGates(BaseModel):
+    """Gates for autonomous mode B (TZ §2)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    min_confidence: float = Field(default=0.85, ge=0, le=1)
+    min_signal_quality: float = Field(default=0.6, ge=0, le=1)
+    max_artifact_fraction: float = Field(default=0.3, ge=0, le=1)
+    require_plausible: bool = True
+
+
+class Thresholds(BaseModel):
+    """Confidence thresholds and alarm budgets (TZ §2, §10, §16)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    detection_min_confidence: float = Field(default=0.5, ge=0, le=1)
+    mode_b: ModeBGates = Field(default_factory=ModeBGates)
+    max_false_alarms_per_hour: float = Field(
+        default=2.0, ge=0, description="cEEG alarm budget (placeholder for real-time, v2)."
+    )
+    # Detector-specific thresholds (kept in config, not hardcoded).
+    diffuse_slowing_delta_theta_ratio: float = Field(default=0.55, ge=0, le=1)
+    asymmetry_index_abnormal: float = Field(default=0.5, ge=0, le=1)
+    suppression_amplitude_uv: float = Field(default=10.0, gt=0)
+    burst_suppression_ratio: float = Field(default=0.5, ge=0, le=1)
+    ictal_min_duration_s: float = Field(default=8.0, gt=0)
+    ictal_rhythmicity: float = Field(default=0.45, ge=0, le=1)
+    ictal_amplitude_factor: float = Field(default=1.5, ge=1)
+
+
+class RuleCondition(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    any_event: list[str] = Field(
+        default_factory=list, description="Fires if any of these event codes is present."
+    )
+    all_events: list[str] = Field(
+        default_factory=list, description="Requires all of these event codes."
+    )
+    context_present: list[str] = Field(
+        default_factory=list,
+        description="Requires clinical-context keys, e.g. 'sedatives', 'antiseizure_meds'.",
+    )
+    context_absent: list[str] = Field(default_factory=list)
+
+
+class RuleChain(BaseModel):
+    """A causal chain / rule (TZ §8.1, §18.3)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    description_ru: str = ""
+    when: RuleCondition
+    cause_ru: str
+    cause_uz: str
+    effect_ru: str
+    effect_uz: str
+    physiology: str = Field(default="pathologic")  # physiologic|pathologic|uncertain|artifact
+    confidence: float = Field(default=0.6, ge=0, le=1)
+    critical: bool = False
+    # For artifact-vs-real discrimination rules (e.g. ECG artifact vs IED).
+    resolves_artifact_for: list[str] = Field(default_factory=list)
+
+
+class RuleBase(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    version: str = "0.1.0"
+    chains: list[RuleChain] = Field(default_factory=list)

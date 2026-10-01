@@ -1,0 +1,33 @@
+# Age / maturational norms engine (TZ §6, first-class). Minimal, extensible.
+# The interpretation layer selects a band by age_years (or postmenstrual_age_weeks
+# for neonates). Values are indicative starting points, not clinical truth — TODO:
+# replace/extend with a curated normative database (low confidence until then).
+version: "0.1.0"
+adult:
+  min_age_years: 18
+  posterior_dominant_rhythm_hz: [8.0, 13.0]   # awake, eyes closed
+  expected_background: alpha
+  notes_ru: >-
+    Взрослый бодрствующий: задний доминирующий ритм (ЗДР) 8-13 Гц, реактивный
+    на открывание глаз; замедление ЗДР < 8 Гц — аномалия.
+child_school:
+  min_age_years: 6
+  max_age_years: 17
+  posterior_dominant_rhythm_hz: [7.5, 12.0]
+  expected_background: alpha_developing
+  physiologic_variants: [posterior_slow_waves_of_youth, hypnagogic_hypersynchrony]
+child_early:
+  min_age_years: 1
+  max_age_years: 5
+  posterior_dominant_rhythm_hz: [6.0, 9.0]
+  expected_background: theta_alpha
+  physiologic_variants: [hypnagogic_hypersynchrony]
+neonate:
+  # Selected by postmenstrual_age_weeks (PMA), not age_years.
+  select_by: postmenstrual_age_weeks
+  pma_weeks: [24, 44]
+  expected_background: discontinuous_to_continuous
+  notes_ru: >-
+    Неонатальная ЭЭГ созревает по постменструальному возрасту: от прерывистой
+    активности (tracé discontinu) к непрерывной; aEEG и цикличность сна —
+    ключевые. TODO: маутрационные шаблоны по неделям ПМВ (v2).

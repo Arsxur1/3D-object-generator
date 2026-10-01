@@ -1,0 +1,28 @@
+# Referential montage (TZ §5). Each electrode shown against a common reference.
+# reference: 'average' | 'linked_ears' | a channel name (e.g. Cz).
+name: referential
+type: referential
+reference: average
+description_ru: >-
+  Референциальный монтаж: каждый электрод относительно общего референса
+  (по умолчанию — усреднённый). Хорош для оценки распределения амплитуды.
+pairs:
+  - { name: Fp1, anode: Fp1 }
+  - { name: Fp2, anode: Fp2 }
+  - { name: F3,  anode: F3 }
+  - { name: F4,  anode: F4 }
+  - { name: C3,  anode: C3 }
+  - { name: C4,  anode: C4 }
+  - { name: P3,  anode: P3 }
+  - { name: P4,  anode: P4 }
+  - { name: O1,  anode: O1 }
+  - { name: O2,  anode: O2 }
+  - { name: F7,  anode: F7 }
+  - { name: F8,  anode: F8 }
+  - { name: T3,  anode: T3 }
+  - { name: T4,  anode: T4 }
+  - { name: T5,  anode: T5 }
+  - { name: T6,  anode: T6 }
+  - { name: Fz,  anode: Fz }
+  - { name: Cz,  anode: Cz }
+  - { name: Pz,  anode: Pz }

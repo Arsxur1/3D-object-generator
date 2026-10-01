@@ -1,0 +1,19 @@
+# Confidence thresholds, mode-B gates, and alarm budget (TZ §2, §10, §16).
+detection_min_confidence: 0.5
+
+mode_b:                         # Autonomous mode gates (TZ §2B)
+  min_confidence: 0.85
+  min_signal_quality: 0.6
+  max_artifact_fraction: 0.3
+  require_plausible: true
+
+max_false_alarms_per_hour: 2.0  # cEEG alarm budget (placeholder; real-time is v2)
+
+# Detector thresholds (kept in config, never hardcoded — TZ §0)
+diffuse_slowing_delta_theta_ratio: 0.55
+asymmetry_index_abnormal: 0.5
+suppression_amplitude_uv: 10.0
+burst_suppression_ratio: 0.5
+ictal_min_duration_s: 8.0        # sustained rhythmic discharge to call ictal
+ictal_rhythmicity: 0.45          # peak-band power concentration (0..1)
+ictal_amplitude_factor: 1.5      # amplitude rise vs channel baseline

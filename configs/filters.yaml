@@ -1,0 +1,6 @@
+# Preprocessing filters (TZ §5). Clinically conventional defaults; all tunable.
+highpass_hz: 0.5        # HP 0.5-1 Hz
+lowpass_hz: 70.0        # LP ~70 Hz (clinical)
+notch_hz: 50.0          # Mains notch: 50 Hz (Uzbekistan grid); switch to 60 for US grid
+notch_enabled: true
+filter_order: 4

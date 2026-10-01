@@ -1,0 +1,26 @@
+# Approximate 2-D scalp coordinates for the 10-20 system (nose = +y, right = +x),
+# normalized to a unit head circle. Used for plotting layout and future topomaps
+# (TZ §11.5). For source-grade geometry, use the optional `mne` backend instead.
+version: "0.1.0"
+positions:
+  Fp1: [-0.31,  0.95]
+  Fp2: [ 0.31,  0.95]
+  F7:  [-0.81,  0.59]
+  F3:  [-0.39,  0.61]
+  Fz:  [ 0.00,  0.61]
+  F4:  [ 0.39,  0.61]
+  F8:  [ 0.81,  0.59]
+  T3:  [-1.00,  0.00]
+  C3:  [-0.50,  0.00]
+  Cz:  [ 0.00,  0.00]
+  C4:  [ 0.50,  0.00]
+  T4:  [ 1.00,  0.00]
+  T5:  [-0.81, -0.59]
+  P3:  [-0.39, -0.61]
+  Pz:  [ 0.00, -0.61]
+  P4:  [ 0.39, -0.61]
+  T6:  [ 0.81, -0.59]
+  O1:  [-0.31, -0.95]
+  O2:  [ 0.31, -0.95]
+  A1:  [-1.10,  0.00]
+  A2:  [ 1.10,  0.00]

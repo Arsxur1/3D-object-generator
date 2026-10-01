@@ -1,0 +1,31 @@
+# Longitudinal bipolar montage ("double banana") — default target montage (TZ §5, §17).
+# Channel names follow the classic 10-20 set (T3/T4/T5/T6), matching TZ §3.
+name: double_banana
+type: bipolar
+description_ru: >-
+  Продольный биполярный монтаж («двойной банан»): 4 цепочки (левая/правая
+  височные и парасагиттальные) + средняя линия. Стандарт для рутинной ЭЭГ.
+pairs:
+  # Left temporal chain
+  - { name: Fp1-F7, anode: Fp1, cathode: F7 }
+  - { name: F7-T3,  anode: F7,  cathode: T3 }
+  - { name: T3-T5,  anode: T3,  cathode: T5 }
+  - { name: T5-O1,  anode: T5,  cathode: O1 }
+  # Left parasagittal chain
+  - { name: Fp1-F3, anode: Fp1, cathode: F3 }
+  - { name: F3-C3,  anode: F3,  cathode: C3 }
+  - { name: C3-P3,  anode: C3,  cathode: P3 }
+  - { name: P3-O1,  anode: P3,  cathode: O1 }
+  # Right parasagittal chain
+  - { name: Fp2-F4, anode: Fp2, cathode: F4 }
+  - { name: F4-C4,  anode: F4,  cathode: C4 }
+  - { name: C4-P4,  anode: C4,  cathode: P4 }
+  - { name: P4-O2,  anode: P4,  cathode: O2 }
+  # Right temporal chain
+  - { name: Fp2-F8, anode: Fp2, cathode: F8 }
+  - { name: F8-T4,  anode: F8,  cathode: T4 }
+  - { name: T4-T6,  anode: T4,  cathode: T6 }
+  - { name: T6-O2,  anode: T6,  cathode: O2 }
+  # Midline chain
+  - { name: Fz-Cz,  anode: Fz,  cathode: Cz }
+  - { name: Cz-Pz,  anode: Cz,  cathode: Pz }

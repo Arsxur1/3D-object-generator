@@ -1,0 +1,24 @@
+# Transverse bipolar montage (TZ §5). Rows run left->right across the head.
+name: transverse
+type: bipolar
+description_ru: >-
+  Поперечный биполярный монтаж: ряды слева направо (лобный, центральный,
+  теменной, затылочный). Помогает латерализовать/локализовать очаг.
+pairs:
+  # Frontal row
+  - { name: F7-F3, anode: F7, cathode: F3 }
+  - { name: F3-Fz, anode: F3, cathode: Fz }
+  - { name: Fz-F4, anode: Fz, cathode: F4 }
+  - { name: F4-F8, anode: F4, cathode: F8 }
+  # Central row
+  - { name: T3-C3, anode: T3, cathode: C3 }
+  - { name: C3-Cz, anode: C3, cathode: Cz }
+  - { name: Cz-C4, anode: Cz, cathode: C4 }
+  - { name: C4-T4, anode: C4, cathode: T4 }
+  # Parietal row
+  - { name: T5-P3, anode: T5, cathode: P3 }
+  - { name: P3-Pz, anode: P3, cathode: Pz }
+  - { name: Pz-P4, anode: Pz, cathode: P4 }
+  - { name: P4-T6, anode: P4, cathode: T6 }
+  # Occipital row
+  - { name: O1-O2, anode: O1, cathode: O2 }

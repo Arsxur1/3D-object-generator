@@ -1,0 +1,34 @@
+# ACNS Critical Care EEG terminology (2021), minimal subset (TZ §7.4).
+# Full modifiers (prevalence, frequency, plus-features) expand in v2.
+version: "2021"
+patterns:
+  GPDs:
+    name_ru: Генерализованные периодические разряды
+    name_uz: Umumlashgan davriy razryadlar
+    localization: generalized
+  LPDs:
+    name_ru: Латерализованные периодические разряды
+    name_uz: Lateralizatsiyalangan davriy razryadlar
+    localization: lateralized
+  BIPDs:
+    name_ru: Билатеральные независимые периодические разряды
+    name_uz: Ikki tomonlama mustaqil davriy razryadlar
+    localization: bilateral_independent
+  LRDA:
+    name_ru: Латерализованная ритмическая дельта-активность
+    name_uz: Lateralizatsiyalangan ritmik delta faollik
+    localization: lateralized
+  GRDA:
+    name_ru: Генерализованная ритмическая дельта-активность
+    name_uz: Umumlashgan ritmik delta faollik
+    localization: generalized
+modifiers:
+  plus_features: ["+F", "+R", "+FR"]     # superimposed fast / rhythmic
+  prevalence: [rare, occasional, frequent, abundant, continuous]
+  frequency_hz_bins: [0.5, 1, 2, 3, 4]
+iic:
+  name_ru: Иктально-интериктальный континуум
+  name_uz: Iktal-interiktal kontinuum
+  note_ru: >-
+    Паттерны на континууме между иктальным и интериктальным; требуют
+    клинической корреляции и, при сомнении, пробного лечения.
