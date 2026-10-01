@@ -52,15 +52,70 @@ class Trial:
         return (meets, round(s.sensitivity, 6), -round(s.fa_per_hour, 6), -lat)
 
 
+SELECTORS = ("strict", "robust")
+
+
 @dataclass
 class TuneResult:
     best: Trial
     baseline: Trial
     trials: list[Trial] = field(default_factory=list)
     fa_target: float = 1.0
+    grid: dict[str, list[Any]] = field(default_factory=dict)
 
     def top(self, n: int = 10) -> list[Trial]:
         return sorted(self.trials, key=lambda t: t.key(self.fa_target), reverse=True)[:n]
+
+    def select(self, rule: str = "strict") -> Trial:
+        """Pick the operating point by a named rule.
+
+        * ``strict``  — max training sensitivity s.t. FA/h <= target, then fewest FA,
+          then shortest latency (increment 8; tends to pick the sharpest corner of
+          the grid and over-fit, see docs/validation_physionet.md).
+        * ``robust``  — the same objective evaluated on each setting's *worst grid
+          neighbour* (every parameter moved one step either way): a setting must
+          keep its sensitivity and FA budget under small threshold perturbations.
+          Ties: own sensitivity, fewer own FA, shorter latency.
+        """
+        if rule == "strict":
+            return max(self.trials, key=lambda t: t.key(self.fa_target))
+        if rule == "robust":
+            rob = robust_scores(self)
+            return max(self.trials, key=lambda t: _robust_key(t, rob[id(t)], self.fa_target))
+        raise ValueError(f"unknown selector {rule!r}; known: {SELECTORS}")
+
+
+def _grid_neighbours(trials: list[Trial], grid: dict[str, list[Any]]) -> dict[int, list[Trial]]:
+    names = list(grid)
+    pos = {k: {v: i for i, v in enumerate(vals)} for k, vals in grid.items()}
+    by_idx = {tuple(pos[k][t.params[k]] for k in names): t for t in trials}
+    out: dict[int, list[Trial]] = {}
+    for idx, t in by_idx.items():
+        nb = [t]
+        for d in range(len(names)):
+            for step in (-1, 1):
+                j = list(idx)
+                j[d] += step
+                if tuple(j) in by_idx:
+                    nb.append(by_idx[tuple(j)])
+        out[id(t)] = nb
+    return out
+
+
+def robust_scores(res: "TuneResult") -> dict[int, tuple[float, float]]:
+    """id(trial) -> (worst-neighbour sensitivity, worst-neighbour FA/h)."""
+    nbs = _grid_neighbours(res.trials, res.grid)
+    return {
+        tid: (min(n.score.sensitivity for n in nb), max(n.score.fa_per_hour for n in nb))
+        for tid, nb in nbs.items()
+    }
+
+
+def _robust_key(t: Trial, rob: tuple[float, float], fa_target: float) -> tuple:
+    r_sens, r_fa = rob
+    lat = t.score.latency_median_s if t.score.latency_median_s is not None else 1e9
+    return (r_fa <= fa_target, round(r_sens, 6), round(t.score.sensitivity, 6),
+            -round(t.score.fa_per_hour, 6), -lat)
 
 
 def grid_search(
@@ -80,7 +135,7 @@ def grid_search(
         th = base.model_copy(update=params)
         trials.append(Trial(params, evaluate_offline(train, th, rules).total))
     best = max(trials, key=lambda t: t.key(fa_target))
-    return TuneResult(best=best, baseline=baseline, trials=trials, fa_target=fa_target)
+    return TuneResult(best=best, baseline=baseline, trials=trials, fa_target=fa_target, grid=grid)
 
 
 def event_confidences(
@@ -190,4 +245,4 @@ def grid_search_realtime(
         params = dict(zip(names, combo))
         trials.append(Trial(params, evaluate_replay(traces, base, with_realtime_params(rt, params), rules).total))
     best = max(trials, key=lambda t: t.key(fa_target))
-    return TuneResult(best=best, baseline=baseline, trials=trials, fa_target=fa_target)
+    return TuneResult(best=best, baseline=baseline, trials=trials, fa_target=fa_target, grid=grid)

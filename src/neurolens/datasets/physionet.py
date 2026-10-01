@@ -60,8 +60,23 @@ class ChecksumError(RuntimeError):
     pass
 
 
+SEGMENT_MIN_BYTES = 64 * 1024 * 1024  # split files larger than this
+SEGMENTS = 4  # parallel byte ranges per large file
+
+
+class RangeUnsupported(RuntimeError):
+    pass
+
+
 def _http_get(url: str, dest: Optional[Path] = None, retries: int = 4) -> bytes:
     if dest is not None:
+        size = _head_size(url)
+        if size and size >= SEGMENT_MIN_BYTES and SEGMENTS > 1:
+            try:
+                _download_segmented(url, dest, size, SEGMENTS, retries)
+                return b""
+            except RangeUnsupported:
+                pass
         _download_resumable(url, dest, retries)
         return b""
     delay = 2.0
@@ -78,11 +93,27 @@ def _http_get(url: str, dest: Optional[Path] = None, retries: int = 4) -> bytes:
     return b""  # unreachable
 
 
-def _download_resumable(url: str, dest: Path, retries: int = 4, max_resumes: int = 200) -> None:
+def _head_size(url: str) -> Optional[int]:
+    try:
+        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "neurolens/0.1"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            n = resp.headers.get("Content-Length")
+            return int(n) if n else None
+    except Exception:
+        return None
+
+
+def _download_resumable(
+    url: str, dest: Path, retries: int = 4, max_resumes: int = 200,
+    start: int = 0, end: Optional[int] = None,
+) -> None:
     """Stream to ``dest``; when a proxy silently cuts a long transfer (stream ends
     early without an error), continue with an HTTP Range request from the bytes
-    already on disk. Integrity is still checked by SHA-256 afterwards."""
-    total: Optional[int] = None
+    already on disk. With ``start``/``end`` only that byte range (inclusive) is
+    fetched — the building block of segmented downloads. Integrity is checked by
+    SHA-256 afterwards."""
+    ranged = start > 0 or end is not None
+    total: Optional[int] = None if end is None else end - start + 1
     dest.write_bytes(b"")
     failures = 0
     delay = 2.0
@@ -91,15 +122,17 @@ def _download_resumable(url: str, dest: Path, retries: int = 4, max_resumes: int
         if total is not None and have >= total:
             return
         headers = {"User-Agent": "neurolens/0.1"}
-        if have:
-            headers["Range"] = f"bytes={have}-"
+        if have or ranged:
+            headers["Range"] = f"bytes={start + have}-" + ("" if end is None else str(end))
         try:
             req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=120) as resp:
-                if have and resp.status != 206:  # server ignored Range: restart
-                    dest.write_bytes(b"")
+                if (have or ranged) and resp.status != 206:
+                    if ranged:
+                        raise RangeUnsupported(url)
+                    dest.write_bytes(b"")  # server ignored Range: restart
                     have = 0
-                if total is None or not have:
+                if total is None:
                     cl = resp.headers.get("Content-Length")
                     total = int(cl) + have if cl else None
                 with open(dest, "ab") as fh:
@@ -108,6 +141,8 @@ def _download_resumable(url: str, dest: Path, retries: int = 4, max_resumes: int
             failures = 0
             if total is None:  # no length known: trust a clean end of stream
                 return
+        except RangeUnsupported:
+            raise
         except Exception:
             failures += 1
             if failures > retries:
@@ -115,7 +150,31 @@ def _download_resumable(url: str, dest: Path, retries: int = 4, max_resumes: int
             time.sleep(delay)
             delay = min(delay * 2, 30.0)
     raise RuntimeError(f"{url}: download did not complete after {max_resumes} resumes")
-    return b""  # unreachable
+
+
+def _download_segmented(url: str, dest: Path, size: int, segments: int = SEGMENTS,
+                        retries: int = 4) -> None:
+    """Fetch ``segments`` byte ranges in parallel (PhysioNet throttles per
+    connection), each resumable, then concatenate in order."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    step = -(-size // segments)
+    bounds = [(i * step, min(size, (i + 1) * step) - 1) for i in range(segments) if i * step < size]
+    parts = [dest.with_name(f"{dest.name}.seg{i}") for i in range(len(bounds))]
+    try:
+        with ThreadPoolExecutor(max_workers=len(bounds)) as pool:
+            futs = [pool.submit(_download_resumable, url, p, retries, 200, a, b)
+                    for p, (a, b) in zip(parts, bounds)]
+            for f in futs:
+                f.result()
+        with open(dest, "wb") as out:
+            for p in parts:
+                with open(p, "rb") as fh:
+                    while chunk := fh.read(1 << 20):
+                        out.write(chunk)
+    finally:
+        for p in parts:
+            p.unlink(missing_ok=True)
 
 
 class PhysioNetClient:
@@ -179,14 +238,7 @@ class PhysioNetClient:
 
     def remote_size(self, rel: str) -> int | None:
         """Size in bytes via HTTP HEAD (None if unavailable)."""
-        try:
-            req = urllib.request.Request(f"{self.base}/{rel}", method="HEAD",
-                                         headers={"User-Agent": "neurolens/0.1"})
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                n = resp.headers.get("Content-Length")
-                return int(n) if n else None
-        except Exception:
-            return None
+        return _head_size(f"{self.base}/{rel}")
 
     def is_cached(self, rel: str) -> bool:
         return self.local_path(rel).exists()

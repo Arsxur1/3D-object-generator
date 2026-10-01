@@ -188,7 +188,7 @@ def _evaluate(args) -> int:
     if not items:
         print("No cached records — run `neurolens physionet fetch` first.")
         return 2
-    recs = prepare_records(items, cfg, args.feature_cache, progress=print)
+    recs = prepare_records(items, cfg, args.feature_cache, progress=print, workers=args.workers)
     results = [evaluate_offline(recs, cfg.thresholds)]
     if args.realtime:
         results.append(evaluate_realtime(items, cfg, progress=print))
@@ -213,7 +213,14 @@ def _fmt_score(name: str, r) -> str:
 def _tune(args) -> int:
     from .evaluation.report import save_results
     from .evaluation.runner import evaluate_offline, prepare_records
-    from .evaluation.tune import fit_ictal_calibration, grid_search, write_overrides
+    from .evaluation.tune import SELECTORS, fit_ictal_calibration, grid_search, write_overrides
+
+    selectors = _subjects(args.selectors)
+    bad = [x for x in selectors if x not in SELECTORS]
+    if not selectors or bad:
+        print(f"--selectors must be from {SELECTORS}; got {args.selectors!r}")
+        return 2
+    primary = selectors[0]
 
     cfg = _load_cfg()
     train_items = _items(args.db, args.train, args.cache)
@@ -223,28 +230,32 @@ def _tune(args) -> int:
         return 2
 
     # --- offline (whole-record) operating point ---
-    train = prepare_records(train_items, cfg, args.feature_cache, progress=print)
-    test = prepare_records(test_items, cfg, args.feature_cache, progress=print)
+    train = prepare_records(train_items, cfg, args.feature_cache, progress=print, workers=args.workers)
+    test = prepare_records(test_items, cfg, args.feature_cache, progress=print, workers=args.workers)
     res = grid_search(train, cfg.thresholds, fa_target=args.fa_target)
-    best = res.best
-    print(f"offline train best {best.params}: sens {best.score.sensitivity:.2f} "
-          f"FA/h {best.score.fa_per_hour:.2f} ({len(res.trials)} trials)")
-    test_before = evaluate_offline(test, cfg.thresholds)
-    tuned = cfg.thresholds.model_copy(update=best.params)
-    test_after = evaluate_offline(test, tuned)
-    test_before.mode, test_after.mode = "offline-default", "offline-tuned"
-    results = [test_before, test_after]
-    cal, cal_metrics = fit_ictal_calibration(train, tuned)
-    print(f"calibration: {cal_metrics}")
-
+    chosen = {sel: res.select(sel) for sel in selectors}
+    test_default = evaluate_offline(test, cfg.thresholds)
+    test_default.mode = "offline-default"
+    results = [test_default]
     provenance = {
         "train_subjects": _subjects(args.train), "test_subjects": _subjects(args.test),
         "default_database": args.db, "fa_target_per_hour": args.fa_target,
-        "offline": {"n_trials": len(res.trials), "train": best.score.as_dict(),
-                    "test_default": test_before.total.as_dict(),
-                    "test_tuned": test_after.total.as_dict()},
-        "calibration": cal_metrics,
+        "selectors": selectors, "primary_selector": primary,
+        "offline": {"n_trials": len(res.trials), "test_default": test_default.total.as_dict()},
     }
+    for sel, trial in chosen.items():
+        r = evaluate_offline(test, cfg.thresholds.model_copy(update=trial.params))
+        r.mode = f"offline-{sel}"
+        results.append(r)
+        provenance["offline"][sel] = {"params": trial.params, "train": trial.score.as_dict(),
+                                      "test": r.total.as_dict()}
+        print(f"offline [{sel}] train {trial.params}: sens {trial.score.sensitivity:.2f} "
+              f"FA/h {trial.score.fa_per_hour:.2f} ({len(res.trials)} trials)")
+    best = chosen[primary]
+    tuned = cfg.thresholds.model_copy(update=best.params)
+    cal, cal_metrics = fit_ictal_calibration(train, tuned)
+    provenance["calibration"] = cal_metrics
+    print(f"calibration ({primary}): {cal_metrics}")
     rt_params = None
     top = {"offline": [{"params": t.params, **t.score.as_dict()} for t in res.top(15)]}
 
@@ -256,21 +267,22 @@ def _tune(args) -> int:
         tr_train = build_traces(train_items, cfg, args.feature_cache, progress=print, workers=args.workers)
         tr_test = build_traces(test_items, cfg, args.feature_cache, progress=print, workers=args.workers)
         rres = grid_search_realtime(tr_train, cfg.thresholds, cfg.realtime, fa_target=args.fa_target)
-        rt_params = rres.best.params
-        print(f"realtime train best {rt_params}: sens {rres.best.score.sensitivity:.2f} "
-              f"FA/h {rres.best.score.fa_per_hour:.2f} ({len(rres.trials)} trials)")
-        rt_before = evaluate_replay(tr_test, cfg.thresholds, cfg.realtime)
+        rt_default = evaluate_replay(tr_test, cfg.thresholds, cfg.realtime)
         rt_offline_th = evaluate_replay(tr_test, tuned, cfg.realtime)
-        rt_after = evaluate_replay(tr_test, cfg.thresholds, with_realtime_params(cfg.realtime, rt_params))
-        rt_before.mode, rt_offline_th.mode, rt_after.mode = (
-            "realtime-default", "realtime-offline-thresholds", "realtime-tuned")
-        results += [rt_before, rt_offline_th, rt_after]
-        provenance["realtime"] = {
-            "n_trials": len(rres.trials), "train": rres.best.score.as_dict(),
-            "test_default": rt_before.total.as_dict(),
-            "test_offline_thresholds": rt_offline_th.total.as_dict(),
-            "test_tuned": rt_after.total.as_dict(),
-        }
+        rt_default.mode, rt_offline_th.mode = "realtime-default", f"realtime-offline-{primary}-thresholds"
+        results += [rt_default, rt_offline_th]
+        provenance["realtime"] = {"n_trials": len(rres.trials), "test_default": rt_default.total.as_dict(),
+                                  "test_offline_thresholds": rt_offline_th.total.as_dict()}
+        for sel in selectors:
+            trial = rres.select(sel)
+            r = evaluate_replay(tr_test, cfg.thresholds, with_realtime_params(cfg.realtime, trial.params))
+            r.mode = f"realtime-{sel}"
+            results.append(r)
+            provenance["realtime"][sel] = {"params": trial.params, "train": trial.score.as_dict(),
+                                           "test": r.total.as_dict()}
+            print(f"realtime [{sel}] train {trial.params}: sens {trial.score.sensitivity:.2f} "
+                  f"FA/h {trial.score.fa_per_hour:.2f} ({len(rres.trials)} trials)")
+        rt_params = rres.select(primary).params
         top["realtime"] = [{"params": t.params, **t.score.as_dict()} for t in rres.top(15)]
 
     for r in results:
@@ -363,6 +375,7 @@ def build_parser() -> argparse.ArgumentParser:
     ev.add_argument("--overrides", default=None)
     ev.add_argument("--realtime", action="store_true", help="Also score the streaming monitor's alarms.")
     ev.add_argument("--feature-cache", default="data/physionet/.features", dest="feature_cache")
+    ev.add_argument("--workers", type=int, default=4, help="Parallel processes for feature preparation.")
     ev.add_argument("--out", default=None)
     ev.set_defaults(func=_evaluate)
 
@@ -374,7 +387,11 @@ def build_parser() -> argparse.ArgumentParser:
     tu.add_argument("--feature-cache", default="data/physionet/.features", dest="feature_cache")
     tu.add_argument("--realtime", action="store_true",
                     help="Also tune the streaming monitor (separate operating point, replayed traces).")
-    tu.add_argument("--workers", type=int, default=4, help="Parallel processes for trace building.")
+    tu.add_argument("--workers", type=int, default=4,
+                    help="Parallel processes for feature preparation and trace building.")
+    tu.add_argument("--selectors", default="strict",
+                    help="Comma-separated operating-point rules (strict, robust); the first is "
+                         "primary and is written by --write.")
     tu.add_argument("--write", action="store_true", help="Write overrides + calibration files.")
     tu.add_argument("--overrides-out", default="configs/thresholds.physionet.yaml", dest="overrides_out")
     tu.add_argument("--calibration-out", default="configs/calibration.physionet.json", dest="calibration_out")

@@ -342,3 +342,83 @@ def test_realtime_replay_matches_live_monitor_and_overrides_roundtrip(tmp_path, 
     assert c3.realtime.alarms["seizure"].persistence_windows == res.best.params["persistence_windows"]
     assert c3.realtime.threshold_overrides["ictal_min_channels"] == res.best.params["ictal_min_channels"]
     assert evaluate_replay([tr], c3.thresholds, c3.realtime).total.tp == 1
+
+
+def _trial(params, sens, fa, lat=5.0):
+    from neurolens.evaluation.matching import AggregateScore
+    from neurolens.evaluation.tune import Trial
+
+    return Trial(params, AggregateScore(1, 10.0, 10, int(sens * 10), 10 - int(sens * 10), int(fa * 10),
+                                        sens, fa, lat, lat, 0.0))
+
+
+def test_robust_selector_avoids_sharp_corner():
+    from neurolens.evaluation.tune import TuneResult
+
+    grid = {"a": [1, 2, 3], "b": [1, 2]}
+    # (a=3,b=2) has zero FA but its neighbours lose sensitivity -> sharp corner;
+    # (a=1,b=1) is the only point whose whole neighbourhood keeps full sensitivity
+    # ((1,2) has neighbour (2,2) at 0.8).
+    table = {
+        (1, 1): (1.0, 0.6), (1, 2): (1.0, 0.4), (2, 1): (1.0, 0.5),
+        (2, 2): (0.8, 0.2), (3, 1): (0.8, 0.1), (3, 2): (1.0, 0.0),
+    }
+    trials = [_trial({"a": a, "b": b}, *v) for (a, b), v in table.items()]
+    res = TuneResult(best=trials[0], baseline=trials[0], trials=trials, fa_target=1.0, grid=grid)
+    assert res.select("strict").params == {"a": 3, "b": 2}
+    assert res.select("robust").params == {"a": 1, "b": 1}
+    with pytest.raises(ValueError):
+        res.select("nope")
+
+
+def test_segmented_download_reassembles_with_cuts(tmp_path, monkeypatch):
+    import io
+
+    import neurolens.datasets.physionet as pn
+
+    payload = bytes((i * 7) % 251 for i in range(10_000))
+    ranges = []
+
+    class Resp(io.BytesIO):
+        def __init__(self, body, status, length):
+            super().__init__(body)
+            self.status, self.headers = status, {"Content-Length": str(length)}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout=None):
+        rng = req.headers.get("Range")
+        ranges.append(rng)
+        a, b = rng.split("=")[1].split("-")
+        a, b = int(a), (int(b) if b else len(payload) - 1)
+        body = payload[a:b + 1]
+        return Resp(body[:700], 206, len(body))  # proxy cuts every response at 700 B
+
+    monkeypatch.setattr(pn.urllib.request, "urlopen", fake_urlopen)
+    dest = tmp_path / "f.part"
+    pn._download_segmented("https://x/f", dest, len(payload), segments=4)
+    assert dest.read_bytes() == payload
+    assert not list(tmp_path.glob("*.seg*"))
+    assert all(r and "-" in r for r in ranges) and len(ranges) > 4
+
+
+def test_prepare_records_parallel_matches_serial(tmp_path, demo_edf, configs):
+    import shutil
+
+    import numpy as np
+
+    from neurolens.datasets.annotations import RecordAnnotation
+    from neurolens.evaluation.runner import prepare_records
+
+    other = tmp_path / "demo2.edf"
+    shutil.copy(demo_edf, other)
+    items = [(RecordAnnotation("s", "s", "s/a.edf"), demo_edf),
+             (RecordAnnotation("s", "s", "s/b.edf"), other)]
+    par = prepare_records(items, configs, tmp_path / "c1", workers=2)
+    ser = prepare_records(items, configs, None, workers=1)
+    assert [r.annotation.file for r in par] == ["s/a.edf", "s/b.edf"]
+    np.testing.assert_allclose(par[1].features.epoch_rms, ser[1].features.epoch_rms)

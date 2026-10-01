@@ -95,8 +95,9 @@ def prepare_records(
     cfg: ConfigBundle,
     cache_dir: str | Path | None = None,
     progress: Optional[Callable[[str], None]] = None,
+    workers: int = 1,
 ) -> list[PreparedRecord]:
-    """Prepare many records; optionally memoise features on disk.
+    """Prepare many records (in parallel processes); optionally memoise on disk.
 
     The cache key covers the EDF (name, size, mtime) and the filter config, so
     a filter change invalidates it. Cache files are local derived data
@@ -105,29 +106,48 @@ def prepare_records(
     import hashlib
     import pickle
 
-    out = []
     cdir = Path(cache_dir) if cache_dir else None
     if cdir:
         cdir.mkdir(parents=True, exist_ok=True)
     fkey = hashlib.sha1(cfg.filters.model_dump_json().encode()).hexdigest()[:10]
-    for ann, path in items:
-        pk = None
-        if cdir:
-            st = path.stat()
-            key = hashlib.sha1(f"{path.name}:{st.st_size}:{st.st_mtime_ns}:{fkey}".encode()).hexdigest()[:16]
-            pk = cdir / f"{path.stem}_{key}.pkl"
-            if pk.exists():
-                rec = pickle.loads(pk.read_bytes())
-                rec.annotation = ann  # annotations may be re-parsed/fixed
-                out.append(rec)
-                continue
-        t0 = perf_counter()
-        rec = prepare_record(ann, path, cfg)
-        if pk:
-            pk.write_bytes(pickle.dumps(rec))
-        out.append(rec)
+
+    def cache_path(path: Path) -> Optional[Path]:
+        if not cdir:
+            return None
+        st = path.stat()
+        key = hashlib.sha1(f"{path.name}:{st.st_size}:{st.st_mtime_ns}:{fkey}".encode()).hexdigest()[:16]
+        return cdir / f"{path.stem}_{key}.pkl"
+
+    todo = [(a, p) for a, p in items if not ((cp := cache_path(p)) and cp.exists())]
+    built: dict[Path, PreparedRecord] = {}
+
+    def done(rec: PreparedRecord, secs: float) -> None:
+        if (cp := cache_path(rec.path)) is not None:
+            cp.write_bytes(pickle.dumps(rec))
+        built[rec.path] = rec
         if progress:
-            progress(f"prepared {ann.file} in {perf_counter() - t0:.0f}s")
+            progress(f"prepared {rec.annotation.file} in {secs:.0f}s")
+
+    if workers > 1 and len(todo) > 1:
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+
+        t0 = perf_counter()
+        with ProcessPoolExecutor(max_workers=min(workers, len(todo))) as pool:
+            futs = [pool.submit(prepare_record, a, p, cfg) for a, p in todo]
+            for fut in as_completed(futs):
+                done(fut.result(), perf_counter() - t0)
+    else:
+        for a, p in todo:
+            t0 = perf_counter()
+            done(prepare_record(a, p, cfg), perf_counter() - t0)
+
+    out = []
+    for ann, path in items:
+        rec = built.get(path)
+        if rec is None:
+            rec = pickle.loads(cache_path(path).read_bytes())
+        rec.annotation = ann  # annotations may be re-parsed/fixed
+        out.append(rec)
     return out
 
 
