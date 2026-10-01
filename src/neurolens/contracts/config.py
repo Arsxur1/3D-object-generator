@@ -82,6 +82,10 @@ class Thresholds(BaseModel):
     ictal_min_duration_s: float = Field(default=8.0, gt=0)
     ictal_rhythmicity: float = Field(default=0.45, ge=0, le=1)
     ictal_amplitude_factor: float = Field(default=1.5, ge=1)
+    # Spatial extent: minimum channels in one ictal cluster. Real-data finding
+    # (CHB-MIT, docs/validation_physionet.md): single-channel rhythmic runs are
+    # mostly artifact/benign; seizures recruit several channels.
+    ictal_min_channels: int = Field(default=1, ge=1)
     # Periodic discharges (GPD/LPD/BIPD) — ACNS §7.4
     generalized_channel_fraction: float = Field(default=0.6, ge=0, le=1)
     pd_min_discharges: int = Field(default=6, ge=3)

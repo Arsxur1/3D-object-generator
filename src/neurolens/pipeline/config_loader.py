@@ -91,3 +91,27 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
         realtime=realtime,
         root=cfg,
     )
+
+
+def apply_overrides(bundle: ConfigBundle, path: str | Path) -> ConfigBundle:
+    """Layer a partial override file (e.g. thresholds tuned on PhysioNet) on a bundle.
+
+    Format::
+
+        thresholds: {ictal_min_channels: 3, ...}
+        realtime: {alarms: {seizure: {persistence_windows: 2}}}
+
+    Values are re-validated through the pydantic contracts; unknown keys fail.
+    """
+    data = _read_yaml(Path(path))
+    th = data.get("thresholds") or {}
+    if th:
+        bundle.thresholds = Thresholds(**{**bundle.thresholds.model_dump(), **th})
+    rt = data.get("realtime") or {}
+    if rt:
+        cur = bundle.realtime.model_dump()
+        alarms = cur.get("alarms", {})
+        for name, rule in (rt.pop("alarms", None) or {}).items():
+            alarms[name] = {**alarms.get(name, {}), **rule}
+        bundle.realtime = RealtimeConfig(**{**cur, **rt, "alarms": alarms})
+    return bundle

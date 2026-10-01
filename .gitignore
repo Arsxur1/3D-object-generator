@@ -24,3 +24,6 @@ feedback.jsonl
 
 # OS
 .DS_Store
+
+# PhysioNet cache (downloaded data + derived features; never committed)
+data/physionet/

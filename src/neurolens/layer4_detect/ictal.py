@@ -60,23 +60,31 @@ class IctalRhythmDetector(Detector):
 
         if not events:
             return []
-        # merge overlapping runs across channels -> keep the highest-confidence,
-        # longest; localize to the channels sharing the top time window.
-        events.sort(key=lambda e: (e.confidence, e.duration_s), reverse=True)
-        best = events[0]
-        overlap_channels = sorted(
-            {
-                e.localization.channels[0]
-                for e in events
-                if _overlaps(e, best) and e.localization.channels
-            }
-        )
-        best.localization.channels = overlap_channels
-        best.localization.lateralization = _lateralization(overlap_channels)
-        best.localization.region = _region_of(overlap_channels[0]) if overlap_channels else None
-        best.metadata["seizure_burden_s"] = round(best.duration_s, 1)
-        best.metadata["n_channels_involved"] = len(overlap_channels)
-        return [best]
+        # Cluster per-channel runs that overlap in time: each cluster is one
+        # seizure (long recordings contain several). Per cluster keep the
+        # highest-confidence run, spanning the cluster, localized to all its
+        # channels.
+        out: list[Event] = []
+        min_ch = getattr(thresholds, "ictal_min_channels", 1)
+        for cluster in _time_clusters(events):
+            cluster.sort(key=lambda e: (e.confidence, e.duration_s), reverse=True)
+            best = cluster[0]
+            chans = sorted({e.localization.channels[0] for e in cluster if e.localization.channels})
+            if len(chans) < min_ch:
+                continue
+            # spatial recruitment is evidence: a multi-channel discharge is more
+            # likely ictal than a focal rhythmic run of the same morphology
+            best.confidence = float(np.clip(best.confidence + 0.01 * (len(chans) - 1), 0.5, 0.99))
+            best.t_start = min(e.t_start for e in cluster)
+            best.t_end = max(e.t_end for e in cluster)
+            best.localization.channels = chans
+            best.localization.lateralization = _lateralization(chans)
+            best.localization.region = _region_of(chans[0]) if chans else None
+            best.metadata["seizure_burden_s"] = round(best.duration_s, 1)
+            best.metadata["n_channels_involved"] = len(chans)
+            out.append(best)
+        out.sort(key=lambda e: (e.confidence, e.duration_s), reverse=True)
+        return out
 
     def _make_event(self, features, ci, chan, a, b, baseline) -> Event:
         times = features.epoch_times
@@ -120,6 +128,20 @@ def _runs(mask: np.ndarray) -> list[tuple[int, int]]:
     if mask[-1]:
         stops = stops + [mask.size]
     return list(zip(starts, stops))
+
+
+def _time_clusters(events: list[Event]) -> list[list[Event]]:
+    s = sorted(events, key=lambda e: e.t_start)
+    clusters: list[list[Event]] = [[s[0]]]
+    end = s[0].t_end
+    for e in s[1:]:
+        if e.t_start <= end:
+            clusters[-1].append(e)
+            end = max(end, e.t_end)
+        else:
+            clusters.append([e])
+            end = e.t_end
+    return clusters
 
 
 def _overlaps(e1: Event, e2: Event) -> bool:

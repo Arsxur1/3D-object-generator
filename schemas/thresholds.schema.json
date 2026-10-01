@@ -101,6 +101,12 @@
       "title": "Ictal Amplitude Factor",
       "type": "number"
     },
+    "ictal_min_channels": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Ictal Min Channels",
+      "type": "integer"
+    },
     "generalized_channel_fraction": {
       "default": 0.6,
       "maximum": 1,

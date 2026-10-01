@@ -17,6 +17,7 @@ burst_suppression_ratio: 0.5
 ictal_min_duration_s: 8.0        # sustained rhythmic discharge to call ictal
 ictal_rhythmicity: 0.45          # peak-band power concentration (0..1)
 ictal_amplitude_factor: 1.5      # amplitude rise vs channel baseline
+ictal_min_channels: 1             # spatial extent (channels per ictal cluster); tuned on CHB-MIT, see thresholds.physionet.yaml
 
 # Periodic discharges (GPD/LPD/BIPD) — ACNS 2021 (§7.4)
 generalized_channel_fraction: 0.6  # >= this fraction of channels involved -> generalized
