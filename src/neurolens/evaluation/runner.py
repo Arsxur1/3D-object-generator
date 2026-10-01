@@ -43,7 +43,7 @@ class PreparedRecord:
     path: Path
     duration_s: float
     features: FeatureSet
-    signal: object  # analysis UnifiedSignal (kept for the detector API)
+    signal: object = None  # not retained (detector uses features only)
     flags: list[str] = field(default_factory=list)
 
 
@@ -82,9 +82,11 @@ def prepare_record(ann: RecordAnnotation, path: Path, cfg: ConfigBundle) -> Prep
     filt = apply_filters(sig, cfg.filters)
     analysis = rereference(filt, "average")
     feats = compute_features(analysis, cfg.filters)
+    # the ictal detector works on features only; dropping the samples keeps the
+    # on-disk feature cache ~100x smaller
     return PreparedRecord(
         annotation=ann, path=path, duration_s=sig.duration_s, features=feats,
-        signal=analysis, flags=list(sig.quality.flags),
+        signal=None, flags=list(sig.quality.flags),
     )
 
 
@@ -131,7 +133,8 @@ def prepare_records(
 
 def offline_detections(rec: PreparedRecord, thresholds: Thresholds) -> list[Detection]:
     events = IctalRhythmDetector().detect(rec.signal, rec.features, thresholds)
-    return [Detection(e.t_start, e.t_end, e.confidence) for e in events]
+    return [Detection(e.t_start, e.t_end, e.confidence) for e in events
+            if e.confidence >= thresholds.detection_min_confidence]
 
 
 def evaluate_offline(

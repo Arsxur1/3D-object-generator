@@ -182,6 +182,14 @@ class RealtimeConfig(BaseModel):
     alarms: dict[str, AlarmRule] = Field(
         default_factory=dict, description="Per-alarm-type rules keyed by AlarmType value."
     )
+    threshold_overrides: dict[str, float] = Field(
+        default_factory=dict,
+        description=(
+            "Detector thresholds used only by the streaming monitor (keys of Thresholds). "
+            "Short windows + a rolling baseline need different operating points than "
+            "whole-record analysis (validated separately on PhysioNet)."
+        ),
+    )
 
     def rule_for(self, alarm_type: str) -> AlarmRule:
         return self.alarms.get(alarm_type, AlarmRule())

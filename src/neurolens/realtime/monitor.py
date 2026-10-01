@@ -74,6 +74,13 @@ class RealtimeMonitor:
         self._baseline: Optional[np.ndarray] = None
         self._baseline_alpha = 0.05  # slow EMA: a seizure does not quickly inflate it
         self._ictal = next((d for d in self.detectors if isinstance(d, IctalRhythmDetector)), None)
+        # streaming operating point: base thresholds + realtime-only overrides
+        self.thresholds = self.cfg.thresholds.model_copy(
+            update=dict(self.cfg.realtime.threshold_overrides)
+        )
+        # optional per-window trace (features + rolling baseline) so evaluation can
+        # replay detection/alarm gating under other thresholds without re-filtering
+        self.trace: Optional[list[tuple]] = None  # (t0, t1, features, baseline)
 
     def run(self, source: StreamSource) -> MonitorSummary:
         rt = self.cfg.realtime
@@ -93,6 +100,8 @@ class RealtimeMonitor:
 
                 t_perf = perf_counter()
                 det, analysis = self._analyze(window_data, source)
+                if self.trace is not None:
+                    self.trace[-1] = (t0, t1, *self.trace[-1])
                 latency_ms = (perf_counter() - t_perf) * 1000.0
                 latencies.append(latency_ms)
 
@@ -127,8 +136,10 @@ class RealtimeMonitor:
             self._baseline = win_med.copy()
         if self._ictal is not None:
             self._ictal.external_baseline = self._baseline.copy()
+        if self.trace is not None:
+            self.trace.append((feats, self._baseline.copy()))
 
-        det = run_detectors(analysis, feats, self.cfg.thresholds, detectors=self.detectors)
+        det = run_detectors(analysis, feats, self.thresholds, detectors=self.detectors)
 
         self._baseline = (1 - self._baseline_alpha) * self._baseline + self._baseline_alpha * win_med
         return det, analysis

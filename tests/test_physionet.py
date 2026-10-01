@@ -303,3 +303,42 @@ def test_resumable_download_survives_cut_transfers(tmp_path, monkeypatch):
     assert dest.read_bytes() == payload
     assert seen_ranges[0] is None and seen_ranges[1] == "bytes=300-"
     assert len(seen_ranges) == 7
+
+
+def test_realtime_replay_matches_live_monitor_and_overrides_roundtrip(tmp_path, demo_edf, configs):
+    import copy
+
+    from neurolens.datasets.annotations import RecordAnnotation
+    from neurolens.evaluation.realtime_replay import (
+        build_traces,
+        evaluate_replay,
+        replay,
+        with_realtime_params,
+    )
+    from neurolens.evaluation.runner import realtime_detections
+    from neurolens.evaluation.tune import grid_search_realtime, write_overrides
+    from neurolens.pipeline.config_loader import apply_overrides
+
+    cfg = copy.deepcopy(configs)
+    ann = RecordAnnotation("synthetic", "s0", "s0/demo.edf", [SeizureInterval(180, 240)])
+    tr = build_traces([(ann, demo_edf)], cfg, tmp_path / "c", workers=1)[0]
+    assert tr.windows and len(tr.windows[0]) == 4
+
+    def key(ds):
+        return [(d.t_start, d.t_end, d.confidence) for d in ds]
+
+    for params in ({}, {"ictal_min_channels": 2, "persistence_windows": 1}):
+        c2 = copy.deepcopy(cfg)
+        c2.realtime = with_realtime_params(cfg.realtime, params)
+        live, _ = realtime_detections(demo_edf, c2)
+        assert key(replay(tr, c2.thresholds, c2.realtime)) == key(live)
+
+    res = grid_search_realtime([tr], cfg.thresholds, cfg.realtime,
+                               grid={"ictal_min_channels": [1, 2], "persistence_windows": [1, 2]})
+    assert len(res.trials) == 4 and res.best.score.sensitivity == 1.0
+    out = write_overrides(tmp_path / "o.yaml", {"ictal_min_channels": 3}, {}, realtime_params=res.best.params)
+    c3 = apply_overrides(copy.deepcopy(cfg), out)
+    assert c3.thresholds.ictal_min_channels == 3
+    assert c3.realtime.alarms["seizure"].persistence_windows == res.best.params["persistence_windows"]
+    assert c3.realtime.threshold_overrides["ictal_min_channels"] == res.best.params["ictal_min_channels"]
+    assert evaluate_replay([tr], c3.thresholds, c3.realtime).total.tp == 1

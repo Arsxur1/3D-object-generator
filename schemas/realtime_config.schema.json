@@ -80,6 +80,14 @@
       "description": "Per-alarm-type rules keyed by AlarmType value.",
       "title": "Alarms",
       "type": "object"
+    },
+    "threshold_overrides": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Detector thresholds used only by the streaming monitor (keys of Thresholds). Short windows + a rolling baseline need different operating points than whole-record analysis (validated separately on PhysioNet).",
+      "title": "Threshold Overrides",
+      "type": "object"
     }
   },
   "title": "RealtimeConfig",
