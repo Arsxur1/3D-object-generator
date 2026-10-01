@@ -61,22 +61,60 @@ class ChecksumError(RuntimeError):
 
 
 def _http_get(url: str, dest: Optional[Path] = None, retries: int = 4) -> bytes:
+    if dest is not None:
+        _download_resumable(url, dest, retries)
+        return b""
     delay = 2.0
     for attempt in range(retries + 1):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "neurolens/0.1"})
             with urllib.request.urlopen(req, timeout=120) as resp:
-                if dest is None:
-                    return resp.read()
-                with open(dest, "wb") as fh:
-                    while chunk := resp.read(1 << 20):
-                        fh.write(chunk)
-                return b""
+                return resp.read()
         except Exception:
             if attempt == retries:
                 raise
             time.sleep(delay)
             delay *= 2
+    return b""  # unreachable
+
+
+def _download_resumable(url: str, dest: Path, retries: int = 4, max_resumes: int = 200) -> None:
+    """Stream to ``dest``; when a proxy silently cuts a long transfer (stream ends
+    early without an error), continue with an HTTP Range request from the bytes
+    already on disk. Integrity is still checked by SHA-256 afterwards."""
+    total: Optional[int] = None
+    dest.write_bytes(b"")
+    failures = 0
+    delay = 2.0
+    for _ in range(max_resumes):
+        have = dest.stat().st_size
+        if total is not None and have >= total:
+            return
+        headers = {"User-Agent": "neurolens/0.1"}
+        if have:
+            headers["Range"] = f"bytes={have}-"
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                if have and resp.status != 206:  # server ignored Range: restart
+                    dest.write_bytes(b"")
+                    have = 0
+                if total is None or not have:
+                    cl = resp.headers.get("Content-Length")
+                    total = int(cl) + have if cl else None
+                with open(dest, "ab") as fh:
+                    while chunk := resp.read(1 << 20):
+                        fh.write(chunk)
+            failures = 0
+            if total is None:  # no length known: trust a clean end of stream
+                return
+        except Exception:
+            failures += 1
+            if failures > retries:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, 30.0)
+    raise RuntimeError(f"{url}: download did not complete after {max_resumes} resumes")
     return b""  # unreachable
 
 

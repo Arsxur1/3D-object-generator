@@ -267,3 +267,39 @@ Seizure end time:16.14.26
     assert anns[0].seizures == [SeizureInterval(1312, 1375)]
     out = _resolve_files(anns, ["PN11/PN11-1.edf"])
     assert out[0].file == "PN11/PN11-1.edf" and out[0].warnings
+
+
+def test_resumable_download_survives_cut_transfers(tmp_path, monkeypatch):
+    import io
+
+    import neurolens.datasets.physionet as pn
+
+    payload = bytes(range(256)) * 8  # 2048 bytes
+    seen_ranges = []
+
+    class Resp(io.BytesIO):
+        def __init__(self, body, status, length):
+            super().__init__(body)
+            self.status = status
+            self.headers = {"Content-Length": str(length)}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout=None):
+        rng = req.headers.get("Range")
+        seen_ranges.append(rng)
+        start = int(rng.split("=")[1].rstrip("-")) if rng else 0
+        rest = payload[start:]
+        # the "proxy" cuts every response after 300 bytes, without an error
+        return Resp(rest[:300], 206 if rng else 200, len(rest))
+
+    monkeypatch.setattr(pn.urllib.request, "urlopen", fake_urlopen)
+    dest = tmp_path / "f.part"
+    pn._download_resumable("https://x/f", dest)
+    assert dest.read_bytes() == payload
+    assert seen_ranges[0] is None and seen_ranges[1] == "bytes=300-"
+    assert len(seen_ranges) == 7
