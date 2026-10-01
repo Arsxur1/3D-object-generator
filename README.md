@@ -150,14 +150,21 @@ neurolens physionet list --subjects chb01
 neurolens physionet fetch --subjects chb01,chb03,chb05 --n-free 2
 # оценка против экспертной разметки: чувствительность, FA/час, латентность
 neurolens evaluate --subjects chb05 --realtime --out out_eval/chb05
-# подбор порогов на одних пациентах, отчёт на других; --write сохраняет оверрайды
-neurolens tune --train chb01,chb03 --test chb05,chb08 --realtime --write --out out_eval/tune
+# Siena (взрослые): докачка больших файлов по HTTP Range, проверка SHA-256
+neurolens physionet fetch --db siena --subjects PN00,PN11,PN12 --max-gb 2.5
+# подбор порогов на одних пациентах, отчёт на других (можно смешивать базы: siena:PN00);
+# --realtime отдельно подбирает рабочую точку монитора; --write сохраняет оверрайды
+neurolens tune --train chb01,chb03,siena:PN00 --test chb05,chb08,siena:PN11,siena:PN12 \
+  --realtime --write --out out_eval/tune
 # применить подобранные пороги
 neurolens analyze rec.edf --overrides configs/thresholds.physionet.yaml
 neurolens monitor rec.edf --overrides configs/thresholds.physionet.yaml
 ```
 
 Биполярные архивы (CHB-MIT) автоматически переводятся в точную среднюю референцию.
+Итог на 7 пациентах (59 ч, 34 приступа): пороги по умолчанию находят все приступы на
+отложенных пациентах (FA 8.6/ч оффлайн, 3.3/ч в мониторе); оверрайд снижает FA до
+0.6–0.75/ч ценой 1–2 пропусков из 15 — поэтому он опционален.
 Методика и полученные числа — `docs/validation_physionet.md`. Данные не коммитятся;
 при использовании цитируйте базы (см. `neurolens physionet list`).
 

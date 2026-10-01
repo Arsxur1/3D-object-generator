@@ -1,13 +1,19 @@
 {
   "version": "0.1.0",
   "default": 1.0,
-  "temperatures": {},
+  "temperatures": {
+    "ictal_rhythm": 1.4749
+  },
   "metrics": {
     "ictal_rhythm": {
-      "n": 22,
-      "positives": 22,
-      "skipped": "too few or single-class events (identity kept)",
-      "source": "physionet chbmit event-level (train chb01,chb03, tuned thresholds)"
+      "n": 29,
+      "positives": 27,
+      "temperature": 1.4749,
+      "ece_before": 0.0513,
+      "ece_after": 0.0179,
+      "brier_before": 0.0646,
+      "brier_after": 0.0598,
+      "source": "physionet event-level (training patients; see thresholds provenance)"
     }
   }
 }
