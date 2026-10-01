@@ -141,6 +141,26 @@ neurolens serve --host 127.0.0.1 --port 8000
 Результаты **деидентифицированы** (имя файла → `subject_id`-хэш), каждый запрос — в
 аудит-лог (`NEUROLENS_AUDIT_LOG`); соль деида — `NEUROLENS_DEID_SALT`.
 
+### Реальные данные PhysioNet: валидация и подбор порогов (§16)
+
+```bash
+# список записей и приступов (CHB-MIT; также --db siena)
+neurolens physionet list --subjects chb01
+# скачать записи с приступами + 2 без приступов на пациента (кэш data/physionet/, SHA-256)
+neurolens physionet fetch --subjects chb01,chb03,chb05 --n-free 2
+# оценка против экспертной разметки: чувствительность, FA/час, латентность
+neurolens evaluate --subjects chb05 --realtime --out out_eval/chb05
+# подбор порогов на одних пациентах, отчёт на других; --write сохраняет оверрайды
+neurolens tune --train chb01,chb03 --test chb05,chb08 --realtime --write --out out_eval/tune
+# применить подобранные пороги
+neurolens analyze rec.edf --overrides configs/thresholds.physionet.yaml
+neurolens monitor rec.edf --overrides configs/thresholds.physionet.yaml
+```
+
+Биполярные архивы (CHB-MIT) автоматически переводятся в точную среднюю референцию.
+Методика и полученные числа — `docs/validation_physionet.md`. Данные не коммитятся;
+при использовании цитируйте базы (см. `neurolens physionet list`).
+
 ### Реальный LLM (Anthropic)
 
 ```bash

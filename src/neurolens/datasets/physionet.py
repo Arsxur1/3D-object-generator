@@ -141,7 +141,18 @@ class PhysioNetClient:
     def is_cached(self, rel: str) -> bool:
         return self.local_path(rel).exists()
 
-    def fetch(self, rel: str, verify: bool = True) -> Path:
+    def fetch(self, rel: str, verify: bool = True, attempts: int = 3) -> Path:
+        """Download one file; a checksum mismatch (typically a transfer cut by a
+        proxy) is retried before giving up."""
+        for i in range(attempts):
+            try:
+                return self._fetch_once(rel, verify)
+            except ChecksumError as exc:
+                if i == attempts - 1 or "not listed" in str(exc):
+                    raise
+        raise AssertionError("unreachable")
+
+    def _fetch_once(self, rel: str, verify: bool) -> Path:
         dest = self.local_path(rel)
         if dest.exists():
             return dest
