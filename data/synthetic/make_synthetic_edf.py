@@ -63,7 +63,55 @@ def _qrs_template(fs: int) -> np.ndarray:
     return q
 
 
-def make_synthetic_edf(path: str | Path, seed: int = SEED, duration_s: int = DURATION_S) -> Path:
+def _inject_periodic(ch, ci, t, fs, rng, n):
+    """ACNS periodic/rhythmic scenario (§7.4/§7.6/§8.2) added to background.
+
+    0-60 LPDs (left, 2 Hz sharp) | 60-120 GRDA (2.5 Hz) | 120-180 LRDA (left, 2 Hz)
+    180-240 FIRDA (frontal, intermittent 2 Hz) | 240-300 extreme delta brush
+    300-360 wicket (temporal 9 Hz arciform).
+    """
+    add = np.zeros(n)
+    q = _qrs_template(int(fs))
+
+    # LPDs 0-60: left-hemisphere periodic sharp discharges at 2 Hz
+    if ch in LEFT:
+        for k in range(0, 60):
+            for j in range(2):  # 2 Hz
+                start = int((k + j * 0.5) * fs)
+                if start + len(q) <= n:
+                    add[start:start + len(q)] += 60.0 * q
+
+    # GRDA 60-120: generalized rhythmic delta 2.5 Hz (per-channel phase)
+    add += 45.0 * np.sin(2 * np.pi * 2.5 * t + 0.5 * ci) * _seg_mask(t, 60, 120)
+
+    # LRDA 120-180: left rhythmic delta 2 Hz
+    if ch in LEFT:
+        add += 45.0 * np.sin(2 * np.pi * 2.0 * t + 0.3 * ci) * _seg_mask(t, 120, 180)
+
+    # FIRDA 180-240: frontal intermittent rhythmic delta 2 Hz (4 s on / 4 s off)
+    if ch in FRONTAL:
+        burst = ((((t - 180) % 8.0) < 4.0)).astype(float)
+        add += 50.0 * np.sin(2 * np.pi * 2.0 * t + 0.4 * ci) * burst * _seg_mask(t, 180, 240)
+
+    # Extreme delta brush 240-300: delta + beta brushes on delta crests
+    # (moderate delta so it reads as EDB, not as an ictal rhythm)
+    m = _seg_mask(t, 240, 300)
+    delta = np.sin(2 * np.pi * 2.0 * t + 0.3 * ci)
+    brush = np.clip(delta, 0, None) * np.sin(2 * np.pi * 24.0 * t)
+    add += (32.0 * delta + 30.0 * brush) * m
+
+    # Wicket 300-360: temporal arciform ~9 Hz in runs (benign variant)
+    if ch in ("T3", "T4", "F7", "F8", "T5", "T6"):
+        run = (((t - 300) % 6.0) < 3.0).astype(float)
+        arci = np.sin(2 * np.pi * 9.0 * t) + 0.3 * np.sin(2 * np.pi * 18.0 * t)  # arciform
+        add += 32.0 * arci * run * _seg_mask(t, 300, 360)
+
+    return add
+
+
+def make_synthetic_edf(
+    path: str | Path, seed: int = SEED, duration_s: int = DURATION_S, scenario: str = "mixed"
+) -> Path:
     rng = np.random.default_rng(seed)
     n = duration_s * FS
     t = np.arange(n) / FS
@@ -72,6 +120,11 @@ def make_synthetic_edf(path: str | Path, seed: int = SEED, duration_s: int = DUR
     for ch in CHANNELS:
         ci = CHANNELS.index(ch)
         sig = 18.0 * _pink(rng, n)  # background (comfortably above the ~10uV floor)
+
+        if scenario == "periodic":
+            sig = sig + _inject_periodic(ch, ci, t, FS, rng, n)
+            data[ch] = sig.astype(np.float64)
+            continue
 
         # posterior alpha (awake) in the first minute + occipital emphasis
         if ch in POSTERIOR:
@@ -162,9 +215,11 @@ def main() -> int:
     ap.add_argument("-o", "--out", default=str(default_out))
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--duration", type=int, default=DURATION_S)
+    ap.add_argument("--scenario", default="mixed", choices=["mixed", "periodic"])
     args = ap.parse_args()
-    out = make_synthetic_edf(args.out, seed=args.seed, duration_s=args.duration)
-    print(f"wrote {out} ({args.duration}s, {FS}Hz, {len(CHANNELS)+1} channels)")
+    out = make_synthetic_edf(args.out, seed=args.seed, duration_s=args.duration,
+                             scenario=args.scenario)
+    print(f"wrote {out} ({args.duration}s, {FS}Hz, {len(CHANNELS)+1} channels, scenario={args.scenario})")
     return 0
 
 

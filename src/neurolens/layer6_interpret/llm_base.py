@@ -75,6 +75,7 @@ class LLMInput:
     causal_edges: list[dict[str, Any]]
     critical_flags: list[str]
     implausible_flags: list[str]
+    seizure_burden: dict[str, Any] | None
     allowed_grounding_keys: list[str]
     gate: ModeGateResult
 
@@ -115,6 +116,16 @@ def build_llm_input(
     ]
     nodes = [n.model_dump() for n in graph.nodes]
     edges = [ed.model_dump() for ed in graph.edges]
+    seizure_burden = (
+        detection.seizure_burden.model_dump() if detection.seizure_burden else None
+    )
+    allowed = (
+        graph.grounding_keys()
+        | {k for e in detection.events for k in ([e.code] + [ev.feature for ev in e.evidence])}
+        | set(background.keys())
+    )
+    if seizure_burden:
+        allowed.add("seizure_burden")
     return LLMInput(
         mode=mode,
         patient=patient.model_dump(),
@@ -125,11 +136,8 @@ def build_llm_input(
         causal_edges=edges,
         critical_flags=graph.critical_flags,
         implausible_flags=graph.implausible_flags,
-        allowed_grounding_keys=sorted(
-            graph.grounding_keys()
-            | {k for e in detection.events for k in ([e.code] + [ev.feature for ev in e.evidence])}
-            | set(background.keys())
-        ),
+        seizure_burden=seizure_burden,
+        allowed_grounding_keys=sorted(allowed),
         gate=gate,
     )
 

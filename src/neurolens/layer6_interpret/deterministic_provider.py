@@ -87,24 +87,56 @@ class DeterministicProvider(LLMProvider):
             )
             trace.append("Эпилептиформные кандидаты сверены с гипотезой ЭКГ-артефакта (Слой 5).")
 
-        # --- ictal / ACNS ---
+        # --- ictal / ACNS periodic & rhythmic patterns ---
         ictal = [e for e in data.events if e["group"] in ("ictal", "periodic")]
-        if ictal:
-            e = ictal[0]
+        for e in ictal:
             dur = e["t_end"] - e["t_start"]
             lat = e["localization"].get("lateralization") or "?"
+            acns = e.get("acns") or {}
+            mods = []
+            if acns.get("frequency_hz") is not None:
+                mods.append(f"{acns['frequency_hz']} Гц")
+            if acns.get("prevalence"):
+                mods.append(acns["prevalence"])
+            if acns.get("plus_features"):
+                mods.append("".join(acns["plus_features"]))
+            if acns.get("iic"):
+                mods.append("ИИК")
+            mod_ru = f"; модификаторы: {', '.join(mods)}" if mods else ""
+            mod_uz = f"; modifikatorlar: {', '.join(mods)}" if mods else ""
             sections.append(
                 ReportSection(
                     key="ictal_acns",
                     text=Bilingual(
-                        ru=f"Иктальный ритмический паттерн ~{dur:.0f} с, латерализация: {lat}.",
-                        uz=f"Iktal ritmik pattern ~{dur:.0f} s, lateralizatsiya: {lat}.",
+                        ru=f"{e['label_ru']} ~{dur:.0f} с, латерализация: {lat}{mod_ru}.",
+                        uz=f"{e['label_uz']} ~{dur:.0f} s, lateralizatsiya: {lat}{mod_uz}.",
                     ),
                     grounding_refs=[e["code"]],
                     confidence=_confidence(e["confidence"]),
                 )
             )
-            trace.append("Иктальное событие зарегистрировано детектором ритмической активности.")
+        if ictal:
+            trace.append("Иктальные/периодические паттерны зарегистрированы (ACNS-терминология, IIC).")
+
+        # seizure burden (cEEG)
+        sb = data.seizure_burden
+        if sb and sb.get("n_seizures", 0) > 0:
+            sections.append(
+                ReportSection(
+                    key="ictal_acns",
+                    text=Bilingual(
+                        ru=(f"Судорожная нагрузка: {sb['n_seizures']} эпизодов, "
+                            f"суммарно {sb['total_seizure_time_s']:.0f} с "
+                            f"({sb['seizure_fraction']*100:.0f}% записи), "
+                            f"{sb['seizures_per_hour']:.1f}/час."),
+                        uz=(f"Tutqanoq yuki: {sb['n_seizures']} epizod, "
+                            f"jami {sb['total_seizure_time_s']:.0f} s "
+                            f"({sb['seizure_fraction']*100:.0f}%), "
+                            f"{sb['seizures_per_hour']:.1f}/soat."),
+                    ),
+                    grounding_refs=["seizure_burden"],
+                )
+            )
 
         # --- causal chain ---
         seen_edges: set[tuple] = set()

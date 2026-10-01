@@ -82,6 +82,24 @@ class Thresholds(BaseModel):
     ictal_min_duration_s: float = Field(default=8.0, gt=0)
     ictal_rhythmicity: float = Field(default=0.45, ge=0, le=1)
     ictal_amplitude_factor: float = Field(default=1.5, ge=1)
+    # Periodic discharges (GPD/LPD/BIPD) — ACNS §7.4
+    generalized_channel_fraction: float = Field(default=0.6, ge=0, le=1)
+    pd_min_discharges: int = Field(default=6, ge=3)
+    pd_isi_cv_max: float = Field(default=0.35, ge=0, description="Max ISI coeff. of variation.")
+    pd_freq_hz_min: float = Field(default=0.5, gt=0)
+    pd_freq_hz_max: float = Field(default=3.0, gt=0)
+    pd_plus_fast_ratio: float = Field(default=0.15, ge=0, le=1, description="Beta+gamma frac -> +F.")
+    # Rhythmic delta (GRDA/LRDA)
+    rda_min_duration_s: float = Field(default=6.0, gt=0)
+    rda_rhythmicity: float = Field(default=0.4, ge=0, le=1)
+    # Ictal-interictal continuum
+    iic_freq_hz_min: float = Field(default=1.5, gt=0)
+    iic_freq_hz_max: float = Field(default=2.5, gt=0)
+    # FIRDA (frontal intermittent rhythmic delta)
+    firda_max_continuous_fraction: float = Field(default=0.7, ge=0, le=1)
+    firda_min_runs: int = Field(default=2, ge=1)
+    # Extreme delta brush
+    edb_beta_ratio: float = Field(default=0.12, ge=0, le=1)
 
 
 class RuleCondition(BaseModel):

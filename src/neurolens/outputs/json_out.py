@@ -69,6 +69,10 @@ def build_result_json(
         "features": _feature_summary(features),
         "events": [e.model_dump(mode="json") for e in detection.events],
         "detectors_run": detection.detectors_run,
+        "seizure_burden": (
+            detection.seizure_burden.model_dump(mode="json")
+            if detection.seizure_burden else None
+        ),
         "causal_graph": graph.model_dump(mode="json"),
         "critical_findings": [cf.model_dump(mode="json") for cf in report.critical_findings],
         "report": report.model_dump(mode="json"),

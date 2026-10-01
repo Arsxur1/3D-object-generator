@@ -40,7 +40,14 @@ class IctalRhythmDetector(Detector):
             for a, b in _runs(active):
                 if (b - a) < min_epochs:
                     continue
-                # keep the single best channel-run globally (avoid duplicates)
+                # Distinguish ictal from rhythmic delta (RDA/IIC): a seizure is
+                # typically >3 Hz OR shows clear frequency evolution. A pure,
+                # non-evolving <=3 Hz rhythm is rhythmic delta, not ictal.
+                seg_f = domf[a:b, ci]
+                mean_f = float(np.mean(seg_f))
+                evolution = abs(float(seg_f[-1]) - float(seg_f[0]))
+                if mean_f <= 3.0 and evolution < 1.5:
+                    continue
                 events.append(self._make_event(features, ci, chan, a, b, baseline))
 
         if not events:

@@ -77,6 +77,36 @@ def suppression_regions(
     ]
 
 
+def suppression_regions_multichannel(
+    channels: np.ndarray,
+    fs: float,
+    amp_thresh_uv: float = 10.0,
+    win_s: float = 8.0,
+    frac_thresh: float = 0.4,
+    min_region_s: float = 12.0,
+) -> list[tuple[float, float]]:
+    """Locate GENERALIZED burst-suppression: suppression across channels together.
+
+    Uses the mean per-channel amplitude envelope, so a single quiet channel does
+    not trigger a (false) burst-suppression — real burst-suppression is
+    generalized. ``channels`` is [n_ch][samples].
+    """
+    if channels.ndim != 2 or channels.shape[0] == 0:
+        return []
+    envs = np.stack([_envelope(channels[i], fs) for i in range(channels.shape[0])], axis=0)
+    mean_env = envs.mean(axis=0)
+    suppressed = _min_run(mean_env < amp_thresh_uv, int(0.5 * fs))
+    win = max(1, int(win_s * fs))
+    kernel = np.ones(win) / win
+    local = np.convolve(suppressed.astype(float), kernel, mode="same")
+    region_mask = local >= frac_thresh
+    return [
+        (a / fs, b / fs)
+        for a, b in _runs(region_mask)
+        if (b - a) >= int(min_region_s * fs)
+    ]
+
+
 def _envelope(x: np.ndarray, fs: float, smooth_s: float = 0.2) -> np.ndarray:
     rect = np.abs(x - np.mean(x))
     win = max(1, int(smooth_s * fs))

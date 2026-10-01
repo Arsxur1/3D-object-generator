@@ -11,9 +11,11 @@ from .base import Detector, LABELS
 from .background_abn import DiffuseSlowingDetector, FocalSlowingDetector
 from .ictal import IctalRhythmDetector
 from .ied import SpikeDetector
+from .periodic import PeriodicPatternDetector
 from .artifact_events import EcgArtifactDetector
 from .suppression_events import BurstSuppressionDetector
-from .special import TriphasicWaveDetector
+from .special import ExtremeDeltaBrushDetector, FirdaDetector, TriphasicWaveDetector
+from .seizure_burden import compute_seizure_burden
 from .registry import default_detectors, run_detectors
 
 __all__ = [
@@ -22,10 +24,14 @@ __all__ = [
     "DiffuseSlowingDetector",
     "FocalSlowingDetector",
     "IctalRhythmDetector",
+    "PeriodicPatternDetector",
     "SpikeDetector",
     "EcgArtifactDetector",
     "BurstSuppressionDetector",
     "TriphasicWaveDetector",
+    "FirdaDetector",
+    "ExtremeDeltaBrushDetector",
+    "compute_seizure_burden",
     "default_detectors",
     "run_detectors",
 ]

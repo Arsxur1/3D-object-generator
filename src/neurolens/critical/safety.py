@@ -72,19 +72,48 @@ def scan_critical_findings(detection: DetectionResult) -> list[CriticalFinding]:
             )
         )
 
-    # IIC / periodic patterns requiring attention (codes appear from v2 detectors).
+    # IIC / periodic patterns requiring attention (TZ §10) — flagged critical only
+    # when on the ictal-interictal continuum (frequency 1.5-2.5 Hz or +F).
     for code in ("lpds", "gpds", "bipds", "lrda"):
-        evs = [e for e in detection.events if e.code == code]
-        for ev in evs:
+        for ev in (e for e in detection.events if e.code == code):
+            iic = bool(ev.acns and ev.acns.iic)
+            freq = ev.acns.frequency_hz if ev.acns else None
+            plus = ",".join(ev.acns.plus_features) if ev.acns else ""
+            modifiers = []
+            if freq is not None:
+                modifiers.append(f"{freq} Гц")
+            if plus:
+                modifiers.append(plus)
+            mod_str = f" ({'; '.join(modifiers)})" if modifiers else ""
+            if not iic:
+                continue
             findings.append(
                 CriticalFinding(
                     code=f"iic_{code}",
                     text=Bilingual(
-                        ru=f"Паттерн {code.upper()} на иктально-интериктальном континууме — требует внимания.",
-                        uz=f"{code.upper()} patterni iktal-interiktal kontinuumda — e’tibor talab qiladi.",
+                        ru=(f"Паттерн {code.upper()}{mod_str} на иктально-интериктальном "
+                            "континууме — требует внимания и клинической корреляции."),
+                        uz=(f"{code.upper()}{mod_str} patterni iktal-interiktal kontinuumda — "
+                            "e’tibor va klinik korrelyatsiya talab qiladi."),
                     ),
                     grounding_refs=[ev.code],
                 )
             )
+
+    # High seizure burden (TZ §7.3) — a strong cEEG signal even below status.
+    sb = detection.seizure_burden
+    if sb and sb.n_seizures >= 2 and sb.seizure_fraction >= 0.1 and not sb.status_epilepticus_suspected:
+        findings.append(
+            CriticalFinding(
+                code="high_seizure_burden",
+                text=Bilingual(
+                    ru=(f"Высокая судорожная нагрузка: {sb.n_seizures} эпизодов, "
+                        f"{sb.seizure_fraction*100:.0f}% записи, {sb.seizures_per_hour:.1f}/час."),
+                    uz=(f"Yuqori tutqanoq yuki: {sb.n_seizures} epizod, "
+                        f"yozuvning {sb.seizure_fraction*100:.0f}%, {sb.seizures_per_hour:.1f}/soat."),
+                ),
+                grounding_refs=["ictal_rhythm"],
+            )
+        )
 
     return findings

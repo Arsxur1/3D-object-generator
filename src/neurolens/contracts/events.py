@@ -48,6 +48,24 @@ class EventEvidence(BaseModel):
     note: Optional[str] = None
 
 
+class AcnsModifiers(BaseModel):
+    """ACNS 2021 modifiers for periodic/rhythmic patterns (TZ §7.4)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    frequency_hz: Optional[float] = Field(default=None, ge=0)
+    prevalence: Optional[str] = Field(
+        default=None, description="rare | occasional | frequent | abundant | continuous"
+    )
+    plus_features: list[str] = Field(
+        default_factory=list, description="e.g. +F (fast), +R (rhythmic), +S (sharp)"
+    )
+    iic: bool = Field(
+        default=False,
+        description="On the ictal-interictal continuum (needs clinical correlation).",
+    )
+
+
 class Event(BaseModel):
     """A detected EEG event/pattern (TZ §7)."""
 
@@ -58,7 +76,7 @@ class Event(BaseModel):
     label_uz: str
     group: str = Field(
         description="Detector group: background | ied | ictal | periodic | "
-        "suppression | special | artifact | sleep"
+        "suppression | special | artifact | variant | sleep"
     )
     localization: Localization = Field(default_factory=Localization)
     t_start: float = Field(ge=0, description="Seconds from recording start.")
@@ -70,11 +88,28 @@ class Event(BaseModel):
         description="True when this is a candidate artifact (e.g. ECG) rather than "
         "a genuine cerebral finding — resolved in Layer 5.",
     )
+    acns: Optional[AcnsModifiers] = Field(
+        default=None, description="ACNS modifiers for periodic/rhythmic patterns (§7.4)."
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @property
     def duration_s(self) -> float:
         return max(0.0, self.t_end - self.t_start)
+
+
+class SeizureBurden(BaseModel):
+    """Seizure-burden accounting for cEEG (TZ §7.3)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    n_seizures: int = 0
+    total_seizure_time_s: float = 0.0
+    recording_duration_s: float = 0.0
+    seizure_fraction: float = Field(default=0.0, ge=0, le=1)
+    seizures_per_hour: float = 0.0
+    longest_seizure_s: float = 0.0
+    status_epilepticus_suspected: bool = False
 
 
 class DetectionResult(BaseModel):
@@ -85,6 +120,7 @@ class DetectionResult(BaseModel):
     events: list[Event] = Field(default_factory=list)
     detectors_run: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+    seizure_burden: Optional[SeizureBurden] = None
 
     def by_group(self, group: str) -> list[Event]:
         return [e for e in self.events if e.group == group]

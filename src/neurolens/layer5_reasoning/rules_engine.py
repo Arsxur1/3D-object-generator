@@ -60,8 +60,10 @@ class RulesEngine:
         for i, ev in enumerate(detection.events):
             nid = f"evt:{ev.code}:{i}"
             resolved = resolutions.get(id(ev))
-            if resolved and resolved.get("is_artifact"):
+            if resolved and resolved.get("kind") == "artifact":
                 phys = PhysiologyLabel.ARTIFACT
+            elif resolved and resolved.get("kind") == "variant":
+                phys = PhysiologyLabel.PHYSIOLOGIC
             else:
                 phys = self.physiology.label_event(ev, patient)
             critical = ev.group in _CRITICAL_GROUPS or ev.code == "lpds"
@@ -97,6 +99,11 @@ class RulesEngine:
             self._apply_causal_chain(
                 rule, detection, context, code_to_nodes, nodes, edges, critical_flags
             )
+
+        # 2b) benign-variant (wicket) resolution of spike candidates
+        self._apply_variant_resolution(
+            detection, resolutions, event_node_ids, code_to_nodes, nodes, edges
+        )
 
         # 3) unresolved spikes with low support -> implausible (needs review)
         for ev in detection.by_group("ied"):
@@ -190,7 +197,7 @@ class RulesEngine:
 
         resolved = [
             ev for ev in detection.by_group("ied")
-            if resolutions.get(id(ev), {}).get("is_artifact")
+            if resolutions.get(id(ev), {}).get("kind") == "artifact"
         ]
         if not resolved:
             return
@@ -233,6 +240,54 @@ class RulesEngine:
                 confidence=rule.confidence,
             )
         )
+
+    def _apply_variant_resolution(
+        self, detection, resolutions, event_node_ids, code_to_nodes, nodes, edges
+    ) -> None:
+        """Resolve spikes coinciding with a benign variant (wicket) as physiologic."""
+        resolved = [
+            ev for ev in detection.by_group("ied")
+            if resolutions.get(id(ev), {}).get("kind") == "variant"
+        ]
+        if not resolved:
+            return
+        wicket_ids = code_to_nodes.get("wicket", [])
+        for ev in resolved:
+            node = next(n for n in nodes if n.id == event_node_ids[id(ev)])
+            node.physiology = PhysiologyLabel.PHYSIOLOGIC
+            node.label_ru += " → доброкачественный вариант (wicket), не IED"
+
+        mech_id = "mech:benign_variant"
+        if not any(n.id == mech_id for n in nodes):
+            nodes.append(
+                CausalNode(
+                    id=mech_id,
+                    kind=NodeKind.MECHANISM,
+                    label_ru=(
+                        f"Острые транзиенты (n={len(resolved)}) соответствуют "
+                        f"доброкачественному варианту (wicket) — физиологично, не эпилептиформно"
+                    ),
+                    label_uz=(
+                        f"O‘tkir tranzientlar (n={len(resolved)}) xavfsiz variantga (wicket) "
+                        f"mos — fiziologik, epileptiform emas"
+                    ),
+                    physiology=PhysiologyLabel.PHYSIOLOGIC,
+                    confidence=0.6,
+                    evidence_refs=["wicket", "spike"],
+                )
+            )
+        if wicket_ids:
+            edges.append(
+                CausalEdge(
+                    source=wicket_ids[0],
+                    target=mech_id,
+                    rule_id="wicket_benign_variant",
+                    relation_ru="объясняет как вариант",
+                    relation_uz="variant sifatida izohlaydi",
+                    physiology=PhysiologyLabel.PHYSIOLOGIC,
+                    confidence=0.6,
+                )
+            )
 
 
 def _context_has(context: ClinicalContext, token: str) -> bool:

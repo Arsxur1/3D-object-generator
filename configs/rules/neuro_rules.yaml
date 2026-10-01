@@ -97,7 +97,96 @@ chains:
     physiology: pathologic
     confidence: 0.6
 
-  # 7) Physiologic response: slowing on hyperventilation/drowsiness is NOT pathology
+  # 7a) GPDs -> diffuse (toxic/metabolic) dysfunction; on IIC if fast/frequency criteria
+  - id: gpds_diffuse
+    description_ru: >-
+      Генерализованные периодические разряды (GPDs) — диффузная дисфункция
+      (токсическая/метаболическая/аноксическая); при +F или 1.5-2.5 Гц — на ИИК.
+    when:
+      any_event: [gpds]
+    cause_ru: Генерализованные периодические разряды (GPDs)
+    cause_uz: Umumlashgan davriy razryadlar (GPDs)
+    effect_ru: Диффузная церебральная дисфункция (токсическая/метаболическая/аноксическая); возможен ИИК
+    effect_uz: Diffuz serebral disfunksiya (toksik/metabolik/anoksik); IIC bo‘lishi mumkin
+    physiology: pathologic
+    confidence: 0.6
+    critical: true
+
+  # 7b) LRDA -> lateralized cortical irritability / structural, on IIC
+  - id: lrda_structural
+    description_ru: >-
+      Латерализованная ритмическая дельта (LRDA) — латерализованная корковая
+      раздражимость/структурный процесс; ассоциирована с судорогами (ИИК).
+    when:
+      any_event: [lrda]
+    cause_ru: Латерализованная ритмическая дельта (LRDA)
+    cause_uz: Lateralizatsiyalangan ritmik delta (LRDA)
+    effect_ru: Латерализованный структурный/раздражительный процесс; связь с судорогами (ИИК)
+    effect_uz: Lateralizatsiyalangan strukturaviy/qo‘zg‘aluvchi jarayon; tutqanoq bilan bog‘liq (IIC)
+    physiology: pathologic
+    confidence: 0.55
+
+  # 7c) GRDA -> nonspecific encephalopathy / increased ICP
+  - id: grda_nonspecific
+    description_ru: >-
+      Генерализованная ритмическая дельта (GRDA) — неспецифический признак
+      энцефалопатии/повышенного ВЧД.
+    when:
+      any_event: [grda]
+    cause_ru: Генерализованная ритмическая дельта (GRDA)
+    cause_uz: Umumlashgan ritmik delta (GRDA)
+    effect_ru: Неспецифическая энцефалопатия / возможное повышение ВЧД
+    effect_uz: Nospetsifik ensefalopatiya / ehtimoliy ICP oshishi
+    physiology: pathologic
+    confidence: 0.5
+
+  # 7d) BIPDs -> bilateral independent structural processes
+  - id: bipds_bilateral
+    description_ru: >-
+      Билатеральные независимые периодические разряды (BIPDs) — двусторонние
+      независимые структурные/раздражительные процессы.
+    when:
+      any_event: [bipds]
+    cause_ru: Билатеральные независимые периодические разряды (BIPDs)
+    cause_uz: Ikki tomonlama mustaqil davriy razryadlar (BIPDs)
+    effect_ru: Двусторонние независимые структурные процессы; высокий риск судорог (ИИК)
+    effect_uz: Ikki tomonlama mustaqil strukturaviy jarayonlar; tutqanoq xavfi yuqori (IIC)
+    physiology: pathologic
+    confidence: 0.55
+    critical: true
+
+  # 7e) FIRDA -> deep midline / nonspecific (encephalopathy or raised ICP)
+  - id: firda_nonspecific
+    description_ru: >-
+      Лобная интермиттирующая ритмическая дельта (FIRDA) — неспецифический
+      признак: глубинная/срединная дисфункция, энцефалопатия или повышение ВЧД.
+    when:
+      any_event: [firda]
+    cause_ru: Лобная интермиттирующая ритмическая дельта (FIRDA)
+    cause_uz: Peshona intermittent ritmik delta (FIRDA)
+    effect_ru: Неспецифическая глубинная/срединная дисфункция (энцефалопатия/ВЧД)
+    effect_uz: Nospetsifik chuqur/o‘rta chiziq disfunksiyasi (ensefalopatiya/ICP)
+    physiology: pathologic
+    confidence: 0.5
+
+  # 7f) Extreme delta brush -> specific (anti-NMDA-R encephalitis; extreme prematurity)
+  - id: edb_specific
+    description_ru: >-
+      Extreme delta brush — относительно специфичный паттерн: анти-NMDA-рецепторный
+      энцефалит (у взрослых/детей) или крайняя недоношенность (неонатально).
+    when:
+      any_event: [extreme_delta_brush]
+    cause_ru: Extreme delta brush
+    cause_uz: Extreme delta brush
+    effect_ru: Анти-NMDA-рецепторный энцефалит (или крайняя недоношенность — по контексту)
+    effect_uz: Anti-NMDA-retseptor ensefaliti (yoki o‘ta chala tug‘ilish — kontekstga ko‘ra)
+    physiology: pathologic
+    confidence: 0.55
+
+  # (Wicket benign-variant resolution of spikes is handled by the plausibility
+  #  engine + Layer 5 variant resolution, not a generic chain — see rules_engine.)
+
+  # 8) Physiologic response: slowing on hyperventilation/drowsiness is NOT pathology
   - id: physiologic_slowing_activation
     description_ru: >-
       Замедление при гипервентиляции/сонливости — физиологический ответ,

@@ -17,3 +17,26 @@ burst_suppression_ratio: 0.5
 ictal_min_duration_s: 8.0        # sustained rhythmic discharge to call ictal
 ictal_rhythmicity: 0.45          # peak-band power concentration (0..1)
 ictal_amplitude_factor: 1.5      # amplitude rise vs channel baseline
+
+# Periodic discharges (GPD/LPD/BIPD) — ACNS 2021 (§7.4)
+generalized_channel_fraction: 0.6  # >= this fraction of channels involved -> generalized
+pd_min_discharges: 6               # min discharges to call a pattern periodic
+pd_isi_cv_max: 0.35                # max coeff. of variation of inter-discharge interval
+pd_freq_hz_min: 0.5
+pd_freq_hz_max: 3.0
+pd_plus_fast_ratio: 0.15           # beta+gamma power fraction during discharges -> +F
+
+# Rhythmic delta activity (GRDA/LRDA)
+rda_min_duration_s: 6.0
+rda_rhythmicity: 0.4
+
+# Ictal-interictal continuum
+iic_freq_hz_min: 1.5
+iic_freq_hz_max: 2.5
+
+# FIRDA (frontal intermittent rhythmic delta)
+firda_max_continuous_fraction: 0.7  # must be intermittent (below this) to be FIRDA
+firda_min_runs: 2
+
+# Extreme delta brush
+edb_beta_ratio: 0.12                # beta power fraction on delta crests

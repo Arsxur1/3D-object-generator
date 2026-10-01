@@ -33,7 +33,14 @@ _DEFAULT_PHYSIOLOGY = {
     "triphasic_waves": PhysiologyLabel.PATHOLOGIC,
     "ecg_artifact": PhysiologyLabel.ARTIFACT,
     "drowsiness_slowing": PhysiologyLabel.PHYSIOLOGIC,
+    "wicket": PhysiologyLabel.PHYSIOLOGIC,
     "lpds": PhysiologyLabel.PATHOLOGIC,
+    "gpds": PhysiologyLabel.PATHOLOGIC,
+    "bipds": PhysiologyLabel.PATHOLOGIC,
+    "lrda": PhysiologyLabel.PATHOLOGIC,
+    "grda": PhysiologyLabel.PATHOLOGIC,
+    "firda": PhysiologyLabel.PATHOLOGIC,
+    "extreme_delta_brush": PhysiologyLabel.PATHOLOGIC,
 }
 
 
@@ -44,6 +51,10 @@ class PhysiologyEngine:
     def label_event(self, event: Event, patient: PatientInfo) -> PhysiologyLabel:
         """Assign a physiology label, adjusting for age norms where relevant."""
         base = _DEFAULT_PHYSIOLOGY.get(event.code, PhysiologyLabel.UNCERTAIN)
+
+        # Age-gated benign variant (e.g. posterior slow waves of youth).
+        if self.is_age_physiologic_variant(event, patient):
+            return PhysiologyLabel.PHYSIOLOGIC
 
         # Age-norm refinement: a PDR within the age-expected range argues that
         # apparent 'slowing' may be physiologic for the patient.
@@ -59,6 +70,26 @@ class PhysiologyEngine:
         return base
 
     def variant_hint(self, event: Event) -> str | None:
-        """If an epileptiform candidate matches a benign-variant profile, name it."""
-        # Skeleton: only a placeholder hook; real variant templates land in v2.
+        """If an epileptiform candidate matches a benign-variant profile, name it.
+
+        Temporal sharp transients are the classic location for wicket/BETS —
+        variants routinely misread as epileptiform (TZ §8.2). The definitive
+        wicket resolution happens in Layer 5 plausibility against detected
+        wicket rhythms; this is a lightweight hint by location.
+        """
+        temporal = {"T3", "T4", "T5", "T6", "F7", "F8"}
+        if event.group == "ied" and set(event.localization.channels) & temporal:
+            return "wicket"
         return None
+
+    def is_age_physiologic_variant(self, event: Event, patient: PatientInfo) -> bool:
+        """Age-gated benign variants (posterior slow waves of youth, etc.)."""
+        age = patient.age_years
+        if age is None or age >= 21:
+            return False
+        _, band = self.norms.band_for_patient(patient)
+        variants = band.get("physiologic_variants", [])
+        region = (event.localization.region or "").lower()
+        if "posterior_slow_waves_of_youth" in variants and region in ("occipital", "parietal"):
+            return event.code in ("focal_slowing",)
+        return False

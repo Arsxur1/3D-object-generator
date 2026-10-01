@@ -12,18 +12,25 @@ from .background_abn import DiffuseSlowingDetector, FocalSlowingDetector
 from .base import Detector
 from .ictal import IctalRhythmDetector
 from .ied import SpikeDetector
-from .special import TriphasicWaveDetector
+from .periodic import PeriodicPatternDetector
+from .seizure_burden import compute_seizure_burden
+from .special import ExtremeDeltaBrushDetector, FirdaDetector, TriphasicWaveDetector
 from .suppression_events import BurstSuppressionDetector
+from .variants import BenignVariantDetector
 
 
 def default_detectors() -> list[Detector]:
-    """The classic/qEEG detector set active in the MVP skeleton."""
+    """The classic/qEEG detector set active in the MVP."""
     return [
         DiffuseSlowingDetector(),
         FocalSlowingDetector(),
         IctalRhythmDetector(),
+        PeriodicPatternDetector(),
         BurstSuppressionDetector(),
         TriphasicWaveDetector(),
+        FirdaDetector(),
+        ExtremeDeltaBrushDetector(),
+        BenignVariantDetector(),
         EcgArtifactDetector(),
         SpikeDetector(),
     ]
@@ -49,4 +56,6 @@ def run_detectors(
             notes.append(f"detector {det.code} failed: {exc}")
         # keep only events above the detection confidence floor
         events.extend(e for e in found if e.confidence >= thresholds.detection_min_confidence)
-    return DetectionResult(events=events, detectors_run=ran, notes=notes)
+    result = DetectionResult(events=events, detectors_run=ran, notes=notes)
+    result.seizure_burden = compute_seizure_burden(result, sig.duration_s or 0.0)
+    return result

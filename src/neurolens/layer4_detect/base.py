@@ -20,6 +20,17 @@ LABELS: dict[str, tuple[str, str]] = {
     "burst_suppression": ("Паттерн «вспышка-подавление»", "“Portlash-bostirish” patterni"),
     "triphasic_waves": ("Трифазные волны", "Uch fazali to‘lqinlar"),
     "drowsiness_slowing": ("Замедление при сонливости (физиологическое)", "Uyquchanlikdagi sekinlashuv (fiziologik)"),
+    # ACNS periodic / rhythmic patterns (§7.4)
+    "gpds": ("Генерализованные периодические разряды (GPDs)", "Umumlashgan davriy razryadlar (GPDs)"),
+    "lpds": ("Латерализованные периодические разряды (LPDs)", "Lateralizatsiyalangan davriy razryadlar (LPDs)"),
+    "bipds": ("Билатеральные независимые периодические разряды (BIPDs)", "Ikki tomonlama mustaqil davriy razryadlar (BIPDs)"),
+    "grda": ("Генерализованная ритмическая дельта (GRDA)", "Umumlashgan ritmik delta (GRDA)"),
+    "lrda": ("Латерализованная ритмическая дельта (LRDA)", "Lateralizatsiyalangan ritmik delta (LRDA)"),
+    # Special patterns (§7.6)
+    "firda": ("Лобная интермиттирующая ритмическая дельта (FIRDA)", "Peshona intermittent ritmik delta (FIRDA)"),
+    "extreme_delta_brush": ("Extreme delta brush", "Extreme delta brush"),
+    # Benign variant (§8.2)
+    "wicket": ("Викет-спайки (доброкачественный вариант)", "Wicket-spike (xavfsiz variant)"),
 }
 
 

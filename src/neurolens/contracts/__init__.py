@@ -14,7 +14,14 @@ from .signal import (
     UnifiedSignal,
     ElectrodeSystem,
 )
-from .events import Event, EventEvidence, Localization, DetectionResult
+from .events import (
+    Event,
+    EventEvidence,
+    Localization,
+    DetectionResult,
+    AcnsModifiers,
+    SeizureBurden,
+)
 from .causal import (
     CausalNode,
     CausalEdge,
@@ -54,6 +61,8 @@ __all__ = [
     "EventEvidence",
     "Localization",
     "DetectionResult",
+    "AcnsModifiers",
+    "SeizureBurden",
     # causal
     "CausalNode",
     "CausalEdge",

@@ -1,9 +1,11 @@
-"""Plausibility & artifact cross-check (TZ §8.3).
+"""Plausibility & artifact/variant cross-check (TZ §8.3, §16).
 
-Separating true IEDs from artifacts is a critical task. Here we resolve
-spike/sharp candidates that temporally coincide with ECG QRS complexes (or
-occur on ECG-contaminated channels) as ECG artifact rather than epileptiform
-discharges, and flag events that nothing explains as implausible.
+Separating true IEDs from artifacts AND from benign variants is critical.
+A spike candidate is resolved as:
+  - ECG artifact — coincides with QRS or sits on an ECG-contaminated channel;
+  - benign variant (wicket) — coincides in time+channel with a detected wicket;
+otherwise it stays a genuine epileptiform candidate. Events that nothing
+explains are flagged implausible upstream.
 """
 
 from __future__ import annotations
@@ -17,20 +19,25 @@ def _near_qrs(event: Event, qrs_times: list[float], tol: float = 0.06) -> bool:
     return any(abs(center - q) <= tol for q in qrs_times)
 
 
+def _overlaps_time(ev: Event, other: Event) -> bool:
+    return not (ev.t_end < other.t_start or other.t_end < ev.t_start)
+
+
 def check_plausibility(
     detection: DetectionResult, artifacts: ArtifactReport | None
 ) -> dict[str, dict]:
-    """Return per-event-code resolution info used by the rules engine.
+    """Resolve spike candidates. Returns {"spike_resolutions": {id(ev): {...}}}.
 
-    Output maps a spike Event (by id(event)) to a dict:
-      {"is_artifact": bool, "reason": str}
-    Also returns a global 'implausible' list of event codes with no explanation.
+    Each resolution: {"kind": "artifact"|"variant", "reason": str}.
     """
     resolutions: dict[int, dict] = {}
+    spikes = detection.by_group("ied")
+
+    # 1) ECG-artifact resolution
     if artifacts is not None and (artifacts.ecg_present or artifacts.ecg_contaminated_channels):
         qrs = artifacts.ecg_qrs_times_s
         contaminated = set(artifacts.ecg_contaminated_channels)
-        for ev in detection.by_group("ied"):
+        for ev in spikes:
             on_contaminated = bool(set(ev.localization.channels) & contaminated)
             coincident = _near_qrs(ev, qrs)
             if coincident or on_contaminated:
@@ -39,8 +46,21 @@ def check_plausibility(
                     reason.append("совпадение с QRS ЭКГ")
                 if on_contaminated:
                     reason.append("на ЭКГ-контаминированном канале")
-                resolutions[id(ev)] = {
-                    "is_artifact": True,
-                    "reason": "; ".join(reason),
-                }
+                resolutions[id(ev)] = {"kind": "artifact", "reason": "; ".join(reason)}
+
+    # 2) benign-variant (wicket) resolution — only for still-unresolved spikes
+    wickets = detection.by_group("variant")
+    if wickets:
+        for ev in spikes:
+            if id(ev) in resolutions:
+                continue
+            ev_chans = set(ev.localization.channels)
+            for w in wickets:
+                if ev_chans & set(w.localization.channels) and _overlaps_time(ev, w):
+                    resolutions[id(ev)] = {
+                        "kind": "variant",
+                        "reason": "совпадает с доброкачественным вариантом (wicket)",
+                    }
+                    break
+
     return {"spike_resolutions": resolutions}

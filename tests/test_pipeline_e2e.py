@@ -77,6 +77,34 @@ def test_e2e_save_outputs(demo_edf, configs, tmp_path):
     assert "ПРОТОКОЛ ЭЭГ" in txt and "Xulosa" in txt
 
 
+def test_e2e_seizure_burden_in_json(demo_edf, configs):
+    _, out = _run(demo_edf, configs)
+    sb = out.result_json["seizure_burden"]
+    assert sb is not None
+    assert sb["n_seizures"] >= 1
+    assert sb["total_seizure_time_s"] > 0
+
+
+def test_e2e_periodic_scenario(tmp_path, configs):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "data" / "synthetic"))
+    from make_synthetic_edf import make_synthetic_edf
+
+    edf = make_synthetic_edf(tmp_path / "periodic.edf", scenario="periodic")
+    pipe = Pipeline(config=configs, provider_pref="deterministic")
+    out = pipe.analyze_file(
+        edf, montage_name="double_banana",
+        patient=PatientInfo(age_years=40), context=ClinicalContext(),
+    )
+    codes = out.detection.codes()
+    # at least one periodic/rhythmic ACNS pattern must be present
+    assert codes & {"lpds", "gpds", "bipds", "lrda", "grda"}
+    # a periodic-pattern causal edge should exist
+    rule_ids = {e.rule_id for e in out.graph.edges}
+    assert rule_ids & {"lpds_structural", "gpds_diffuse", "grda_nonspecific",
+                       "lrda_structural", "firda_nonspecific"}
+
+
 def test_mode_b_gate_escalates_on_low_quality(demo_edf):
     # fresh configs (do not mutate the shared session fixture)
     from neurolens.pipeline.config_loader import load_configs
