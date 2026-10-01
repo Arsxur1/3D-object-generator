@@ -72,6 +72,10 @@ def test_e2e_save_outputs(demo_edf, configs, tmp_path):
     paths = pipe.save_outputs(out, tmp_path / "out")
     assert paths["json"].exists()
     assert paths["protocol"].exists()
+    # all §11 output formats produced
+    for key in ("curves", "dsa_aeeg", "topomap", "causal_graph", "pdf"):
+        assert key in paths and paths[key].exists(), f"missing output: {key}"
+    assert paths["pdf"].read_bytes()[:5] == b"%PDF-"
     # protocol has both languages and the disclaimer
     txt = paths["protocol"].read_text(encoding="utf-8")
     assert "ПРОТОКОЛ ЭЭГ" in txt and "Xulosa" in txt

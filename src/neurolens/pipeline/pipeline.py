@@ -39,8 +39,11 @@ from ..layer6_interpret.llm_base import (
 )
 from ..layer6_interpret.factory import make_provider
 from ..layer6_interpret.protocol import render_protocol
+from ..outputs.causal_plot import plot_causal_graph
 from ..outputs.json_out import build_result_json, save_json
+from ..outputs.pdf_report import build_pdf_report
 from ..outputs.plots import plot_dsa_aeeg, plot_montage_with_events
+from ..outputs.topomap import plot_band_topomaps
 from .config_loader import ConfigBundle, load_configs
 
 
@@ -188,6 +191,22 @@ class Pipeline:
                 paths["dsa_aeeg"] = plot_dsa_aeeg(
                     output.features.dsa, output.features.aeeg, out_dir / "dsa_aeeg.png"
                 )
+            if self.cfg.electrode_coords:
+                paths["topomap"] = plot_band_topomaps(
+                    output.features, self.cfg.electrode_coords, out_dir / "topomap.png"
+                )
+            paths["causal_graph"] = plot_causal_graph(
+                output.graph, out_dir / "causal_graph.png"
+            )
         except Exception as exc:  # plotting must not break the run
             (out_dir / "plot_error.txt").write_text(str(exc), encoding="utf-8")
+
+        # PDF report (embeds whichever figures were produced)
+        try:
+            paths["pdf"] = build_pdf_report(
+                output.report, output.detection, output.signal,
+                output.montage_name, paths, out_dir / "report.pdf",
+            )
+        except Exception as exc:  # report generation must not break the run
+            (out_dir / "pdf_error.txt").write_text(str(exc), encoding="utf-8")
         return paths

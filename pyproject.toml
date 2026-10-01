@@ -21,6 +21,7 @@ dependencies = [
     "pyyaml>=6.0",
     "jsonschema>=4.17",
     "matplotlib>=3.7",
+    "reportlab>=4.0",
 ]
 
 [project.optional-dependencies]
