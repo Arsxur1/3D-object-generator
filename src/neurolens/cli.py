@@ -130,6 +130,21 @@ def _subjects(text: str) -> list[str]:
     return [x.strip() for x in text.split(",") if x.strip()]
 
 
+def _items(default_db: str, text: str, cache):
+    """Subjects may name their database ("siena:PN00"), so one evaluation can
+    pool populations (paediatric CHB-MIT + adult Siena)."""
+    from .evaluation.runner import load_items
+
+    by_db: dict[str, list[str]] = {}
+    for tok in _subjects(text):
+        db, _, sub = tok.rpartition(":")
+        by_db.setdefault(db or default_db, []).append(sub)
+    items = []
+    for db, subs in by_db.items():
+        items += load_items(db, subs, cache)
+    return items
+
+
 def _physionet(args) -> int:
     from .datasets.physionet import DATABASES, PhysioNetClient
 
@@ -169,7 +184,7 @@ def _evaluate(args) -> int:
     from .evaluation.runner import evaluate_offline, evaluate_realtime, load_items, prepare_records
 
     cfg = _load_cfg(args.overrides)
-    items = load_items(args.db, _subjects(args.subjects), args.cache)
+    items = _items(args.db, args.subjects, args.cache)
     if not items:
         print("No cached records — run `neurolens physionet fetch` first.")
         return 2
@@ -196,8 +211,8 @@ def _tune(args) -> int:
     from .pipeline.config_loader import apply_overrides
 
     cfg = _load_cfg()
-    train_items = load_items(args.db, _subjects(args.train), args.cache)
-    test_items = load_items(args.db, _subjects(args.test), args.cache)
+    train_items = _items(args.db, args.train, args.cache)
+    test_items = _items(args.db, args.test, args.cache)
     if not train_items or not test_items:
         print("Need cached train and test records — run `neurolens physionet fetch` first.")
         return 2
@@ -323,7 +338,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ev = sub.add_parser("evaluate", help="Score seizure detection against expert labels.")
     _data_args(ev)
-    ev.add_argument("--subjects", required=True)
+    ev.add_argument("--subjects", required=True, help="e.g. chb05,chb08 or chb05,siena:PN00")
     ev.add_argument("--overrides", default=None)
     ev.add_argument("--realtime", action="store_true", help="Also score the streaming monitor's alarms.")
     ev.add_argument("--feature-cache", default="data/physionet/.features", dest="feature_cache")

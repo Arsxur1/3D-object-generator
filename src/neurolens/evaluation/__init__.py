@@ -11,6 +11,7 @@ from .runner import (
     evaluate_realtime,
     load_items,
     prepare_record,
+    prepare_records,
 )
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "evaluate_realtime",
     "load_items",
     "prepare_record",
+    "prepare_records",
     "score_record",
 ]
