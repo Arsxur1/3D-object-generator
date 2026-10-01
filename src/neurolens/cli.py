@@ -24,7 +24,7 @@ def _analyze(args) -> int:
         sedatives=args.sedative or [],
         clinical_question=args.question,
     )
-    pipe = Pipeline(provider_pref=args.provider)
+    pipe = Pipeline(provider_pref=args.provider, calibration_file=getattr(args, "calibration", None))
     out = pipe.analyze_file(
         args.file, mode=mode, montage_name=args.montage, patient=patient, context=context
     )
@@ -95,6 +95,20 @@ def _monitor(args) -> int:
     return 0
 
 
+def _calibrate(args) -> int:
+    from .calibration.from_feedback import build_calibration
+
+    cal = build_calibration(args.feedback, out_path=args.out, min_samples=args.min_samples)
+    print(f"Калибровка/Kalibrovka: default T={cal.default}, "
+          f"per-code={len(cal.temperatures)} кодов")
+    if cal.metrics:
+        m = cal.metrics
+        print(f"  ECE до/после: {m.get('ece_before')} -> {m.get('ece_after')}  (n={m.get('n_samples')})")
+    if args.out:
+        print(f"  Сохранено/Saqlangan: {args.out}")
+    return 0
+
+
 def _serve(args) -> int:
     try:
         import uvicorn
@@ -126,6 +140,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--age", type=float, default=None)
     a.add_argument("--sedative", action="append", default=None)
     a.add_argument("--question", default=None)
+    a.add_argument("--calibration", default=None, help="Confidence calibration JSON file.")
     a.set_defaults(func=_analyze)
 
     d = sub.add_parser("demo", help="Generate a synthetic EDF and analyze it.")
@@ -141,6 +156,12 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--out", default=None, help="Output dir for alarm fragments + summary.")
     m.add_argument("--realtime", action="store_true", help="Pace replay to wall-clock.")
     m.set_defaults(func=_monitor)
+
+    cal = sub.add_parser("calibrate", help="Fit confidence calibration from a feedback log.")
+    cal.add_argument("--feedback", required=True, help="Path to the feedback JSONL log.")
+    cal.add_argument("--out", default="configs/calibration.json")
+    cal.add_argument("--min-samples", type=int, default=10, dest="min_samples")
+    cal.set_defaults(func=_calibrate)
 
     sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
     sv.add_argument("--host", default="127.0.0.1")

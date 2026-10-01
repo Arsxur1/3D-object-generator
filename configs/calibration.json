@@ -1,0 +1,7 @@
+{
+  "version": "0.1.0",
+  "default": 1.0,
+  "temperatures": {},
+  "metrics": {},
+  "_note": "Identity calibration (no-op). Fit real temperatures from the neurophysiologist feedback log with: neurolens calibrate --feedback <feedback.jsonl> --out configs/calibration.json"
+}

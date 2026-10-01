@@ -71,12 +71,18 @@ class Pipeline:
         config: ConfigBundle | None = None,
         provider_pref: str = "auto",
         run_ica: bool = True,
+        calibration_file: str | Path | None = None,
     ):
         self.cfg = config or load_configs()
         self.provider_pref = provider_pref
         self.run_ica = run_ica
         self.norms = NormsEngine(self.cfg.norms)
         self.physiology = PhysiologyEngine(self.norms)
+        self.calibrator = None
+        if calibration_file and Path(calibration_file).exists():
+            from ..calibration.calibrator import ConfidenceCalibrator
+
+            self.calibrator = ConfidenceCalibrator.load(calibration_file)
 
     # -- entry points ----------------------------------------------------
     def analyze_file(
@@ -123,6 +129,11 @@ class Pipeline:
         # --- Layer 4: detection ---
         detection = run_detectors(analysis, features, cfg.thresholds, artifacts)
 
+        # --- confidence calibration (TZ §13): calibrated confidences feed the
+        #     causal graph, mode-B gate, and alarms so thresholds are reliable ---
+        if self.calibrator is not None:
+            self.calibrator.apply_to_detection(detection)
+
         # --- Layer 5: causal reasoning ---
         graph = build_causal_graph(
             detection, analysis.context, analysis.patient,
@@ -153,6 +164,12 @@ class Pipeline:
         result_json = build_result_json(
             analysis, features, detection, graph, report, gate, montage_name
         )
+        result_json["calibration"] = {
+            "applied": self.calibrator is not None,
+            "default_temperature": self.calibrator.default if self.calibrator else 1.0,
+            "per_code_temperatures": self.calibrator.temperatures if self.calibrator else {},
+            "metrics": self.calibrator.metrics if self.calibrator else {},
+        }
 
         return PipelineOutput(
             signal=analysis,

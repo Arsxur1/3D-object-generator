@@ -44,6 +44,9 @@ JSON + текстовый протокол + графики**.
   для §12 требованиями — **деидентификация PHI** перед выдачей, **аудит-лог**,
   **версионирование**; эндпоинты analyze/monitor/feedback/schemas. Ядро — edge/локально,
   облако — тяжёлые модели/LLM.
+- **Калибровка уверенности (§13, §16):** temperature scaling по коду события + метрики
+  ECE/MCE/Brier; сборка калибровки из лога правок нейрофизиолога; калиброванные confidence
+  идут в каузальный граф, gate режима B и тревоги — чтобы пороги были надёжны.
 - **Слой 6 — реальный LLM:** провайдер Anthropic (schema-constrained) при наличии
   `ANTHROPIC_API_KEY`; иначе детерминированный заземлённый провайдер (оффлайн,
   воспроизводимо, используется в тестах).
@@ -103,6 +106,18 @@ neurolens monitor data/synthetic/demo.edf --realtime --out out_rt  # в темп
 `curves.png` (кривые в монтаже с отметками событий), `dsa_aeeg.png` (тренд DSA + aEEG),
 `topomap.png` (топокарты мощности по диапазонам), `causal_graph.png` (каузальный граф),
 `report.pdf` (сводный PDF-отчёт RU/UZ с ключевыми кривыми, топокартами, графом и заключением).
+
+### Калибровка уверенности (§13)
+
+```bash
+# собрать калибровку из лога правок нейрофизиолога (confirm/reject + confidence)
+neurolens calibrate --feedback feedback.jsonl --out configs/calibration.json
+# применить калиброванные confidence при анализе (gate режима B и тревоги — надёжнее)
+neurolens analyze data/synthetic/demo.edf --calibration configs/calibration.json --out out_demo
+```
+
+`configs/calibration.json` — identity по умолчанию (no-op); реальные температуры
+фитятся из feedback-лога (`/feedback` эндпоинт или CLI).
 
 ### REST API (§12)
 
@@ -187,9 +202,13 @@ PDF-отчёт RU/UZ (шрифт DejaVu для кириллицы) с ключе
 feedback/schemas/health/version), деидентификация PHI, аудит-лог, версионирование,
 CLI `serve`; эндпоинт правок нейрофизиолога (§13).
 
+**Инкремент 6 (сделано):** калибровка уверенности (§13/§16) — ECE/MCE/Brier +
+temperature scaling per-code, сборка из feedback-лога, интеграция в пайплайн
+(калиброванный gate режима B), CLI `calibrate`.
+
 **Далее (§17 v2):** приборные форматы; LSL с нативным liblsl; ML-детекторы
 (`braindecode`); неонатальная специализация + маутрационные модели aEEG; стадирование
-сна; полный ICA + ICLabel/ASR; локализация источника/HFO; калибровка уверенности
-(temperature scaling, ECE); конвейер дообучения на правках нейрофизиолога.
+сна; полный ICA + ICLabel/ASR; локализация источника/HFO; конвейер дообучения на
+правках нейрофизиолога.
 
 См. `DECISIONS.md` — инженерные решения и их обоснования.

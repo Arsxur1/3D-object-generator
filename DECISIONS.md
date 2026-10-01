@@ -184,6 +184,19 @@
   гибрид edge+cloud. Тонкий слой не размывает ядро; TestClient даёт оффлайн-тесты.
   `subject_id` (соль `NEUROLENS_DEID_SALT`) позволяет серийное сопоставление без PHI.
 
+## D21. Калибровка уверенности — per-code temperature scaling из feedback (инкремент 6)
+
+- **Решение:** `calibration/` — метрики ECE/MCE/Brier, `TemperatureScaler` (fit T по NLL
+  через `scipy`, `p'=σ(logit(p)/T)`), `ConfidenceCalibrator` (температуры по коду события +
+  pooled-default, JSON, identity-фолбэк), `from_feedback.build_calibration` (confirm→1/
+  reject→0 + `model_confidence` из `FeedbackLogger`). Пайплайн применяет калибровку до
+  каузального графа и gate режима B; `result_json.calibration` фиксирует применённое.
+- **Обоснование:** §16 требует ECE ниже порога и надёжные пороги режима B/тревог; эвристический
+  confidence детекторов некалиброван. Temperature scaling — стандарт, лёгкий (numpy/scipy),
+  без обучаемых моделей. Замыкает петлю §13: правки нейрофизиолога → калибровка.
+- **Последствия:** identity по умолчанию (без feedback ничего не меняется); реальные
+  температуры появляются по мере накопления правок. Per-class ML-калибровка — v2.
+
 ## Отложено (интерфейсы заложены)
 
 Приборные форматы и LSL (Слой 1); полный ICA+ICLabel/ASR (Слой 2); ML-детекторы,
