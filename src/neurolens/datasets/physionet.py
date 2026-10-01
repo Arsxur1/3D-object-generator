@@ -129,14 +129,26 @@ class PhysioNetClient:
         if self.name == "chbmit":
             return parse_chbmit_summary(self.text(f"{subject}/{subject}-summary.txt"), subject)
         if self.name == "siena":
-            return parse_siena_seizure_list(
+            anns = parse_siena_seizure_list(
                 self.text(f"{subject}/Seizures-list-{subject}.txt"), subject
             )
+            return _resolve_files(anns, [r for r in self.records() if r.startswith(subject + "/")])
         raise NotImplementedError(self.name)
 
     # -- binary files ------------------------------------------------------
     def local_path(self, rel: str) -> Path:
         return self.cache / rel
+
+    def remote_size(self, rel: str) -> int | None:
+        """Size in bytes via HTTP HEAD (None if unavailable)."""
+        try:
+            req = urllib.request.Request(f"{self.base}/{rel}", method="HEAD",
+                                         headers={"User-Agent": "neurolens/0.1"})
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                n = resp.headers.get("Content-Length")
+                return int(n) if n else None
+        except Exception:
+            return None
 
     def is_cached(self, rel: str) -> bool:
         return self.local_path(rel).exists()
@@ -199,3 +211,24 @@ def sha256_file(path: Path) -> str:
         while chunk := fh.read(1 << 20):
             h.update(chunk)
     return h.hexdigest()
+
+
+def _resolve_files(anns: list[RecordAnnotation], records: list[str]) -> list[RecordAnnotation]:
+    """Map annotated file names onto real RECORDS entries (lists contain typos,
+    e.g. Siena "PN11-.edf" for "PN11-1.edf"). Unresolvable names are kept and warned."""
+    import difflib
+
+    real = set(records)
+    claimed = {a.file for a in anns if a.file in real}
+    for a in anns:
+        if a.file in real or not records:
+            continue
+        free = [r for r in records if r not in claimed]
+        match = difflib.get_close_matches(a.file, free, n=1, cutoff=0.8)
+        if match:
+            a.warnings.append(f"annotated file {a.file!r} resolved to {match[0]!r}")
+            a.file = match[0]
+            claimed.add(match[0])
+        else:
+            a.warnings.append(f"annotated file {a.file!r} not found in RECORDS")
+    return anns

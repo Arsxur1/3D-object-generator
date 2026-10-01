@@ -252,3 +252,18 @@ def test_overrides_reject_unknown_keys(tmp_path, configs):
     cfg = apply_overrides(copy.deepcopy(configs), p)
     assert cfg.realtime.alarms["seizure"].persistence_windows == 3
     assert cfg.realtime.alarms["seizure"].refractory_s == configs.realtime.alarms["seizure"].refractory_s
+
+
+def test_siena_mixed_separators_and_file_resolution():
+    from neurolens.datasets.physionet import _resolve_files
+
+    text = """Seizure n 1:
+File name: PN11-.edf
+Registration start time: 15.51.31
+Seizure start time: 16:13.23
+Seizure end time:16.14.26
+"""
+    anns = parse_siena_seizure_list(text, "PN11")
+    assert anns[0].seizures == [SeizureInterval(1312, 1375)]
+    out = _resolve_files(anns, ["PN11/PN11-1.edf"])
+    assert out[0].file == "PN11/PN11-1.edf" and out[0].warnings

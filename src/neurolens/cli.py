@@ -153,7 +153,8 @@ def _physionet(args) -> int:
         anns = client.annotations(sub)
         files += [a.file for a in anns if a.has_seizure]
         files += [a.file for a in anns if not a.has_seizure][: args.n_free]
-    est_gb = len([f for f in files if not client.is_cached(f)]) * 0.042
+    todo = [f for f in files if not client.is_cached(f)]
+    est_gb = sum((client.remote_size(f) or 42_000_000) for f in todo) / 1e9
     print(f"{len(files)} files ({est_gb:.1f} GB to download) -> {client.cache}")
     if est_gb > args.max_gb:
         print(f"Refusing: exceeds --max-gb {args.max_gb}")
