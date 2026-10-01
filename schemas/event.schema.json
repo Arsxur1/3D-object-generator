@@ -1,0 +1,248 @@
+{
+  "$defs": {
+    "AcnsModifiers": {
+      "additionalProperties": false,
+      "description": "ACNS 2021 modifiers for periodic/rhythmic patterns (TZ §7.4).",
+      "properties": {
+        "frequency_hz": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frequency Hz"
+        },
+        "prevalence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "rare | occasional | frequent | abundant | continuous",
+          "title": "Prevalence"
+        },
+        "plus_features": {
+          "description": "e.g. +F (fast), +R (rhythmic), +S (sharp)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Plus Features",
+          "type": "array"
+        },
+        "iic": {
+          "default": false,
+          "description": "On the ictal-interictal continuum (needs clinical correlation).",
+          "title": "Iic",
+          "type": "boolean"
+        }
+      },
+      "title": "AcnsModifiers",
+      "type": "object"
+    },
+    "EventEvidence": {
+      "additionalProperties": false,
+      "description": "A quantitative fact supporting an event — the grounding unit.\n\n``feature`` names a Layer-3 feature (or Layer-2 quality flag); ``value`` and\n``reference`` let downstream layers and the grounding validator re-check it.",
+      "properties": {
+        "feature": {
+          "title": "Feature",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Normative/threshold reference the value is compared to.",
+          "title": "Reference"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Channels",
+          "type": "array"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "feature"
+      ],
+      "title": "EventEvidence",
+      "type": "object"
+    },
+    "Localization": {
+      "additionalProperties": false,
+      "description": "Where on the scalp an event is expressed.",
+      "properties": {
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Channels",
+          "type": "array"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. frontal, temporal_left, generalized, hemispheric_right",
+          "title": "Region"
+        },
+        "lateralization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "left | right | bilateral | generalized | midline",
+          "title": "Lateralization"
+        }
+      },
+      "title": "Localization",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A detected EEG event/pattern (TZ §7).",
+  "properties": {
+    "code": {
+      "description": "Stable machine code, e.g. 'diffuse_slowing'.",
+      "title": "Code",
+      "type": "string"
+    },
+    "label_ru": {
+      "title": "Label Ru",
+      "type": "string"
+    },
+    "label_uz": {
+      "title": "Label Uz",
+      "type": "string"
+    },
+    "group": {
+      "description": "Detector group: background | ied | ictal | periodic | suppression | special | artifact | variant | sleep",
+      "title": "Group",
+      "type": "string"
+    },
+    "localization": {
+      "$ref": "#/$defs/Localization"
+    },
+    "t_start": {
+      "description": "Seconds from recording start.",
+      "minimum": 0,
+      "title": "T Start",
+      "type": "number"
+    },
+    "t_end": {
+      "minimum": 0,
+      "title": "T End",
+      "type": "number"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EventEvidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "is_artifact_hypothesis": {
+      "default": false,
+      "description": "True when this is a candidate artifact (e.g. ECG) rather than a genuine cerebral finding — resolved in Layer 5.",
+      "title": "Is Artifact Hypothesis",
+      "type": "boolean"
+    },
+    "acns": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AcnsModifiers"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "ACNS modifiers for periodic/rhythmic patterns (§7.4)."
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "code",
+    "label_ru",
+    "label_uz",
+    "group",
+    "t_start",
+    "t_end",
+    "confidence"
+  ],
+  "title": "Event",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

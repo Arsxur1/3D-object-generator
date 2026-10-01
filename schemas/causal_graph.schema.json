@@ -1,0 +1,202 @@
+{
+  "$defs": {
+    "CausalEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "relation_ru": {
+          "default": "приводит к",
+          "title": "Relation Ru",
+          "type": "string"
+        },
+        "relation_uz": {
+          "default": "olib keladi",
+          "title": "Relation Uz",
+          "type": "string"
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Rule from the YAML rule base.",
+          "title": "Rule Id"
+        },
+        "physiology": {
+          "$ref": "#/$defs/PhysiologyLabel",
+          "default": "uncertain"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "confidence"
+      ],
+      "title": "CausalEdge",
+      "type": "object"
+    },
+    "CausalNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/NodeKind"
+        },
+        "label_ru": {
+          "title": "Label Ru",
+          "type": "string"
+        },
+        "label_uz": {
+          "title": "Label Uz",
+          "type": "string"
+        },
+        "physiology": {
+          "$ref": "#/$defs/PhysiologyLabel",
+          "default": "uncertain"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "event_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Links an EVENT node back to a Layer-4 Event.code.",
+          "title": "Event Code"
+        },
+        "critical": {
+          "default": false,
+          "description": "Hard-safety 'must not miss' finding.",
+          "title": "Critical",
+          "type": "boolean"
+        },
+        "implausible": {
+          "default": false,
+          "description": "Nothing explains this node -> check artifact/electrode.",
+          "title": "Implausible",
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "description": "Feature names / event codes that ground this node.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label_ru",
+        "label_uz",
+        "confidence"
+      ],
+      "title": "CausalNode",
+      "type": "object"
+    },
+    "NodeKind": {
+      "enum": [
+        "event",
+        "mechanism",
+        "context"
+      ],
+      "title": "NodeKind",
+      "type": "string"
+    },
+    "PhysiologyLabel": {
+      "enum": [
+        "physiologic",
+        "pathologic",
+        "uncertain",
+        "artifact"
+      ],
+      "title": "PhysiologyLabel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Causal graph + critical/plausibility flags (TZ §8 output).",
+  "properties": {
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/CausalNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/CausalEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "critical_flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Critical Flags",
+      "type": "array"
+    },
+    "implausible_flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Implausible Flags",
+      "type": "array"
+    },
+    "rule_base_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rule Base Version"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    }
+  },
+  "title": "CausalGraph",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

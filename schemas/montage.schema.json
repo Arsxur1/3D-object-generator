@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "MontagePair": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "anode": {
+          "title": "Anode",
+          "type": "string"
+        },
+        "cathode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cathode"
+        }
+      },
+      "required": [
+        "name",
+        "anode"
+      ],
+      "title": "MontagePair",
+      "type": "object"
+    },
+    "MontageType": {
+      "enum": [
+        "referential",
+        "bipolar",
+        "laplacian"
+      ],
+      "title": "MontageType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A montage definition (TZ §5: montage engine is first-class).",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/MontageType"
+    },
+    "description_ru": {
+      "default": "",
+      "title": "Description Ru",
+      "type": "string"
+    },
+    "reference": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "For referential montages: the reference label.",
+      "title": "Reference"
+    },
+    "pairs": {
+      "items": {
+        "$ref": "#/$defs/MontagePair"
+      },
+      "title": "Pairs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ],
+  "title": "MontageConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

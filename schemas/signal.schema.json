@@ -1,0 +1,281 @@
+{
+  "$defs": {
+    "ClinicalContext": {
+      "additionalProperties": false,
+      "description": "Clinical context — input to the causal/physiological analysis (TZ §3, §8).\n\nEverything is optional; presence sharpens the causal chains (e.g. sedation\nor hypothermia distinguishes burst-suppression from severe injury).",
+      "properties": {
+        "sedatives": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sedatives",
+          "type": "array"
+        },
+        "antiseizure_meds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Antiseizure Meds",
+          "type": "array"
+        },
+        "temperature_c": {
+          "anyOf": [
+            {
+              "maximum": 45,
+              "minimum": 20,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Temperature C"
+        },
+        "clinical_question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Clinical Question"
+        },
+        "symptoms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Symptoms",
+          "type": "array"
+        },
+        "prior_eeg_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prior Eeg Id"
+        }
+      },
+      "title": "ClinicalContext",
+      "type": "object"
+    },
+    "ElectrodeSystem": {
+      "enum": [
+        "10-20",
+        "10-10",
+        "10-5",
+        "neonatal_reduced",
+        "unknown"
+      ],
+      "title": "ElectrodeSystem",
+      "type": "string"
+    },
+    "PatientInfo": {
+      "additionalProperties": false,
+      "description": "Patient descriptors. Age / postmenstrual age drive interpretation (TZ §1).",
+      "properties": {
+        "age_years": {
+          "anyOf": [
+            {
+              "maximum": 130,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Age Years"
+        },
+        "postmenstrual_age_weeks": {
+          "anyOf": [
+            {
+              "maximum": 60,
+              "minimum": 20,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Key parameter for neonatal EEG maturation.",
+          "title": "Postmenstrual Age Weeks"
+        },
+        "sex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sex"
+        }
+      },
+      "title": "PatientInfo",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "digitized": {
+          "default": false,
+          "title": "Digitized",
+          "type": "boolean"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source File"
+        },
+        "pipeline_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pipeline Version"
+        }
+      },
+      "title": "Provenance",
+      "type": "object"
+    },
+    "QualityInfo": {
+      "additionalProperties": false,
+      "description": "Per-channel signal-quality metadata produced by Layer 2.",
+      "properties": {
+        "per_channel_sqi": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Per Channel Sqi",
+          "type": "array"
+        },
+        "impedances": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Impedances",
+          "type": "array"
+        },
+        "flags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Flags",
+          "type": "array"
+        }
+      },
+      "title": "QualityInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Single internal representation of an EEG recording (TZ §3).\n\nThe numeric samples live in :attr:`signal` (a numpy array, excluded from\nJSON). :meth:`metadata_dict` returns the JSON-safe metadata contract.",
+  "properties": {
+    "signal": {
+      "title": "Signal"
+    },
+    "sampling_rate_hz": {
+      "exclusiveMinimum": 0,
+      "title": "Sampling Rate Hz",
+      "type": "number"
+    },
+    "channel_names": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Channel Names",
+      "type": "array"
+    },
+    "electrode_system": {
+      "$ref": "#/$defs/ElectrodeSystem",
+      "default": "unknown"
+    },
+    "reference": {
+      "default": "unknown",
+      "title": "Reference",
+      "type": "string"
+    },
+    "duration_s": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duration S"
+    },
+    "units": {
+      "default": "uV",
+      "title": "Units",
+      "type": "string"
+    },
+    "source": {
+      "default": "edf",
+      "title": "Source",
+      "type": "string"
+    },
+    "patient": {
+      "$ref": "#/$defs/PatientInfo"
+    },
+    "context": {
+      "$ref": "#/$defs/ClinicalContext"
+    },
+    "quality": {
+      "$ref": "#/$defs/QualityInfo"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "signal",
+    "sampling_rate_hz",
+    "channel_names"
+  ],
+  "title": "UnifiedSignal",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

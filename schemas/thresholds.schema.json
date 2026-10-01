@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "ModeBGates": {
+      "additionalProperties": false,
+      "description": "Gates for autonomous mode B (TZ §2).",
+      "properties": {
+        "min_confidence": {
+          "default": 0.85,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Min Confidence",
+          "type": "number"
+        },
+        "min_signal_quality": {
+          "default": 0.6,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Min Signal Quality",
+          "type": "number"
+        },
+        "max_artifact_fraction": {
+          "default": 0.3,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Max Artifact Fraction",
+          "type": "number"
+        },
+        "require_plausible": {
+          "default": true,
+          "title": "Require Plausible",
+          "type": "boolean"
+        }
+      },
+      "title": "ModeBGates",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Confidence thresholds and alarm budgets (TZ §2, §10, §16).",
+  "properties": {
+    "detection_min_confidence": {
+      "default": 0.5,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Detection Min Confidence",
+      "type": "number"
+    },
+    "mode_b": {
+      "$ref": "#/$defs/ModeBGates"
+    },
+    "max_false_alarms_per_hour": {
+      "default": 2.0,
+      "description": "cEEG alarm budget (placeholder for real-time, v2).",
+      "minimum": 0,
+      "title": "Max False Alarms Per Hour",
+      "type": "number"
+    },
+    "diffuse_slowing_delta_theta_ratio": {
+      "default": 0.55,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Diffuse Slowing Delta Theta Ratio",
+      "type": "number"
+    },
+    "asymmetry_index_abnormal": {
+      "default": 0.5,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Asymmetry Index Abnormal",
+      "type": "number"
+    },
+    "suppression_amplitude_uv": {
+      "default": 10.0,
+      "exclusiveMinimum": 0,
+      "title": "Suppression Amplitude Uv",
+      "type": "number"
+    },
+    "burst_suppression_ratio": {
+      "default": 0.5,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Burst Suppression Ratio",
+      "type": "number"
+    },
+    "ictal_min_duration_s": {
+      "default": 8.0,
+      "exclusiveMinimum": 0,
+      "title": "Ictal Min Duration S",
+      "type": "number"
+    },
+    "ictal_rhythmicity": {
+      "default": 0.45,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Ictal Rhythmicity",
+      "type": "number"
+    },
+    "ictal_amplitude_factor": {
+      "default": 1.5,
+      "minimum": 1,
+      "title": "Ictal Amplitude Factor",
+      "type": "number"
+    },
+    "generalized_channel_fraction": {
+      "default": 0.6,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Generalized Channel Fraction",
+      "type": "number"
+    },
+    "pd_min_discharges": {
+      "default": 6,
+      "minimum": 3,
+      "title": "Pd Min Discharges",
+      "type": "integer"
+    },
+    "pd_isi_cv_max": {
+      "default": 0.35,
+      "description": "Max ISI coeff. of variation.",
+      "minimum": 0,
+      "title": "Pd Isi Cv Max",
+      "type": "number"
+    },
+    "pd_freq_hz_min": {
+      "default": 0.5,
+      "exclusiveMinimum": 0,
+      "title": "Pd Freq Hz Min",
+      "type": "number"
+    },
+    "pd_freq_hz_max": {
+      "default": 3.0,
+      "exclusiveMinimum": 0,
+      "title": "Pd Freq Hz Max",
+      "type": "number"
+    },
+    "pd_plus_fast_ratio": {
+      "default": 0.15,
+      "description": "Beta+gamma frac -> +F.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Pd Plus Fast Ratio",
+      "type": "number"
+    },
+    "rda_min_duration_s": {
+      "default": 6.0,
+      "exclusiveMinimum": 0,
+      "title": "Rda Min Duration S",
+      "type": "number"
+    },
+    "rda_rhythmicity": {
+      "default": 0.4,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Rda Rhythmicity",
+      "type": "number"
+    },
+    "iic_freq_hz_min": {
+      "default": 1.5,
+      "exclusiveMinimum": 0,
+      "title": "Iic Freq Hz Min",
+      "type": "number"
+    },
+    "iic_freq_hz_max": {
+      "default": 2.5,
+      "exclusiveMinimum": 0,
+      "title": "Iic Freq Hz Max",
+      "type": "number"
+    },
+    "firda_max_continuous_fraction": {
+      "default": 0.7,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Firda Max Continuous Fraction",
+      "type": "number"
+    },
+    "firda_min_runs": {
+      "default": 2,
+      "minimum": 1,
+      "title": "Firda Min Runs",
+      "type": "integer"
+    },
+    "edb_beta_ratio": {
+      "default": 0.12,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Edb Beta Ratio",
+      "type": "number"
+    }
+  },
+  "title": "Thresholds",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "RuleChain": {
+      "additionalProperties": false,
+      "description": "A causal chain / rule (TZ §8.1, §18.3).",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "description_ru": {
+          "default": "",
+          "title": "Description Ru",
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/RuleCondition"
+        },
+        "cause_ru": {
+          "title": "Cause Ru",
+          "type": "string"
+        },
+        "cause_uz": {
+          "title": "Cause Uz",
+          "type": "string"
+        },
+        "effect_ru": {
+          "title": "Effect Ru",
+          "type": "string"
+        },
+        "effect_uz": {
+          "title": "Effect Uz",
+          "type": "string"
+        },
+        "physiology": {
+          "default": "pathologic",
+          "title": "Physiology",
+          "type": "string"
+        },
+        "confidence": {
+          "default": 0.6,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "critical": {
+          "default": false,
+          "title": "Critical",
+          "type": "boolean"
+        },
+        "resolves_artifact_for": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resolves Artifact For",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "when",
+        "cause_ru",
+        "cause_uz",
+        "effect_ru",
+        "effect_uz"
+      ],
+      "title": "RuleChain",
+      "type": "object"
+    },
+    "RuleCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "any_event": {
+          "description": "Fires if any of these event codes is present.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Any Event",
+          "type": "array"
+        },
+        "all_events": {
+          "description": "Requires all of these event codes.",
+          "items": {
+            "type": "string"
+          },
+          "title": "All Events",
+          "type": "array"
+        },
+        "context_present": {
+          "description": "Requires clinical-context keys, e.g. 'sedatives', 'antiseizure_meds'.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Context Present",
+          "type": "array"
+        },
+        "context_absent": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Context Absent",
+          "type": "array"
+        }
+      },
+      "title": "RuleCondition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": "0.1.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "chains": {
+      "items": {
+        "$ref": "#/$defs/RuleChain"
+      },
+      "title": "Chains",
+      "type": "array"
+    }
+  },
+  "title": "RuleBase",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

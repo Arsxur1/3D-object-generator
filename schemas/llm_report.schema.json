@@ -1,0 +1,201 @@
+{
+  "$defs": {
+    "Bilingual": {
+      "additionalProperties": false,
+      "description": "A piece of text in both report languages (TZ: заключения на RU и UZ).",
+      "properties": {
+        "ru": {
+          "title": "Ru",
+          "type": "string"
+        },
+        "uz": {
+          "title": "Uz",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ru",
+        "uz"
+      ],
+      "title": "Bilingual",
+      "type": "object"
+    },
+    "Confidence": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        },
+        "label_ru": {
+          "description": "Word form, e.g. 'высокая'/'средняя'/'низкая'.",
+          "title": "Label Ru",
+          "type": "string"
+        },
+        "label_uz": {
+          "title": "Label Uz",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label_ru",
+        "label_uz"
+      ],
+      "title": "Confidence",
+      "type": "object"
+    },
+    "CriticalFinding": {
+      "additionalProperties": false,
+      "description": "Hard-safety finding surfaced independently of LLM/mode (TZ §10).",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "$ref": "#/$defs/Bilingual"
+        },
+        "grounding_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Grounding Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "CriticalFinding",
+      "type": "object"
+    },
+    "OperatingMode": {
+      "enum": [
+        "A",
+        "B"
+      ],
+      "title": "OperatingMode",
+      "type": "string"
+    },
+    "ReportSection": {
+      "additionalProperties": false,
+      "description": "One grounded section/statement of the protocol.",
+      "properties": {
+        "key": {
+          "description": "background | epileptiform | ictal_acns | causal | impression | next_step",
+          "title": "Key",
+          "type": "string"
+        },
+        "text": {
+          "$ref": "#/$defs/Bilingual"
+        },
+        "grounding_refs": {
+          "description": "Identifiers this statement is grounded on (feature/event/node/edge).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Grounding Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Confidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "key",
+        "text"
+      ],
+      "title": "ReportSection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Full Layer-6 output (schema-constrained; TZ §9).",
+  "properties": {
+    "mode": {
+      "$ref": "#/$defs/OperatingMode"
+    },
+    "mode_gate_passed": {
+      "default": false,
+      "description": "For mode B: whether autonomous gates (TZ §2) were satisfied.",
+      "title": "Mode Gate Passed",
+      "type": "boolean"
+    },
+    "escalation_reason": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Bilingual"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Set when review is required (mode B gate failed or low quality)."
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/ReportSection"
+      },
+      "title": "Sections",
+      "type": "array"
+    },
+    "impression": {
+      "$ref": "#/$defs/Bilingual"
+    },
+    "overall_confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "critical_findings": {
+      "items": {
+        "$ref": "#/$defs/CriticalFinding"
+      },
+      "title": "Critical Findings",
+      "type": "array"
+    },
+    "reasoning_trace": {
+      "description": "Visible chain of reasoning (TZ §9).",
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasoning Trace",
+      "type": "array"
+    },
+    "provider": {
+      "default": "deterministic",
+      "description": "Which Layer-6 provider ran.",
+      "title": "Provider",
+      "type": "string"
+    },
+    "disclaimer_ru": {
+      "default": "Система поддержки принятия решений. Не является медицинским заключением. Итоговая интерпретация и решение — за квалифицированным нейрофизиологом/реаниматологом.",
+      "title": "Disclaimer Ru",
+      "type": "string"
+    },
+    "disclaimer_uz": {
+      "default": "Qaror qabul qilishni qo‘llab-quvvatlash tizimi. Bu tibbiy xulosa emas. Yakuniy talqin va qaror malakali neyrofiziolog/reanimatolog zimmasida.",
+      "title": "Disclaimer Uz",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mode",
+    "impression",
+    "overall_confidence"
+  ],
+  "title": "LLMReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

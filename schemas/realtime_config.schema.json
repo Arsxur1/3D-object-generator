@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "AlarmRule": {
+      "additionalProperties": false,
+      "description": "Per-alarm-type gating for real-time monitoring (TZ §2, §16).",
+      "properties": {
+        "min_confidence": {
+          "default": 0.6,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Min Confidence",
+          "type": "number"
+        },
+        "persistence_windows": {
+          "default": 2,
+          "description": "Consecutive windows the finding must persist before alarming.",
+          "minimum": 1,
+          "title": "Persistence Windows",
+          "type": "integer"
+        },
+        "refractory_s": {
+          "default": 30.0,
+          "description": "Do not re-fire the same type within this interval.",
+          "minimum": 0,
+          "title": "Refractory S",
+          "type": "number"
+        },
+        "max_per_hour": {
+          "default": 6.0,
+          "description": "Cap on alarms of this type per hour (FA/h control).",
+          "minimum": 0,
+          "title": "Max Per Hour",
+          "type": "number"
+        },
+        "critical": {
+          "default": true,
+          "description": "Hard-safety type — never suppressed by FA/h control (TZ §10).",
+          "title": "Critical",
+          "type": "boolean"
+        }
+      },
+      "title": "AlarmRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Streaming cEEG monitor configuration (TZ §2 sub-mode, §4, §16).",
+  "properties": {
+    "window_s": {
+      "default": 30.0,
+      "description": "Rolling analysis window length.",
+      "exclusiveMinimum": 0,
+      "title": "Window S",
+      "type": "number"
+    },
+    "step_s": {
+      "default": 5.0,
+      "description": "Advance between analyses.",
+      "exclusiveMinimum": 0,
+      "title": "Step S",
+      "type": "number"
+    },
+    "latency_budget_ms": {
+      "default": 5000.0,
+      "description": "Per-window processing budget (must be << step).",
+      "exclusiveMinimum": 0,
+      "title": "Latency Budget Ms",
+      "type": "number"
+    },
+    "max_false_alarms_per_hour": {
+      "default": 10.0,
+      "minimum": 0,
+      "title": "Max False Alarms Per Hour",
+      "type": "number"
+    },
+    "alarms": {
+      "additionalProperties": {
+        "$ref": "#/$defs/AlarmRule"
+      },
+      "description": "Per-alarm-type rules keyed by AlarmType value.",
+      "title": "Alarms",
+      "type": "object"
+    }
+  },
+  "title": "RealtimeConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

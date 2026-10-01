@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "Alarm": {
+      "additionalProperties": false,
+      "description": "A single near-real-time alarm (TZ §2, §10).",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/AlarmType"
+        },
+        "severity": {
+          "$ref": "#/$defs/AlarmSeverity"
+        },
+        "message": {
+          "$ref": "#/$defs/Bilingual"
+        },
+        "t_start": {
+          "description": "Stream time (s) of the alarm window start.",
+          "minimum": 0,
+          "title": "T Start",
+          "type": "number"
+        },
+        "t_end": {
+          "minimum": 0,
+          "title": "T End",
+          "type": "number"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Channels",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidence": {
+          "description": "Feature/event grounding refs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "window_index": {
+          "minimum": 0,
+          "title": "Window Index",
+          "type": "integer"
+        },
+        "latency_ms": {
+          "description": "Processing latency for the triggering window.",
+          "minimum": 0,
+          "title": "Latency Ms",
+          "type": "number"
+        },
+        "fragment_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to the EEG fragment (PNG) for verification (TZ §10).",
+          "title": "Fragment Path"
+        },
+        "is_critical_finding": {
+          "default": false,
+          "description": "Hard-safety finding — never suppressed by FA/h control.",
+          "title": "Is Critical Finding",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "severity",
+        "message",
+        "t_start",
+        "t_end",
+        "confidence",
+        "window_index",
+        "latency_ms"
+      ],
+      "title": "Alarm",
+      "type": "object"
+    },
+    "AlarmSeverity": {
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ],
+      "title": "AlarmSeverity",
+      "type": "string"
+    },
+    "AlarmType": {
+      "enum": [
+        "seizure",
+        "status_epilepticus",
+        "iic",
+        "burst_suppression",
+        "suppression"
+      ],
+      "title": "AlarmType",
+      "type": "string"
+    },
+    "Bilingual": {
+      "additionalProperties": false,
+      "description": "A piece of text in both report languages (TZ: заключения на RU и UZ).",
+      "properties": {
+        "ru": {
+          "title": "Ru",
+          "type": "string"
+        },
+        "uz": {
+          "title": "Uz",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ru",
+        "uz"
+      ],
+      "title": "Bilingual",
+      "type": "object"
+    },
+    "SeizureBurden": {
+      "additionalProperties": false,
+      "description": "Seizure-burden accounting for cEEG (TZ §7.3).",
+      "properties": {
+        "n_seizures": {
+          "default": 0,
+          "title": "N Seizures",
+          "type": "integer"
+        },
+        "total_seizure_time_s": {
+          "default": 0.0,
+          "title": "Total Seizure Time S",
+          "type": "number"
+        },
+        "recording_duration_s": {
+          "default": 0.0,
+          "title": "Recording Duration S",
+          "type": "number"
+        },
+        "seizure_fraction": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Seizure Fraction",
+          "type": "number"
+        },
+        "seizures_per_hour": {
+          "default": 0.0,
+          "title": "Seizures Per Hour",
+          "type": "number"
+        },
+        "longest_seizure_s": {
+          "default": 0.0,
+          "title": "Longest Seizure S",
+          "type": "number"
+        },
+        "status_epilepticus_suspected": {
+          "default": false,
+          "title": "Status Epilepticus Suspected",
+          "type": "boolean"
+        }
+      },
+      "title": "SeizureBurden",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Session summary of a streaming cEEG run (TZ §16 budgets).",
+  "properties": {
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "montage": {
+      "title": "Montage",
+      "type": "string"
+    },
+    "duration_s": {
+      "title": "Duration S",
+      "type": "number"
+    },
+    "n_windows": {
+      "title": "N Windows",
+      "type": "integer"
+    },
+    "window_s": {
+      "title": "Window S",
+      "type": "number"
+    },
+    "step_s": {
+      "title": "Step S",
+      "type": "number"
+    },
+    "alarms": {
+      "items": {
+        "$ref": "#/$defs/Alarm"
+      },
+      "title": "Alarms",
+      "type": "array"
+    },
+    "n_alarms_raised": {
+      "default": 0,
+      "title": "N Alarms Raised",
+      "type": "integer"
+    },
+    "n_alarms_suppressed": {
+      "default": 0,
+      "title": "N Alarms Suppressed",
+      "type": "integer"
+    },
+    "alarms_per_hour": {
+      "default": 0.0,
+      "title": "Alarms Per Hour",
+      "type": "number"
+    },
+    "false_alarm_budget_per_hour": {
+      "default": 0.0,
+      "title": "False Alarm Budget Per Hour",
+      "type": "number"
+    },
+    "within_budget": {
+      "default": true,
+      "title": "Within Budget",
+      "type": "boolean"
+    },
+    "seizure_burden": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SeizureBurden"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "latency_ms_mean": {
+      "default": 0.0,
+      "title": "Latency Ms Mean",
+      "type": "number"
+    },
+    "latency_ms_p95": {
+      "default": 0.0,
+      "title": "Latency Ms P95",
+      "type": "number"
+    },
+    "realtime_feasible": {
+      "default": true,
+      "title": "Realtime Feasible",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "source",
+    "montage",
+    "duration_s",
+    "n_windows",
+    "window_s",
+    "step_s"
+  ],
+  "title": "MonitorSummary",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

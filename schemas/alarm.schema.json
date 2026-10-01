@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "AlarmSeverity": {
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ],
+      "title": "AlarmSeverity",
+      "type": "string"
+    },
+    "AlarmType": {
+      "enum": [
+        "seizure",
+        "status_epilepticus",
+        "iic",
+        "burst_suppression",
+        "suppression"
+      ],
+      "title": "AlarmType",
+      "type": "string"
+    },
+    "Bilingual": {
+      "additionalProperties": false,
+      "description": "A piece of text in both report languages (TZ: заключения на RU и UZ).",
+      "properties": {
+        "ru": {
+          "title": "Ru",
+          "type": "string"
+        },
+        "uz": {
+          "title": "Uz",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ru",
+        "uz"
+      ],
+      "title": "Bilingual",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A single near-real-time alarm (TZ §2, §10).",
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/AlarmType"
+    },
+    "severity": {
+      "$ref": "#/$defs/AlarmSeverity"
+    },
+    "message": {
+      "$ref": "#/$defs/Bilingual"
+    },
+    "t_start": {
+      "description": "Stream time (s) of the alarm window start.",
+      "minimum": 0,
+      "title": "T Start",
+      "type": "number"
+    },
+    "t_end": {
+      "minimum": 0,
+      "title": "T End",
+      "type": "number"
+    },
+    "channels": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Channels",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "evidence": {
+      "description": "Feature/event grounding refs.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "window_index": {
+      "minimum": 0,
+      "title": "Window Index",
+      "type": "integer"
+    },
+    "latency_ms": {
+      "description": "Processing latency for the triggering window.",
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "number"
+    },
+    "fragment_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to the EEG fragment (PNG) for verification (TZ §10).",
+      "title": "Fragment Path"
+    },
+    "is_critical_finding": {
+      "default": false,
+      "description": "Hard-safety finding — never suppressed by FA/h control.",
+      "title": "Is Critical Finding",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "severity",
+    "message",
+    "t_start",
+    "t_end",
+    "confidence",
+    "window_index",
+    "latency_ms"
+  ],
+  "title": "Alarm",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
