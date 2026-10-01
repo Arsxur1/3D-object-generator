@@ -40,6 +40,10 @@ JSON + текстовый протокол + графики**.
   **тревоги** (судороги, эпилептический статус, IIC, burst-suppression) с контролем
   частоты ложных тревог/час (персистентность + рефрактерность + лимиты) и **фрагментом
   ЭЭГ** к каждой тревоге; накопление судорожной нагрузки и бюджет латентности.
+- **REST API (§12, §14):** FastAPI-сервис над пайплайном и монитором с обязательными
+  для §12 требованиями — **деидентификация PHI** перед выдачей, **аудит-лог**,
+  **версионирование**; эндпоинты analyze/monitor/feedback/schemas. Ядро — edge/локально,
+  облако — тяжёлые модели/LLM.
 - **Слой 6 — реальный LLM:** провайдер Anthropic (schema-constrained) при наличии
   `ANTHROPIC_API_KEY`; иначе детерминированный заземлённый провайдер (оффлайн,
   воспроизводимо, используется в тестах).
@@ -99,6 +103,20 @@ neurolens monitor data/synthetic/demo.edf --realtime --out out_rt  # в темп
 `curves.png` (кривые в монтаже с отметками событий), `dsa_aeeg.png` (тренд DSA + aEEG),
 `topomap.png` (топокарты мощности по диапазонам), `causal_graph.png` (каузальный граф),
 `report.pdf` (сводный PDF-отчёт RU/UZ с ключевыми кривыми, топокартами, графом и заключением).
+
+### REST API (§12)
+
+```bash
+python -m pip install -e ".[api]"          # fastapi + uvicorn + multipart
+neurolens serve --host 127.0.0.1 --port 8000
+# GET  /health · /version · /config/montages · /schemas/{name}
+# POST /analyze {path,mode,montage,provider,age_years,...}   (или /analyze/upload — multipart)
+# POST /monitor {path,montage,window_s,step_s}
+# POST /feedback {recording_id,target_kind,target_ref,action,...}
+```
+
+Результаты **деидентифицированы** (имя файла → `subject_id`-хэш), каждый запрос — в
+аудит-лог (`NEUROLENS_AUDIT_LOG`); соль деида — `NEUROLENS_DEID_SALT`.
 
 ### Реальный LLM (Anthropic)
 
@@ -165,9 +183,13 @@ PDF-отчёт RU/UZ (шрифт DejaVu для кириллицы) с ключе
 рефрактерность, лимиты) и фрагментом ЭЭГ, скользящий базлайн для потоковой детекции
 судорог, бюджет латентности, CLI `monitor`.
 
+**Инкремент 5 (сделано):** REST API (§12/§14) — FastAPI-сервис (analyze/monitor/
+feedback/schemas/health/version), деидентификация PHI, аудит-лог, версионирование,
+CLI `serve`; эндпоинт правок нейрофизиолога (§13).
+
 **Далее (§17 v2):** приборные форматы; LSL с нативным liblsl; ML-детекторы
 (`braindecode`); неонатальная специализация + маутрационные модели aEEG; стадирование
-сна; полный ICA + ICLabel/ASR; локализация источника/HFO; FastAPI; калибровка
-уверенности; конвейер дообучения на правках нейрофизиолога.
+сна; полный ICA + ICLabel/ASR; локализация источника/HFO; калибровка уверенности
+(temperature scaling, ECE); конвейер дообучения на правках нейрофизиолога.
 
 См. `DECISIONS.md` — инженерные решения и их обоснования.

@@ -17,5 +17,10 @@ out_*/
 data/synthetic/*.edf
 *.edf
 
+# Runtime logs (API audit trail, neurophysiologist feedback)
+*.jsonl
+audit.log.jsonl
+feedback.jsonl
+
 # OS
 .DS_Store

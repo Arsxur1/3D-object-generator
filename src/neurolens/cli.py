@@ -95,6 +95,18 @@ def _monitor(args) -> int:
     return 0
 
 
+def _serve(args) -> int:
+    try:
+        import uvicorn
+    except Exception:
+        print("FastAPI/uvicorn not installed. Install with: pip install -e '.[api]'")
+        return 1
+    from .api.app import create_app
+
+    uvicorn.run(create_app(), host=args.host, port=args.port)
+    return 0
+
+
 def _export_schemas(args) -> int:
     from .contracts.export_schemas import main as export_main
 
@@ -129,6 +141,11 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--out", default=None, help="Output dir for alarm fragments + summary.")
     m.add_argument("--realtime", action="store_true", help="Pace replay to wall-clock.")
     m.set_defaults(func=_monitor)
+
+    sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
+    sv.add_argument("--host", default="127.0.0.1")
+    sv.add_argument("--port", type=int, default=8000)
+    sv.set_defaults(func=_serve)
 
     s = sub.add_parser("export-schemas", help="Export JSON Schemas from contracts.")
     s.add_argument("dir", nargs="?", default=None)
