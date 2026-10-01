@@ -107,7 +107,10 @@ def fit_ictal_calibration(
     conf, lab = event_confidences(train, thresholds, rules)
     cal = base or ConfidenceCalibrator.identity()
     if conf.size < 5 or lab.min() == lab.max():
-        return cal, {"n": int(conf.size), "skipped": "too few or single-class events"}
+        info = {"n": int(conf.size), "positives": int(lab.sum()) if lab.size else 0,
+                "skipped": "too few or single-class events (identity kept)"}
+        cal.metrics[IctalRhythmDetector.code] = info
+        return cal, info
     scaler = TemperatureScaler().fit(conf, lab)
     after = scaler.transform(conf)
     metrics = {
