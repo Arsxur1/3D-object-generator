@@ -111,6 +111,8 @@ def build_llm_input(
             "confidence": e.confidence,
             "evidence": [ev.model_dump() for ev in e.evidence],
             "is_artifact_hypothesis": e.is_artifact_hypothesis,
+            "acns": e.acns.model_dump() if e.acns else None,
+            "metadata": e.metadata,
         }
         for e in detection.events
     ]

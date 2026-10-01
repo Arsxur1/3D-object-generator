@@ -17,12 +17,20 @@ from .epochs import epoch_indices
 @dataclass
 class AEEG:
     times_s: np.ndarray      # epoch centers
-    upper_uv: np.ndarray     # upper margin (compressed uV scale)
-    lower_uv: np.ndarray     # lower margin
+    upper_uv: np.ndarray     # upper margin (compressed uV scale, for display)
+    lower_uv: np.ndarray     # lower margin (compressed)
     channel: str
+    upper_raw: np.ndarray = None  # raw (uncompressed) uV margins for classification
+    lower_raw: np.ndarray = None
 
     def bandwidth(self) -> np.ndarray:
         return self.upper_uv - self.lower_uv
+
+    def median_upper_raw(self) -> float:
+        return float(np.median(self.upper_raw)) if self.upper_raw is not None and self.upper_raw.size else 0.0
+
+    def median_lower_raw(self) -> float:
+        return float(np.median(self.lower_raw)) if self.lower_raw is not None and self.lower_raw.size else 0.0
 
 
 def _semilog_compress(uv: np.ndarray) -> np.ndarray:
@@ -46,9 +54,13 @@ def aeeg_envelope(
         centers.append((s0 + s1) / 2.0 / fs)
         uppers.append(np.percentile(seg, 90))
         lowers.append(np.percentile(seg, 10))
+    uppers = np.asarray(uppers)
+    lowers = np.asarray(lowers)
     return AEEG(
         times_s=np.asarray(centers),
-        upper_uv=_semilog_compress(np.asarray(uppers)),
-        lower_uv=_semilog_compress(np.asarray(lowers)),
+        upper_uv=_semilog_compress(uppers),
+        lower_uv=_semilog_compress(lowers),
         channel=channel,
+        upper_raw=uppers,
+        lower_raw=lowers,
     )

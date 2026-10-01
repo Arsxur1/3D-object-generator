@@ -109,6 +109,25 @@ def _inject_periodic(ch, ci, t, fs, rng, n):
     return add
 
 
+def _inject_neonatal(ch, ci, t, fs, rng, n):
+    """Preterm-like discontinuous background (DNV) with sleep-wake cycling (§1, §6).
+
+    Bursts (~1.5 s) separated by low-amplitude inter-burst intervals (~4.5 s);
+    a slow ~120 s modulation of the inter-burst baseline produces sleep-wake
+    cycling that the aEEG classifier detects.
+    """
+    # low inter-burst baseline (<5 uV lower margin -> DNV), with sleep-wake
+    # cycling as a slow ~120 s modulation of that baseline.
+    swc = 4.0 + 1.8 * np.sin(2 * np.pi * t / 120.0)
+    baseline = swc * _pink(rng, n)
+    # discontinuous bursts every 6 s, 3.5 s long -> continuity ~0.58 (DNV, not BS)
+    tb = t % 6.0
+    in_burst = (tb < 3.5).astype(float)
+    burst = in_burst * (30.0 * np.sin(2 * np.pi * 3.0 * t + 0.2 * ci)
+                        + 13.0 * np.sin(2 * np.pi * 7.0 * t))
+    return baseline + burst
+
+
 def make_synthetic_edf(
     path: str | Path, seed: int = SEED, duration_s: int = DURATION_S, scenario: str = "mixed"
 ) -> Path:
@@ -123,6 +142,11 @@ def make_synthetic_edf(
 
         if scenario == "periodic":
             sig = sig + _inject_periodic(ch, ci, t, FS, rng, n)
+            data[ch] = sig.astype(np.float64)
+            continue
+
+        if scenario == "neonatal":
+            sig = _inject_neonatal(ch, ci, t, FS, rng, n)  # replaces adult background
             data[ch] = sig.astype(np.float64)
             continue
 
@@ -215,7 +239,7 @@ def main() -> int:
     ap.add_argument("-o", "--out", default=str(default_out))
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--duration", type=int, default=DURATION_S)
-    ap.add_argument("--scenario", default="mixed", choices=["mixed", "periodic"])
+    ap.add_argument("--scenario", default="mixed", choices=["mixed", "periodic", "neonatal"])
     args = ap.parse_args()
     out = make_synthetic_edf(args.out, seed=args.seed, duration_s=args.duration,
                              scenario=args.scenario)

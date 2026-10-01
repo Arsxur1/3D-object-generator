@@ -31,6 +31,10 @@ LABELS: dict[str, tuple[str, str]] = {
     "extreme_delta_brush": ("Extreme delta brush", "Extreme delta brush"),
     # Benign variant (§8.2)
     "wicket": ("Викет-спайки (доброкачественный вариант)", "Wicket-spike (xavfsiz variant)"),
+    # Neonatal (§1, §6)
+    "neonatal_background": ("Неонатальный фон (aEEG)", "Neonatal fon (aEEG)"),
+    "neonatal_burst_suppression": ("Неонатальная вспышка-подавление", "Neonatal portlash-bostirish"),
+    "neonatal_inactive": ("Неонатальная неактивная кривая (изоэлектрия)", "Neonatal faolsiz egri (izoelektrik)"),
 }
 
 

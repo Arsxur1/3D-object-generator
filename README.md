@@ -47,6 +47,10 @@ JSON + текстовый протокол + графики**.
 - **Калибровка уверенности (§13, §16):** temperature scaling по коду события + метрики
   ECE/MCE/Brier; сборка калибровки из лога правок нейрофизиолога; калиброванные confidence
   идут в каузальный граф, gate режима B и тревоги — чтобы пороги были надёжны.
+- **Неонатальная специализация (§1, §6):** классификация паттерна aEEG (Hellström-Westas:
+  CNV/DNV/BS/CLV/FT), цикличность сон-бодрствование (SWC), маутрационные нормы по ПМВ и
+  **возраст-зависимая физиологичность** (прерывистость нормальна у недоношенного,
+  патологична у доношенного); неонатальный редуцированный монтаж; правило BS→HIE.
 - **Слой 6 — реальный LLM:** провайдер Anthropic (schema-constrained) при наличии
   `ANTHROPIC_API_KEY`; иначе детерминированный заземлённый провайдер (оффлайн,
   воспроизводимо, используется в тестах).
@@ -87,6 +91,10 @@ python -m pip install -e ".[mne]"
 python data/synthetic/make_synthetic_edf.py            # → data/synthetic/demo.edf
 # сценарий с периодическими паттернами ACNS (LPDs/GRDA/FIRDA/EDB/wicket):
 python data/synthetic/make_synthetic_edf.py --scenario periodic -o periodic.edf
+# неонатальный сценарий (прерывистый фон + SWC); анализ с ПМВ активирует неонат. разбор:
+python data/synthetic/make_synthetic_edf.py --scenario neonatal -o neo.edf
+neurolens analyze neo.edf --pma 28 --montage neonatal --out out_neo    # недоношенный: норма для возраста
+neurolens analyze neo.edf --pma 40 --montage neonatal --out out_neo    # доношенный: та же запись — патология
 
 # 2) сквозной демо-прогон (печатает протокол RU/UZ, пишет out_demo/)
 python examples/run_demo.py
@@ -206,9 +214,12 @@ CLI `serve`; эндпоинт правок нейрофизиолога (§13).
 temperature scaling per-code, сборка из feedback-лога, интеграция в пайплайн
 (калиброванный gate режима B), CLI `calibrate`.
 
+**Инкремент 7 (сделано):** неонатальная специализация (§1/§6) — классификация aEEG
+(Hellström-Westas), SWC, маутрационные нормы по ПМВ, возраст-зависимая физиологичность,
+неонатальный монтаж/сценарий, правило BS→HIE.
+
 **Далее (§17 v2):** приборные форматы; LSL с нативным liblsl; ML-детекторы
-(`braindecode`); неонатальная специализация + маутрационные модели aEEG; стадирование
-сна; полный ICA + ICLabel/ASR; локализация источника/HFO; конвейер дообучения на
-правках нейрофизиолога.
+(`braindecode`); стадирование сна (AASM); полный ICA + ICLabel/ASR; локализация
+источника/HFO; серийное сравнение по архиву; путь к сертификации.
 
 См. `DECISIONS.md` — инженерные решения и их обоснования.

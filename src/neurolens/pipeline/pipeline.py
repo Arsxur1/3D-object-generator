@@ -28,7 +28,7 @@ from ..layer2_preprocess.reref import rereference
 from ..layer2_preprocess.sqi import compute_sqi, overall_quality
 from ..layer3_features.feature_set import FeatureSet, compute_features
 from ..layer3_features.norms import NormsEngine
-from ..layer4_detect.registry import run_detectors
+from ..layer4_detect.registry import default_detectors, run_detectors
 from ..layer5_reasoning.physiology import PhysiologyEngine
 from ..layer5_reasoning.rules_engine import build_causal_graph
 from ..layer6_interpret.grounding import validate_grounding
@@ -127,7 +127,12 @@ class Pipeline:
         features = compute_features(analysis, cfg.filters)
 
         # --- Layer 4: detection ---
-        detection = run_detectors(analysis, features, cfg.thresholds, artifacts)
+        detectors = default_detectors()
+        if analysis.patient.postmenstrual_age_weeks is not None:
+            from ..layer4_detect.neonatal import NeonatalBackgroundDetector
+
+            detectors = detectors + [NeonatalBackgroundDetector(self.norms)]
+        detection = run_detectors(analysis, features, cfg.thresholds, artifacts, detectors=detectors)
 
         # --- confidence calibration (TZ §13): calibrated confidences feed the
         #     causal graph, mode-B gate, and alarms so thresholds are reliable ---

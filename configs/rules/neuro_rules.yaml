@@ -183,6 +183,36 @@ chains:
     physiology: pathologic
     confidence: 0.55
 
+  # 7h) Neonatal burst-suppression -> severe neonatal encephalopathy (e.g. HIE)
+  - id: neonatal_bs_hie
+    description_ru: >-
+      Вспышка-подавление у новорождённого — тяжёлая неонатальная энцефалопатия
+      (напр. гипоксически-ишемическая, HIE); прогностически неблагоприятно.
+    when:
+      any_event: [neonatal_burst_suppression]
+    cause_ru: Неонатальная вспышка-подавление (aEEG BS)
+    cause_uz: Neonatal portlash-bostirish (aEEG BS)
+    effect_ru: Тяжёлая неонатальная энцефалопатия (напр. гипоксически-ишемическая, HIE)
+    effect_uz: Og‘ir neonatal ensefalopatiya (masalan, gipoksik-ishemik, HIE)
+    physiology: pathologic
+    confidence: 0.65
+    critical: true
+
+  # 7i) Neonatal inactive/flat trace -> very severe injury
+  - id: neonatal_inactive_severe
+    description_ru: >-
+      Неактивная (изоэлектрическая) кривая у новорождённого — крайне тяжёлое
+      повреждение мозга; требует срочной оценки и технических оговорок.
+    when:
+      any_event: [neonatal_inactive]
+    cause_ru: Неонатальная неактивная кривая (изоэлектрия)
+    cause_uz: Neonatal faolsiz egri (izoelektrik)
+    effect_ru: Крайне тяжёлое повреждение мозга (плохой прогноз)
+    effect_uz: O‘ta og‘ir miya shikasti (yomon prognoz)
+    physiology: pathologic
+    confidence: 0.6
+    critical: true
+
   # (Wicket benign-variant resolution of spikes is handled by the plausibility
   #  engine + Layer 5 variant resolution, not a generic chain — see rules_engine.)
 

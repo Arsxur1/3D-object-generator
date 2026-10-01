@@ -15,6 +15,7 @@ from .periodic import PeriodicPatternDetector
 from .artifact_events import EcgArtifactDetector
 from .suppression_events import BurstSuppressionDetector
 from .special import ExtremeDeltaBrushDetector, FirdaDetector, TriphasicWaveDetector
+from .neonatal import NeonatalBackgroundDetector
 from .seizure_burden import compute_seizure_burden
 from .registry import default_detectors, run_detectors
 
@@ -31,6 +32,7 @@ __all__ = [
     "TriphasicWaveDetector",
     "FirdaDetector",
     "ExtremeDeltaBrushDetector",
+    "NeonatalBackgroundDetector",
     "compute_seizure_burden",
     "default_detectors",
     "run_detectors",

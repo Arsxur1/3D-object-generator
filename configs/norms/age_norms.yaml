@@ -29,5 +29,32 @@ neonate:
   expected_background: discontinuous_to_continuous
   notes_ru: >-
     Неонатальная ЭЭГ созревает по постменструальному возрасту: от прерывистой
-    активности (tracé discontinu) к непрерывной; aEEG и цикличность сна —
-    ключевые. TODO: маутрационные шаблоны по неделям ПМВ (v2).
+    активности (tracé discontinu) к непрерывной; aEEG-паттерн и цикличность
+    сон-бодрствование (SWC) — ключевые маркеры зрелости и целостности мозга.
+  # Maturational expectations by PMA (weeks). The first band whose pma_max >= PMA
+  # applies. Values are indicative starting points (TODO: curated dataset).
+  maturation:
+    - pma_max: 28
+      expected_aeeg: DNV
+      max_normal_ibi_s: 30.0
+      swc_expected: false
+      continuity_normal_min: 0.2
+      notes_ru: "Крайняя недоношенность: выраженная прерывистость (tracé discontinu), длинные IBI, delta brushes — норма."
+    - pma_max: 32
+      expected_aeeg: DNV
+      max_normal_ibi_s: 20.0
+      swc_expected: false
+      continuity_normal_min: 0.4
+      notes_ru: "Недоношенный 28-31 нед: прерывистость сохраняется, IBI короче, SWC начинает формироваться."
+    - pma_max: 37
+      expected_aeeg: CNV
+      max_normal_ibi_s: 10.0
+      swc_expected: true
+      continuity_normal_min: 0.6
+      notes_ru: "32-36 нед: нарастание непрерывности, появление цикличности сна (SWC)."
+    - pma_max: 100
+      expected_aeeg: CNV
+      max_normal_ibi_s: 6.0
+      swc_expected: true
+      continuity_normal_min: 0.85
+      notes_ru: "Доношенный (≥37 нед): непрерывный фон (CNV) с SWC; выраженная прерывистость/burst-suppression — патология."

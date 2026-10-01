@@ -1,0 +1,20 @@
+# Reduced neonatal bipolar montage (TZ §1). Fewer electrodes than 10-20;
+# standard neonatal double-distance chains.
+name: neonatal
+type: bipolar
+description_ru: >-
+  Редуцированный неонатальный биполярный монтаж (меньше электродов): парасагиттальные
+  и височные цепочки + средняя линия. Используется у новорождённых.
+pairs:
+  - { name: Fp1-C3, anode: Fp1, cathode: C3 }
+  - { name: C3-O1,  anode: C3,  cathode: O1 }
+  - { name: Fp2-C4, anode: Fp2, cathode: C4 }
+  - { name: C4-O2,  anode: C4,  cathode: O2 }
+  - { name: Fp1-T3, anode: Fp1, cathode: T3 }
+  - { name: T3-O1,  anode: T3,  cathode: O1 }
+  - { name: Fp2-T4, anode: Fp2, cathode: T4 }
+  - { name: T4-O2,  anode: T4,  cathode: O2 }
+  - { name: T3-C3,  anode: T3,  cathode: C3 }
+  - { name: C3-Cz,  anode: C3,  cathode: Cz }
+  - { name: Cz-C4,  anode: Cz,  cathode: C4 }
+  - { name: C4-T4,  anode: C4,  cathode: T4 }

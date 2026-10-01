@@ -64,6 +64,30 @@ class DeterministicProvider(LLMProvider):
         )
         trace.append("Фон охарактеризован по количественным признакам Слоя 3.")
 
+        # --- neonatal aEEG background (TZ §1, §6) ---
+        neo = next((e for e in data.events if e["code"] == "neonatal_background"), None)
+        if neo is not None:
+            m = neo.get("metadata", {})
+            appr = "не соответствует возрасту" if m.get("abnormal_for_age") else "соответствует возрасту"
+            swc = "есть" if m.get("swc_present") else "отсутствует"
+            sections.append(
+                ReportSection(
+                    key="background",
+                    text=Bilingual(
+                        ru=(f"Неонатальный фон (aEEG): паттерн {m.get('aeeg_category')} "
+                            f"(ожидаемо для ПМВ {m.get('pma_weeks')} нед: {m.get('expected_aeeg_category')}); "
+                            f"цикличность сна (SWC): {swc}; IBI {m.get('ibi_s')} с; "
+                            f"непрерывность {m.get('continuity')} — {appr}."),
+                        uz=(f"Neonatal fon (aEEG): pattern {m.get('aeeg_category')}; "
+                            f"SWC: {'bor' if m.get('swc_present') else 'yo‘q'}; "
+                            f"IBI {m.get('ibi_s')} s; uzluksizlik {m.get('continuity')}."),
+                    ),
+                    grounding_refs=["neonatal_background", "aeeg_category", "continuity", "swc_present"],
+                    confidence=_confidence(neo["confidence"]),
+                )
+            )
+            trace.append("Неонатальный фон оценён по aEEG и маутрационным нормам (ПМВ).")
+
         # --- epileptiform (IED), including artifact resolution ---
         ied = [e for e in data.events if e["group"] == "ied"]
         if ied:

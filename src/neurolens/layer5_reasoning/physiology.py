@@ -41,6 +41,9 @@ _DEFAULT_PHYSIOLOGY = {
     "grda": PhysiologyLabel.PATHOLOGIC,
     "firda": PhysiologyLabel.PATHOLOGIC,
     "extreme_delta_brush": PhysiologyLabel.PATHOLOGIC,
+    "neonatal_burst_suppression": PhysiologyLabel.PATHOLOGIC,
+    "neonatal_inactive": PhysiologyLabel.PATHOLOGIC,
+    "neonatal_background": PhysiologyLabel.UNCERTAIN,
 }
 
 
@@ -51,6 +54,15 @@ class PhysiologyEngine:
     def label_event(self, event: Event, patient: PatientInfo) -> PhysiologyLabel:
         """Assign a physiology label, adjusting for age norms where relevant."""
         base = _DEFAULT_PHYSIOLOGY.get(event.code, PhysiologyLabel.UNCERTAIN)
+
+        # Neonatal background is physiologic iff appropriate for the PMA
+        # (discontinuity is normal in a preterm, abnormal at term).
+        if event.code == "neonatal_background":
+            abnormal = event.metadata.get("abnormal_for_age")
+            if abnormal is True:
+                return PhysiologyLabel.PATHOLOGIC
+            if abnormal is False:
+                return PhysiologyLabel.PHYSIOLOGIC
 
         # Age-gated benign variant (e.g. posterior slow waves of youth).
         if self.is_age_physiologic_variant(event, patient):

@@ -53,3 +53,29 @@ class NormsEngine:
         if rng is None:
             return None
         return rng[0] <= pdr_hz <= rng[1]
+
+    # -- neonatal maturational expectations (TZ §6) ----------------------
+    def neonatal_expectations(self, patient: PatientInfo) -> Optional[dict[str, Any]]:
+        """Return the maturational-norm band applicable to the patient's PMA."""
+        pma = patient.postmenstrual_age_weeks
+        if pma is None:
+            return None
+        bands = self.norms.get("neonate", {}).get("maturation", [])
+        for band in bands:
+            if pma <= band.get("pma_max", 100):
+                return band
+        return bands[-1] if bands else None
+
+    def is_continuity_normal_for_pma(self, continuity: float, patient: PatientInfo) -> Optional[bool]:
+        exp = self.neonatal_expectations(patient)
+        if exp is None:
+            return None
+        return continuity >= float(exp.get("continuity_normal_min", 0.0))
+
+    def expected_aeeg_category(self, patient: PatientInfo) -> Optional[str]:
+        exp = self.neonatal_expectations(patient)
+        return exp.get("expected_aeeg") if exp else None
+
+    def swc_expected(self, patient: PatientInfo) -> Optional[bool]:
+        exp = self.neonatal_expectations(patient)
+        return bool(exp.get("swc_expected")) if exp else None

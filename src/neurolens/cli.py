@@ -19,7 +19,11 @@ def _analyze(args) -> int:
     from .pipeline.pipeline import Pipeline
 
     mode = OperatingMode.B_AUTONOMOUS if args.mode.upper() == "B" else OperatingMode.A_DECISION_SUPPORT
-    patient = PatientInfo(age_years=args.age) if args.age is not None else None
+    pma = getattr(args, "pma", None)
+    patient = (
+        PatientInfo(age_years=args.age, postmenstrual_age_weeks=pma)
+        if (args.age is not None or pma is not None) else None
+    )
     context = ClinicalContext(
         sedatives=args.sedative or [],
         clinical_question=args.question,
@@ -137,7 +141,8 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--montage", default="double_banana")
     a.add_argument("--out", default=None, help="Output directory for JSON/protocol/plots.")
     a.add_argument("--provider", default="auto", choices=["auto", "anthropic", "deterministic"])
-    a.add_argument("--age", type=float, default=None)
+    a.add_argument("--age", type=float, default=None, help="Age in years.")
+    a.add_argument("--pma", type=float, default=None, help="Postmenstrual age (weeks) — enables neonatal analysis.")
     a.add_argument("--sedative", action="append", default=None)
     a.add_argument("--question", default=None)
     a.add_argument("--calibration", default=None, help="Confidence calibration JSON file.")
