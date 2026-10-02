@@ -79,15 +79,66 @@ class EvalResult:
 
 def prepare_record(ann: RecordAnnotation, path: Path, cfg: ConfigBundle) -> PreparedRecord:
     sig = ingest(path)
+    duration_s, flags = sig.duration_s, list(sig.quality.flags)
     filt = apply_filters(sig, cfg.filters)
+    del sig  # long multi-channel records: free each stage as soon as possible
     analysis = rereference(filt, "average")
+    del filt
     feats = compute_features(analysis, cfg.filters)
     # the ictal detector works on features only; dropping the samples keeps the
     # on-disk feature cache ~100x smaller
     return PreparedRecord(
-        annotation=ann, path=path, duration_s=sig.duration_s, features=feats,
-        signal=None, flags=list(sig.quality.flags),
+        annotation=ann, path=path, duration_s=duration_s, features=feats,
+        signal=None, flags=flags,
     )
+
+
+# Peak resident memory per byte of EDF observed when processing a whole record
+# (int16 on disk -> float64 working copies through filtering/re-referencing).
+MEM_PER_EDF_BYTE = 16.0
+
+
+def memory_budget_bytes(fraction: float = 0.6) -> int:
+    """Usable memory for parallel workers (cgroup limit if set, else physical RAM)."""
+    import os
+
+    limit = None
+    try:
+        raw = Path("/sys/fs/cgroup/memory.max").read_text().strip()
+        if raw.isdigit():
+            limit = int(raw)
+    except OSError:
+        pass
+    phys = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+    return int(fraction * min(limit or phys, phys))
+
+
+def run_memory_bounded(fn, tasks: list[tuple], est_bytes: list[int], workers: int,
+                       on_done: Callable, budget: int | None = None) -> None:
+    """Run ``fn(*task)`` in worker processes, never starting a task while the
+    estimated memory of running tasks plus its own would exceed ``budget``
+    (a task larger than the budget runs alone). Results go to ``on_done``."""
+    from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
+
+    budget = budget or memory_budget_bytes()
+    order = sorted(range(len(tasks)), key=lambda i: -est_bytes[i])  # big first
+    running: dict = {}
+    with ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
+        while order or running:
+            used = sum(running.values())
+            started = False
+            for k, i in enumerate(order):
+                if len(running) < workers and (not running or used + est_bytes[i] <= budget):
+                    running[pool.submit(fn, *tasks[i])] = est_bytes[i]
+                    order.pop(k)
+                    started = True
+                    break
+            if started:
+                continue
+            finished, _ = wait(list(running), return_when=FIRST_COMPLETED)
+            for f in finished:
+                running.pop(f)
+                on_done(f.result())
 
 
 def prepare_records(
@@ -129,13 +180,12 @@ def prepare_records(
             progress(f"prepared {rec.annotation.file} in {secs:.0f}s")
 
     if workers > 1 and len(todo) > 1:
-        from concurrent.futures import ProcessPoolExecutor, as_completed
-
         t0 = perf_counter()
-        with ProcessPoolExecutor(max_workers=min(workers, len(todo))) as pool:
-            futs = [pool.submit(prepare_record, a, p, cfg) for a, p in todo]
-            for fut in as_completed(futs):
-                done(fut.result(), perf_counter() - t0)
+        run_memory_bounded(
+            prepare_record, [(a, p, cfg) for a, p in todo],
+            [int(p.stat().st_size * MEM_PER_EDF_BYTE) for _, p in todo],
+            min(workers, len(todo)), lambda rec: done(rec, perf_counter() - t0),
+        )
     else:
         for a, p in todo:
             t0 = perf_counter()

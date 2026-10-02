@@ -76,19 +76,21 @@ def build_traces(
             if not ((cp := cache_path(path)) and cp.exists())]
     built: dict[Path, MonitorTrace] = {}
     if todo:
-        from concurrent.futures import ProcessPoolExecutor, as_completed
+        from .runner import run_memory_bounded
 
-        n = max(1, min(workers, len(todo)))
-        with ProcessPoolExecutor(max_workers=n) as pool:
-            futs = {pool.submit(build_trace, ann, path, cfg): path for ann, path in todo}
-            for fut in as_completed(futs):
-                path = futs[fut]
-                tr = fut.result()
-                if (cp := cache_path(path)) is not None:
-                    cp.write_bytes(pickle.dumps(tr))
-                built[path] = tr
-                if progress:
-                    progress(f"traced {tr.annotation.file} ({len(tr.windows)} windows)")
+        def done(tr: MonitorTrace) -> None:
+            path = path_of[tr.annotation.file]
+            if (cp := cache_path(path)) is not None:
+                cp.write_bytes(pickle.dumps(tr))
+            built[path] = tr
+            if progress:
+                progress(f"traced {tr.annotation.file} ({len(tr.windows)} windows)")
+
+        path_of = {ann.file: path for ann, path in todo}
+        # replay source holds the whole record as float64 (~4x EDF bytes) + ingest peak
+        run_memory_bounded(build_trace, [(a, p, cfg) for a, p in todo],
+                           [int(p.stat().st_size * 8) for _, p in todo],
+                           max(1, min(workers, len(todo))), done)
     for ann, path in items:
         tr = built.get(path)
         if tr is None:

@@ -453,3 +453,20 @@ def test_prereg_assessment_logic():
     assert a["hypotheses"]["H4_realtime_margin_sens_ge_0.9_and_fa_le_budget"] is True
     assert a["decision"]["adopt_realtime_margin_as_monitor_default"] is True  # 0.95 >= 0.95
     assert a["by_population"]["offline-margin"]["siena"]["tp"] == 9
+
+
+def test_run_memory_bounded_respects_budget(tmp_path):
+    from neurolens.evaluation.runner import run_memory_bounded
+
+    got = []
+    # budget 10: tasks 8 and 7 can never overlap; 2-unit tasks may run alongside
+    run_memory_bounded(_sleep_echo, [(i,) for i in range(5)], [8, 7, 2, 2, 2], 3,
+                       got.append, budget=10)
+    assert sorted(got) == [0, 1, 2, 3, 4]
+
+
+def _sleep_echo(i):
+    import time
+
+    time.sleep(0.05)
+    return i
