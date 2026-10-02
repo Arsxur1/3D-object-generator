@@ -1,0 +1,157 @@
+{
+ "training_subjects": [
+  "chb01",
+  "chb03",
+  "chb05",
+  "chb08",
+  "siena:PN00",
+  "siena:PN11",
+  "siena:PN12",
+  "chb02",
+  "chb11",
+  "chb13",
+  "chb14",
+  "chb16",
+  "chb17",
+  "chb18",
+  "chb19",
+  "chb20",
+  "chb22",
+  "siena:PN05",
+  "siena:PN16",
+  "siena:PN17"
+ ],
+ "grid": {
+  "threshold": [
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   0.97,
+   0.99
+  ],
+  "min_epochs": [
+   5,
+   10,
+   15,
+   20,
+   30,
+   45
+  ]
+ },
+ "offline": {
+  "threshold_detector_default_loso_data": {
+   "n_records": 142,
+   "hours": 151.6406,
+   "n_seizures": 100,
+   "tp": 86,
+   "fn": 14,
+   "fp": 1433,
+   "sensitivity": 0.86,
+   "fa_per_hour": 9.45,
+   "latency_median_s": 6.5,
+   "latency_p90_s": 28.5,
+   "f1_event": 0.1062
+  },
+  "A_replacement": {
+   "params": {
+    "threshold": 0.4,
+    "min_epochs": 5
+   },
+   "loso": {
+    "n_records": 142,
+    "hours": 151.6406,
+    "n_seizures": 100,
+    "tp": 94,
+    "fn": 6,
+    "fp": 1355,
+    "sensitivity": 0.94,
+    "fa_per_hour": 8.9356,
+    "latency_median_s": 9.0,
+    "latency_p90_s": 25.7,
+    "f1_event": 0.1214
+   },
+   "fa_budget": 9.45
+  },
+  "B_quiet": {
+   "params": {
+    "threshold": 0.4,
+    "min_epochs": 30
+   },
+   "loso": {
+    "n_records": 142,
+    "hours": 151.6406,
+    "n_seizures": 100,
+    "tp": 71,
+    "fn": 29,
+    "fp": 138,
+    "sensitivity": 0.71,
+    "fa_per_hour": 0.91,
+    "latency_median_s": 6.0,
+    "latency_p90_s": 20.0,
+    "f1_event": 0.4595
+   },
+   "fa_budget": 1.0,
+   "rule": "margin"
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_offline_v1.json",
+   "sha256": "e74576ab94193f873f3fa2c29bae92030d3b688bffc491327f5e609b30171ed7",
+   "n_trees": 200
+  }
+ },
+ "realtime": {
+  "threshold_monitor_default_fa_per_hour": 4.1287,
+  "A_replacement": {
+   "params": {
+    "threshold": 0.3,
+    "min_epochs": 15
+   },
+   "loso": {
+    "n_records": 142,
+    "hours": 151.6208,
+    "n_seizures": 100,
+    "tp": 90,
+    "fn": 10,
+    "fp": 606,
+    "sensitivity": 0.9,
+    "fa_per_hour": 3.9968,
+    "latency_median_s": 21.0,
+    "latency_p90_s": 45.2,
+    "f1_event": 0.2261
+   },
+   "fa_budget": 4.1287
+  },
+  "B_quiet": {
+   "params": {
+    "threshold": 0.4,
+    "min_epochs": 30
+   },
+   "loso": {
+    "n_records": 142,
+    "hours": 151.6208,
+    "n_seizures": 100,
+    "tp": 71,
+    "fn": 29,
+    "fp": 132,
+    "sensitivity": 0.71,
+    "fa_per_hour": 0.8706,
+    "latency_median_s": 35.0,
+    "latency_p90_s": 49.0,
+    "f1_event": 0.4686
+   },
+   "fa_budget": 1.0,
+   "rule": "margin"
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_realtime_v1.json",
+   "sha256": "9591cb9a98b8f559082625145a6cfda2fee0ecdebb0032e966c8da942e1f17fa",
+   "n_trees": 185
+  }
+ }
+}

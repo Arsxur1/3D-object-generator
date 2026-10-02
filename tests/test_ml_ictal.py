@@ -115,3 +115,27 @@ def test_ml_detector_finds_injected_seizure():
     assert len(events) == 1
     e = events[0]
     assert 240 <= e.t_start <= 275 and e.group == "ictal" and e.code == "ictal_ml"
+
+
+def test_prereg10_assessment_logic():
+    from neurolens.evaluation.prereg10 import assess, macro_sensitivity
+
+    def rec(file, n, tp, fp, hours=5.0):
+        return {"file": file, "hours": hours, "n_seizures": n, "tp": tp, "fp": fp, "latencies_s": [5.0] * tp}
+
+    def mode(name, big_tp, small_tp, fp):
+        # one patient with 40 seizures, one with 4: macro and micro differ
+        return {"mode": name, "records": [rec("chb12/a.edf", 40, big_tp, fp), rec("chb04/b.edf", 4, small_tp, fp)]}
+
+    metrics = {"results": [
+        mode("offline-threshold-default", 30, 4, 40), mode("offline-ml-A", 36, 4, 30), mode("offline-ml-B", 20, 2, 4),
+        mode("realtime-threshold-default", 30, 4, 20), mode("realtime-ml-A", 36, 2, 18), mode("realtime-ml-B", 30, 3, 4),
+    ]}
+    a = assess(metrics)
+    assert macro_sensitivity(metrics["results"][4]["records"]) == round((36 / 40 + 2 / 4) / 2, 4)
+    h = a["hypotheses"]
+    assert h["H1_realtime_mlA_noninferior_sens_and_no_more_FA"] is True   # 38/44 vs 34/44, 3.6 vs 4.0 FA/h
+    assert h["H2_offline_mlA_noninferior_sens_and_no_more_FA"] is True
+    assert h["H3_realtime_mlB_quiet_FA_le_1_and_sens_ge_0.6"] is True      # 33/44, 0.8 FA/h
+    assert h["H4_realtime_mlA_macro_sens_noninferior"] is False            # macro 0.70 vs 0.875
+    assert a["decision"]["ml_becomes_default_realtime_seizure_detector"] is True

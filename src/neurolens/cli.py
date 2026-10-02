@@ -298,6 +298,33 @@ def _tune(args) -> int:
     return 0
 
 
+def _ml_eval(args) -> int:
+    import json
+
+    from .evaluation.ml_eval import run_and_save
+
+    cfg = _load_cfg()
+    items = _items(args.db, args.test, args.cache)
+    if not items:
+        print("No cached test records — run `neurolens physionet fetch` first.")
+        return 2
+    out = run_and_save(items, cfg, args.frozen, args.out, feature_cache=args.feature_cache,
+                       workers=args.workers, realtime=not args.offline_only, progress=print)
+    for r in out["results"]:
+        print(_fmt_score(r.mode, r))
+    if args.assess:
+        from .evaluation.prereg10 import assess
+
+        metrics = json.loads(out["paths"]["json"].read_text(encoding="utf-8"))
+        a = assess(metrics)
+        path = out["paths"]["json"].with_name("prereg_assessment.json")
+        path.write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
+        print(json.dumps({"hypotheses": a["hypotheses"], "decision": a["decision"],
+                          "macro_sensitivity": a["macro_sensitivity"]}, indent=1))
+    print(f"Saved: {out['paths']['json']}")
+    return 0
+
+
 def _serve(args) -> int:
     try:
         import uvicorn
@@ -397,6 +424,17 @@ def build_parser() -> argparse.ArgumentParser:
     tu.add_argument("--calibration-out", default="configs/calibration.physionet.json", dest="calibration_out")
     tu.add_argument("--out", default=None, help="Report dir (metrics.json + summary.md).")
     tu.set_defaults(func=_tune)
+
+    me = sub.add_parser("ml-eval", help="Evaluate frozen learned detectors vs thresholds on held-out records.")
+    _data_args(me)
+    me.add_argument("--test", required=True, help="Subjects, e.g. chb04,siena:PN07")
+    me.add_argument("--frozen", default="docs/preregistration_increment10_frozen.json")
+    me.add_argument("--feature-cache", default="data/physionet/.features", dest="feature_cache")
+    me.add_argument("--workers", type=int, default=3)
+    me.add_argument("--offline-only", action="store_true", dest="offline_only")
+    me.add_argument("--assess", action="store_true", help="Apply the increment-10 pre-registered analysis.")
+    me.add_argument("--out", default="out_eval/ml_eval")
+    me.set_defaults(func=_ml_eval)
 
     sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
     sv.add_argument("--host", default="127.0.0.1")
