@@ -139,3 +139,72 @@ def test_prereg10_assessment_logic():
     assert h["H3_realtime_mlB_quiet_FA_le_1_and_sens_ge_0.6"] is True      # 33/44, 0.8 FA/h
     assert h["H4_realtime_mlA_macro_sens_noninferior"] is False            # macro 0.70 vs 0.875
     assert a["decision"]["ml_becomes_default_realtime_seizure_detector"] is True
+
+
+class _StubModel:
+    """Fires when amplitude vs own baseline is high (z_top3 feature)."""
+
+    meta = {"name": "stub"}
+
+    def predict_proba(self, X):
+        z = X[:, FEATURE_NAMES.index("z_top3")]
+        return 1.0 / (1.0 + np.exp(-(z - 0.7) * 20))
+
+
+def _windows(f, win=30, step=5):
+    """Split a stream of epochs (1 s step, centres 1..n) into overlapping monitor windows."""
+    n = f.epoch_rms.shape[0]
+    out = []
+    for t0 in range(0, n - win + 1, step):
+        sl = slice(t0, t0 + win - 1)
+        out.append((float(t0), SimpleNamespace(
+            epoch_times=np.arange(1, win, dtype=float), epoch_rms=f.epoch_rms[sl],
+            epoch_band_conc=f.epoch_band_conc[sl], epoch_domfreq=f.epoch_domfreq[sl],
+            epoch_relpow={k: v[sl] for k, v in f.epoch_relpow.items()}, eeg_channels=f.eeg_channels)))
+    return out
+
+
+def test_streaming_ml_matches_offline_runs():
+    from neurolens.realtime.ml_stream import StreamingIctalML
+
+    f = _fake_features(n=600, seizure=(300, 380))
+    model = _StubModel()
+    stream = StreamingIctalML(model, threshold=0.8, min_epochs=10)
+    first_alarm = None
+    active_windows = 0
+    for t0, w in _windows(f):
+        ev = stream.update(t0, w)
+        if ev:
+            active_windows += 1
+            first_alarm = first_alarm or (t0 + ev[0].t_start, t0 + ev[0].t_end)
+            assert ev[0].group == "ictal" and ev[0].code == "ictal_ml"
+    # offline reference on the same epoch stream (window epochs cover times 1..n-1)
+    seen = SimpleNamespace(**{k: getattr(f, k) for k in ("epoch_rms", "epoch_band_conc", "epoch_domfreq",
+                                                          "epoch_relpow", "eeg_channels")})
+    m = (600 // 5) * 5 - 1
+    seen.epoch_rms, seen.epoch_band_conc, seen.epoch_domfreq = (f.epoch_rms[:m], f.epoch_band_conc[:m],
+                                                                f.epoch_domfreq[:m])
+    seen.epoch_relpow = {k: v[:m] for k, v in f.epoch_relpow.items()}
+    runs = probability_runs(model.predict_proba(featurize(seen)), 0.8, 10)
+    assert len(runs) == 1 and active_windows > 0
+    a, b, _ = runs[0]
+    assert first_alarm[0] == float(a + 1)  # epoch index a has centre time a+1
+
+
+def test_pipeline_and_monitor_with_learned_detector(demo_edf, configs):
+    import copy
+
+    from neurolens.pipeline.pipeline import Pipeline
+    from neurolens.realtime.monitor import RealtimeMonitor
+    from neurolens.realtime.stream import EdfReplaySource
+
+    cfg = copy.deepcopy(configs)
+    assert cfg.ml.offline is not None and cfg.ml.realtime is not None
+    out = Pipeline(config=cfg, provider_pref="deterministic", run_ica=False, learned=True).analyze_file(demo_edf)
+    assert "ictal_ml" in out.detection.detectors_run and "ictal_rhythm" not in out.detection.detectors_run
+    mon = RealtimeMonitor(cfg, learned=True)
+    assert mon._ml is not None and not any(type(d).__name__ == "IctalRhythmDetector" for d in mon.detectors)
+    summary = mon.run(EdfReplaySource(demo_edf, chunk_s=cfg.realtime.step_s))
+    assert summary.n_windows > 0
+    # default config keeps the threshold detector (pre-registered decision pending)
+    assert RealtimeMonitor(cfg)._ml is None

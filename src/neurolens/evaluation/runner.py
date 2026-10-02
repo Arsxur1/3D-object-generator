@@ -230,7 +230,7 @@ def realtime_detections(path: Path, cfg: ConfigBundle) -> tuple[list[Detection],
     from ..realtime.stream import EdfReplaySource
 
     src = EdfReplaySource(path, chunk_s=cfg.realtime.step_s)
-    mon = RealtimeMonitor(cfg, detectors=[IctalRhythmDetector()])
+    mon = RealtimeMonitor(cfg, detectors=[IctalRhythmDetector()], learned=False)
     summary = mon.run(src)
     dets = [
         Detection(a.t_start, a.t_end, a.confidence, t_known=a.t_end)

@@ -15,6 +15,7 @@ import yaml
 
 from ..contracts.config import (
     FilterConfig,
+    LearnedDetectorConfig,
     MontageConfig,
     RealtimeConfig,
     RuleBase,
@@ -49,6 +50,15 @@ class ConfigBundle:
     electrode_coords: dict[str, tuple[float, float]] = field(default_factory=dict)
     realtime: RealtimeConfig = field(default_factory=RealtimeConfig)
     root: Path | None = None
+    ml: LearnedDetectorConfig = field(default_factory=LearnedDetectorConfig)
+
+    def ml_model_path(self, rel: str) -> Path:
+        """Resolve a model path from configs/ml.yaml (relative to the repo root)."""
+        p = Path(rel)
+        if p.is_absolute():
+            return p
+        base = (self.root.parent if self.root else Path.cwd())
+        return base / p
 
     def montage(self, name: str) -> MontageConfig:
         if name not in self.montages:
@@ -79,6 +89,8 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
 
     rt_file = cfg / "realtime.yaml"
     realtime = RealtimeConfig(**_read_yaml(rt_file)) if rt_file.exists() else RealtimeConfig()
+    ml_file = cfg / "ml.yaml"
+    ml = LearnedDetectorConfig(**_read_yaml(ml_file)) if ml_file.exists() else LearnedDetectorConfig()
 
     return ConfigBundle(
         filters=filters,
@@ -90,6 +102,7 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
         electrode_coords=coords,
         realtime=realtime,
         root=cfg,
+        ml=ml,
     )
 
 

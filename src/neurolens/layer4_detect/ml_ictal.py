@@ -373,7 +373,7 @@ def probability_runs(p: np.ndarray, threshold: float, min_epochs: int,
         starts = [0] + starts
     if on[-1]:
         stops = stops + [on.size]
-    return [(a, b, float(p[a:b].mean())) for a, b in zip(starts, stops) if b - a >= min_epochs]
+    return [(int(a), int(b), float(p[a:b].mean())) for a, b in zip(starts, stops) if b - a >= min_epochs]
 
 
 @dataclass
@@ -404,7 +404,7 @@ class MLIctalDetector(Detector):
             rms = np.asarray(features.epoch_rms)[a:b]
             base = np.median(np.asarray(features.epoch_rms), axis=0) + 1e-9
             involved = [features.eeg_channels[i] for i in np.where((rms / base).mean(axis=0) > 1.5)[0]]
-            ru, uz = self.labels("ictal_rhythm")
+            ru, uz = self.labels(self.code)
             out.append(Event(
                 code=self.code, label_ru=ru, label_uz=uz, group=self.group,
                 localization=Localization(channels=involved),

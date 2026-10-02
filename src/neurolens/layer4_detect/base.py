@@ -15,6 +15,7 @@ LABELS: dict[str, tuple[str, str]] = {
     "diffuse_slowing": ("Диффузное замедление фоновой активности", "Fon faolligining diffuz sekinlashuvi"),
     "focal_slowing": ("Очаговое замедление / асимметрия", "O‘choqli sekinlashuv / assimetriya"),
     "ictal_rhythm": ("Иктальный ритмический паттерн (судорожная активность)", "Iktal ritmik pattern (tutqanoq faolligi)"),
+    "ictal_ml": ("Судорожная активность (обученный детектор)", "Tutqanoq faolligi (o‘qitilgan detektor)"),
     "spike": ("Эпилептиформный разряд (спайк/острая волна)", "Epileptiform razryad (spike/o‘tkir to‘lqin)"),
     "ecg_artifact": ("ЭКГ-артефакт", "EKG artefakti"),
     "burst_suppression": ("Паттерн «вспышка-подавление»", "“Portlash-bostirish” patterni"),

@@ -193,3 +193,29 @@ class RealtimeConfig(BaseModel):
 
     def rule_for(self, alarm_type: str) -> AlarmRule:
         return self.alarms.get(alarm_type, AlarmRule())
+
+
+class LearnedDetectorMode(BaseModel):
+    """One operating point of the learned ictal detector (increment 10)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    model: str = Field(description="Model JSON path, relative to the repository root.")
+    threshold: float = Field(ge=0, le=1)
+    min_epochs: int = Field(ge=1)
+    alarm_persistence_windows: int = Field(
+        default=1, ge=1,
+        description="Seizure-alarm persistence when this detector drives the monitor "
+                    "(the run of min_epochs already provides persistence).")
+
+
+class LearnedDetectorConfig(BaseModel):
+    """configs/ml.yaml — learned ictal detector per path (offline / real-time)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    offline: Optional[LearnedDetectorMode] = None
+    realtime: Optional[LearnedDetectorMode] = None
+    provenance: dict = Field(default_factory=dict)
+

@@ -1,0 +1,18 @@
+# Learned ictal detector (increment 10): gradient-boosted trees over causal epoch
+# features, JSON models in configs/models/. Operating points = point A
+# ("replacement") frozen in docs/preregistration_increment10_frozen.json.
+# `enabled` follows the pre-registered decision rule (docs/preregistration_increment10.md);
+# until the held-out result is known both paths stay disabled.
+offline:
+  enabled: false
+  model: configs/models/ictal_gbm_offline_v1.json
+  threshold: 0.4
+  min_epochs: 5
+realtime:
+  enabled: false
+  model: configs/models/ictal_gbm_realtime_v1.json
+  threshold: 0.3
+  min_epochs: 15
+  alarm_persistence_windows: 1
+provenance:
+  preregistration: docs/preregistration_increment10.md

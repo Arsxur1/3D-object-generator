@@ -28,6 +28,7 @@ _DEFAULT_PHYSIOLOGY = {
     "diffuse_slowing": PhysiologyLabel.PATHOLOGIC,
     "focal_slowing": PhysiologyLabel.PATHOLOGIC,
     "ictal_rhythm": PhysiologyLabel.PATHOLOGIC,
+    "ictal_ml": PhysiologyLabel.PATHOLOGIC,
     "spike": PhysiologyLabel.PATHOLOGIC,
     "burst_suppression": PhysiologyLabel.PATHOLOGIC,
     "triphasic_waves": PhysiologyLabel.PATHOLOGIC,

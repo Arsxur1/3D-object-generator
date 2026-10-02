@@ -43,7 +43,7 @@ def build_trace(ann: RecordAnnotation, path: Path, cfg: ConfigBundle) -> Monitor
     from ..realtime.stream import EdfReplaySource
 
     src = EdfReplaySource(path, chunk_s=cfg.realtime.step_s)
-    mon = RealtimeMonitor(cfg, detectors=[IctalRhythmDetector()])
+    mon = RealtimeMonitor(cfg, detectors=[IctalRhythmDetector()], learned=False)
     mon.trace = []
     summary = mon.run(src)
     return MonitorTrace(ann, summary.duration_s, mon.trace)

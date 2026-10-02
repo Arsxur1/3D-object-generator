@@ -62,12 +62,30 @@ class RealtimeMonitor:
         montage_name: str = "double_banana",
         detectors: list[Detector] | None = None,
         out_dir: str | Path | None = None,
+        learned: Optional[bool] = None,
     ):
         self.cfg = config or load_configs()
         self.montage_name = montage_name
         self.detectors = detectors or [
             IctalRhythmDetector(), BurstSuppressionDetector(), PeriodicPatternDetector(),
         ]
+        # learned seizure detector (configs/ml.yaml); learned=None follows the config
+        ml_mode = self.cfg.ml.realtime
+        use_ml = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
+        self._ml = None
+        self._rt = self.cfg.realtime
+        if use_ml:
+            if ml_mode is None:
+                raise ValueError("learned=True but configs/ml.yaml has no realtime section")
+            from ..layer4_detect.ml_ictal import load_model
+            from .ml_stream import StreamingIctalML
+
+            self._ml = StreamingIctalML(load_model(self.cfg.ml_model_path(ml_mode.model)),
+                                        ml_mode.threshold, ml_mode.min_epochs)
+            self.detectors = [d for d in self.detectors if not isinstance(d, IctalRhythmDetector)]
+            rule = self._rt.rule_for(AlarmType.SEIZURE.value).model_copy(
+                update={"persistence_windows": ml_mode.alarm_persistence_windows})
+            self._rt = self._rt.model_copy(update={"alarms": {**self._rt.alarms, AlarmType.SEIZURE.value: rule}})
         self.out_dir = Path(out_dir) if out_dir else None
         self._seizure_intervals: list[tuple[float, float]] = []
         # rolling per-channel amplitude baseline for streaming seizure detection
@@ -83,7 +101,7 @@ class RealtimeMonitor:
         self.trace: Optional[list[tuple]] = None  # (t0, t1, features, baseline)
 
     def run(self, source: StreamSource) -> MonitorSummary:
-        rt = self.cfg.realtime
+        rt = self._rt
         fs = source.sampling_rate_hz
         buf = WindowBuffer(len(source.channel_names), fs, rt.window_s, rt.step_s)
         mgr = AlarmManager(rt)
@@ -99,7 +117,7 @@ class RealtimeMonitor:
                 last_t1 = t1
 
                 t_perf = perf_counter()
-                det, analysis = self._analyze(window_data, source)
+                det, analysis = self._analyze(window_data, source, t0)
                 if self.trace is not None:
                     self.trace[-1] = (t0, t1, *self.trace[-1])
                 latency_ms = (perf_counter() - t_perf) * 1000.0
@@ -115,7 +133,7 @@ class RealtimeMonitor:
         return self._summary(source, alarms, mgr, latencies, n_windows, last_t1)
 
     # -- per-window analysis ---------------------------------------------
-    def _analyze(self, window_data: np.ndarray, source: StreamSource):
+    def _analyze(self, window_data: np.ndarray, source: StreamSource, t0: float = 0.0):
         sig = UnifiedSignal(
             signal=window_data.astype(np.float32),
             sampling_rate_hz=source.sampling_rate_hz,
@@ -140,6 +158,8 @@ class RealtimeMonitor:
             self.trace.append((feats, self._baseline.copy()))
 
         det = run_detectors(analysis, feats, self.thresholds, detectors=self.detectors)
+        if self._ml is not None:
+            det.events.extend(self._ml.update(t0, feats))
 
         self._baseline = (1 - self._baseline_alpha) * self._baseline + self._baseline_alpha * win_med
         return det, analysis

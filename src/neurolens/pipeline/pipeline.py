@@ -72,8 +72,22 @@ class Pipeline:
         provider_pref: str = "auto",
         run_ica: bool = True,
         calibration_file: str | Path | None = None,
+        learned: Optional[bool] = None,
     ):
         self.cfg = config or load_configs()
+        # learned ictal detector (configs/ml.yaml); learned=None follows the config
+        ml_mode = self.cfg.ml.offline
+        self.learned = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
+        self._ml_detector = None
+        if self.learned:
+            if ml_mode is None:
+                raise ValueError("learned=True but configs/ml.yaml has no offline section")
+            from ..layer4_detect.ml_ictal import MLDetectorConfig, MLIctalDetector, load_model
+
+            self._ml_detector = MLIctalDetector(
+                load_model(self.cfg.ml_model_path(ml_mode.model)),
+                MLDetectorConfig(threshold=ml_mode.threshold, min_epochs=ml_mode.min_epochs),
+            )
         self.provider_pref = provider_pref
         self.run_ica = run_ica
         self.norms = NormsEngine(self.cfg.norms)
@@ -128,6 +142,11 @@ class Pipeline:
 
         # --- Layer 4: detection ---
         detectors = default_detectors()
+        if self._ml_detector is not None:
+            from ..layer4_detect.ictal import IctalRhythmDetector
+
+            detectors = [d for d in detectors if not isinstance(d, IctalRhythmDetector)]
+            detectors.append(self._ml_detector)
         if analysis.patient.postmenstrual_age_weeks is not None:
             from ..layer4_detect.neonatal import NeonatalBackgroundDetector
 

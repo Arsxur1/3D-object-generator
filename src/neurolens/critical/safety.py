@@ -112,7 +112,7 @@ def scan_critical_findings(detection: DetectionResult) -> list[CriticalFinding]:
                     uz=(f"Yuqori tutqanoq yuki: {sb.n_seizures} epizod, "
                         f"yozuvning {sb.seizure_fraction*100:.0f}%, {sb.seizures_per_hour:.1f}/soat."),
                 ),
-                grounding_refs=["ictal_rhythm"],
+                grounding_refs=sorted({e.code for e in detection.by_group("ictal")}) or ["ictal_rhythm"],
             )
         )
 
