@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import threading
 import time
 import urllib.request
 from dataclasses import dataclass
@@ -62,6 +63,11 @@ class ChecksumError(RuntimeError):
 
 SEGMENT_MIN_BYTES = 64 * 1024 * 1024  # split files larger than this
 SEGMENTS = 4  # parallel byte ranges per large file
+# Global cap on simultaneous HTTP transfers across all files and segments.
+# PhysioNet stalls/resets connections when a client opens too many at once
+# (observed at ~18), so parallelism is bounded here, not per call site.
+MAX_CONNECTIONS = int(os.environ.get("NEUROLENS_MAX_CONNECTIONS", "6"))
+_CONN = threading.BoundedSemaphore(MAX_CONNECTIONS)
 
 
 class RangeUnsupported(RuntimeError):
@@ -104,7 +110,7 @@ def _head_size(url: str) -> Optional[int]:
 
 
 def _download_resumable(
-    url: str, dest: Path, retries: int = 4, max_resumes: int = 200,
+    url: str, dest: Path, retries: int = 8, max_resumes: int = 200,
     start: int = 0, end: Optional[int] = None,
 ) -> None:
     """Stream to ``dest``; when a proxy silently cuts a long transfer (stream ends
@@ -126,7 +132,7 @@ def _download_resumable(
             headers["Range"] = f"bytes={start + have}-" + ("" if end is None else str(end))
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with _CONN, urllib.request.urlopen(req, timeout=120) as resp:
                 if (have or ranged) and resp.status != 206:
                     if ranged:
                         raise RangeUnsupported(url)
@@ -148,7 +154,7 @@ def _download_resumable(
             if failures > retries:
                 raise
             time.sleep(delay)
-            delay = min(delay * 2, 30.0)
+            delay = min(delay * 2, 120.0)  # a throttling server needs real back-off
     raise RuntimeError(f"{url}: download did not complete after {max_resumes} resumes")
 
 
