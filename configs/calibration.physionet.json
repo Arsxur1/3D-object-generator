@@ -2,17 +2,17 @@
   "version": "0.1.0",
   "default": 1.0,
   "temperatures": {
-    "ictal_rhythm": 1.4749
+    "ictal_rhythm": 9.1431
   },
   "metrics": {
     "ictal_rhythm": {
-      "n": 29,
-      "positives": 27,
-      "temperature": 1.4749,
-      "ece_before": 0.0513,
-      "ece_after": 0.0179,
-      "brier_before": 0.0646,
-      "brier_after": 0.0598,
+      "n": 153,
+      "positives": 77,
+      "temperature": 9.1431,
+      "ece_before": 0.4125,
+      "ece_after": 0.1615,
+      "brier_before": 0.3982,
+      "brier_after": 0.2439,
       "source": "physionet event-level (training patients; see thresholds provenance)"
     }
   }
