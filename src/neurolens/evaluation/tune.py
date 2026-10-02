@@ -52,7 +52,7 @@ class Trial:
         return (meets, round(s.sensitivity, 6), -round(s.fa_per_hour, 6), -lat)
 
 
-SELECTORS = ("strict", "robust")
+SELECTORS = ("strict", "robust", "margin")
 
 
 @dataclass
@@ -75,13 +75,19 @@ class TuneResult:
         * ``robust``  — the same objective evaluated on each setting's *worst grid
           neighbour* (every parameter moved one step either way): a setting must
           keep its sensitivity and FA budget under small threshold perturbations.
-          Ties: own sensitivity, fewer own FA, shorter latency.
+          Ties: own sensitivity, fewer own FA, shorter latency. (On training data this
+          trades sensitivity for FA robustness — see docs/preregistration_increment9.md.)
+        * ``margin``  — "spend the FA budget on a sensitivity margin": own FA/h <=
+          target, max own sensitivity, then max *worst-neighbour sensitivity* (how
+          far thresholds can drift before a seizure is missed), then fewer FA,
+          shorter latency.
         """
         if rule == "strict":
             return max(self.trials, key=lambda t: t.key(self.fa_target))
-        if rule == "robust":
+        if rule in ("robust", "margin"):
             rob = robust_scores(self)
-            return max(self.trials, key=lambda t: _robust_key(t, rob[id(t)], self.fa_target))
+            keyf = _robust_key if rule == "robust" else _margin_key
+            return max(self.trials, key=lambda t: keyf(t, rob[id(t)], self.fa_target))
         raise ValueError(f"unknown selector {rule!r}; known: {SELECTORS}")
 
 
@@ -109,6 +115,13 @@ def robust_scores(res: "TuneResult") -> dict[int, tuple[float, float]]:
         tid: (min(n.score.sensitivity for n in nb), max(n.score.fa_per_hour for n in nb))
         for tid, nb in nbs.items()
     }
+
+
+def _margin_key(t: Trial, rob: tuple[float, float], fa_target: float) -> tuple:
+    r_sens, _ = rob
+    lat = t.score.latency_median_s if t.score.latency_median_s is not None else 1e9
+    return (t.score.fa_per_hour <= fa_target, round(t.score.sensitivity, 6), round(r_sens, 6),
+            -round(t.score.fa_per_hour, 6), -lat)
 
 
 def _robust_key(t: Trial, rob: tuple[float, float], fa_target: float) -> tuple:

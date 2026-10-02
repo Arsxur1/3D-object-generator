@@ -1,0 +1,177 @@
+{
+ "train": "chb01,chb03,chb05,chb08,siena:PN00,siena:PN11,siena:PN12",
+ "n_records": 57,
+ "hours": 59.4,
+ "seizures": 34,
+ "offline": {
+  "baseline_train": {
+   "n_records": 57,
+   "hours": 59.4028,
+   "n_seizures": 34,
+   "tp": 34,
+   "fn": 0,
+   "fp": 497,
+   "sensitivity": 1.0,
+   "fa_per_hour": 8.3666,
+   "latency_median_s": 3.0,
+   "latency_p90_s": 10.0,
+   "f1_event": 0.1204
+  },
+  "strict": {
+   "params": {
+    "ictal_min_channels": 4,
+    "ictal_min_duration_s": 6.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.0
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.4028,
+    "n_seizures": 34,
+    "tp": 34,
+    "fn": 0,
+    "fp": 24,
+    "sensitivity": 1.0,
+    "fa_per_hour": 0.404,
+    "latency_median_s": 5.0,
+    "latency_p90_s": 46.9,
+    "f1_event": 0.7391
+   },
+   "worst_neighbour_sens": 0.7058823529411765,
+   "worst_neighbour_fa_h": 1.1279
+  },
+  "robust": {
+   "params": {
+    "ictal_min_channels": 3,
+    "ictal_min_duration_s": 6.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.5
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.4028,
+    "n_seizures": 34,
+    "tp": 32,
+    "fn": 2,
+    "fp": 19,
+    "sensitivity": 0.9412,
+    "fa_per_hour": 0.3199,
+    "latency_median_s": 7.0,
+    "latency_p90_s": 41.7,
+    "f1_event": 0.7529
+   },
+   "worst_neighbour_sens": 0.6764705882352942,
+   "worst_neighbour_fa_h": 0.9427
+  },
+  "margin": {
+   "params": {
+    "ictal_min_channels": 2,
+    "ictal_min_duration_s": 6.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.5
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.4028,
+    "n_seizures": 34,
+    "tp": 34,
+    "fn": 0,
+    "fp": 56,
+    "sensitivity": 1.0,
+    "fa_per_hour": 0.9427,
+    "latency_median_s": 7.5,
+    "latency_p90_s": 37.8,
+    "f1_event": 0.5484
+   },
+   "worst_neighbour_sens": 0.8529411764705882,
+   "worst_neighbour_fa_h": 2.845
+  }
+ },
+ "realtime": {
+  "baseline_train": {
+   "n_records": 57,
+   "hours": 59.3958,
+   "n_seizures": 34,
+   "tp": 34,
+   "fn": 0,
+   "fp": 166,
+   "sensitivity": 1.0,
+   "fa_per_hour": 2.7948,
+   "latency_median_s": 18.0,
+   "latency_p90_s": 25.7,
+   "f1_event": 0.2906
+  },
+  "strict": {
+   "params": {
+    "ictal_min_channels": 1,
+    "ictal_min_duration_s": 8.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.0,
+    "persistence_windows": 2
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.3958,
+    "n_seizures": 34,
+    "tp": 34,
+    "fn": 0,
+    "fp": 43,
+    "sensitivity": 1.0,
+    "fa_per_hour": 0.724,
+    "latency_median_s": 20.0,
+    "latency_p90_s": 35.3,
+    "f1_event": 0.6126
+   },
+   "worst_neighbour_sens": 0.7941176470588235,
+   "worst_neighbour_fa_h": 2.7948
+  },
+  "robust": {
+   "params": {
+    "ictal_min_channels": 1,
+    "ictal_min_duration_s": 8.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.5,
+    "persistence_windows": 2
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.3958,
+    "n_seizures": 34,
+    "tp": 29,
+    "fn": 5,
+    "fp": 18,
+    "sensitivity": 0.8529,
+    "fa_per_hour": 0.3031,
+    "latency_median_s": 22.0,
+    "latency_p90_s": 50.6,
+    "f1_event": 0.716
+   },
+   "worst_neighbour_sens": 0.6470588235294118,
+   "worst_neighbour_fa_h": 0.8418
+  },
+  "margin": {
+   "params": {
+    "ictal_min_channels": 1,
+    "ictal_min_duration_s": 8.0,
+    "ictal_rhythmicity": 0.45,
+    "ictal_amplitude_factor": 2.0,
+    "persistence_windows": 2
+   },
+   "train": {
+    "n_records": 57,
+    "hours": 59.3958,
+    "n_seizures": 34,
+    "tp": 34,
+    "fn": 0,
+    "fp": 43,
+    "sensitivity": 1.0,
+    "fa_per_hour": 0.724,
+    "latency_median_s": 20.0,
+    "latency_p90_s": 35.3,
+    "f1_event": 0.6126
+   },
+   "worst_neighbour_sens": 0.7941176470588235,
+   "worst_neighbour_fa_h": 2.7948
+  }
+ }
+}

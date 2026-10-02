@@ -367,6 +367,8 @@ def test_robust_selector_avoids_sharp_corner():
     res = TuneResult(best=trials[0], baseline=trials[0], trials=trials, fa_target=1.0, grid=grid)
     assert res.select("strict").params == {"a": 3, "b": 2}
     assert res.select("robust").params == {"a": 1, "b": 1}
+    # margin: own FA in budget + full own sensitivity, then best worst-neighbour sensitivity
+    assert res.select("margin").params == {"a": 1, "b": 1}
     with pytest.raises(ValueError):
         res.select("nope")
 
