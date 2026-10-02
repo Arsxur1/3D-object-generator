@@ -424,3 +424,32 @@ def test_prepare_records_parallel_matches_serial(tmp_path, demo_edf, configs):
     ser = prepare_records(items, configs, None, workers=1)
     assert [r.annotation.file for r in par] == ["s/a.edf", "s/b.edf"]
     np.testing.assert_allclose(par[1].features.epoch_rms, ser[1].features.epoch_rms)
+
+
+def test_prereg_assessment_logic():
+    from neurolens.evaluation.prereg import assess, clopper_pearson
+
+    lo, hi = clopper_pearson(24, 24)
+    assert hi == 1.0 and abs(lo - 0.8575) < 1e-3
+
+    def rec(file, n, tp, fp, hours=1.0):
+        return {"file": file, "hours": hours, "n_seizures": n, "tp": tp, "fp": fp,
+                "latencies_s": [5.0] * tp}
+
+    def mode(name, tp_c, fp_c, tp_s, fp_s):
+        return {"mode": name, "records": [rec("chb02/a.edf", 10, tp_c, fp_c, 5.0),
+                                          rec("PN05/b.edf", 10, tp_s, fp_s, 5.0)]}
+
+    metrics = {"results": [
+        mode("offline-default", 10, 40, 10, 40), mode("offline-strict", 9, 1, 8, 1),
+        mode("offline-robust", 8, 1, 8, 0), mode("offline-margin", 10, 4, 9, 4),
+        mode("realtime-default", 10, 20, 10, 15), mode("realtime-strict", 10, 3, 9, 3),
+        mode("realtime-robust", 9, 1, 8, 1), mode("realtime-margin", 10, 3, 9, 3),
+    ]}
+    a = assess(metrics)
+    assert a["hypotheses"]["H1_offline_margin_sens_ge_strict"] is True
+    assert a["hypotheses"]["H2_offline_margin_fa_le_budget"] is True     # 8 FA / 10 h
+    assert a["hypotheses"]["H3_default_most_sensitive_but_over_budget"] is True
+    assert a["hypotheses"]["H4_realtime_margin_sens_ge_0.9_and_fa_le_budget"] is True
+    assert a["decision"]["adopt_realtime_margin_as_monitor_default"] is True  # 0.95 >= 0.95
+    assert a["by_population"]["offline-margin"]["siena"]["tp"] == 9
