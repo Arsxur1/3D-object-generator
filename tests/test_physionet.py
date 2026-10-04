@@ -529,3 +529,24 @@ def test_edf_replay_keeps_float32_and_identical_values(demo_edf):
     assert src._data.dtype == np.float32
     data = np.hstack([c.data for c in src.chunks()])
     np.testing.assert_array_equal(data, ingest(demo_edf).signal)
+
+
+def test_siena_bare_start_end_time_variant_over_midnight():
+    text = """File name: PN01.edf
+Registration start time: 19.00.44
+Registration end time: 08.29.41
+
+Seizure n 1
+Start time: 21:51:02
+End time: 21.51.56
+
+Seizure n 2
+Start time: 07.53.17
+End time: 07.54.31
+"""
+    recs = parse_siena_seizure_list(text, "PN01")
+    assert [(s.onset_s, s.offset_s) for s in recs[0].seizures] == [
+        (2 * 3600 + 50 * 60 + 18, 2 * 3600 + 51 * 60 + 12),
+        (12 * 3600 + 52 * 60 + 33, 12 * 3600 + 53 * 60 + 47),
+    ]
+    assert recs[0].duration_s == 13 * 3600 + 28 * 60 + 57

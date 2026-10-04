@@ -16,8 +16,10 @@ from .annotations import RecordAnnotation, SeizureInterval
 _FILE = re.compile(r"File name:\s*(\S+)", re.I)
 _REG_START = re.compile(r"Registration start time:\s*([\d.:]+)", re.I)
 _REG_END = re.compile(r"Registration end time:\s*([\d.:]+)", re.I)
-_SZ_START = re.compile(r"Seizure start time:\s*([\d.:]+)", re.I)
-_SZ_END = re.compile(r"Seizure end time:\s*([\d.:]+)", re.I)
+# "Seizure start time:" or (PN01) bare "Start time:" — anchored at line start so
+# "Registration start time:" can never match
+_SZ_START = re.compile(r"^(?:Seizure\s+)?start time:\s*([\d.:]+)", re.I)
+_SZ_END = re.compile(r"^(?:Seizure\s+)?end time:\s*([\d.:]+)", re.I)
 _FS = re.compile(r"Data Sampling Rate:\s*([\d.]+)\s*Hz", re.I)
 
 MAX_SEIZURE_S = 15 * 60  # longer annotated "seizures" are treated as typos
@@ -60,9 +62,9 @@ def parse_siena_seizure_list(text: str, subject: str) -> list[RecordAnnotation]:
         elif m := _REG_END.search(line):
             if cur_file in reg_start:
                 rec.duration_s = float(_rel(_clock(m.group(1)), reg_start[cur_file]))
-        elif m := _SZ_START.search(line):
+        elif m := _SZ_START.match(line):
             sz_start = _clock(m.group(1))
-        elif m := _SZ_END.search(line):
+        elif m := _SZ_END.match(line):
             if sz_start is None or cur_file not in reg_start:
                 rec.warnings.append("seizure end without start/registration time")
                 continue
