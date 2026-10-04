@@ -85,6 +85,23 @@ def causal_baseline(log_rms: np.ndarray, init: Optional[np.ndarray] = None) -> n
     return base
 
 
+def causal_baseline_gated(log_rms: np.ndarray, init: Optional[np.ndarray] = None,
+                          gate: float = LOG15) -> np.ndarray:
+    """EMA baseline that does **not** learn from elevated epochs: channel c is
+    updated at epoch t only if log_rms[t,c] - baseline[t,c] < ``gate`` (1.5×).
+    Prevents a long seizure from being absorbed into "normal" (experimental, v3)."""
+    a = 1.0 / EMA_TAU_EPOCHS
+    if init is None:
+        init = np.median(log_rms[: min(INIT_EPOCHS, len(log_rms))], axis=0)
+    ema = np.array(init, dtype=float)
+    base = np.empty_like(log_rms)
+    for t in range(log_rms.shape[0]):
+        base[t] = ema
+        upd = (log_rms[t] - ema) < gate
+        ema = np.where(upd, (1.0 - a) * ema + a * log_rms[t], ema)
+    return base
+
+
 def base_features(rms: np.ndarray, conc: np.ndarray, domf: np.ndarray,
                   relpow: dict[str, np.ndarray], baseline: np.ndarray) -> np.ndarray:
     z = np.log(np.maximum(rms, 1e-6)) - baseline
@@ -117,7 +134,7 @@ FEATURE_NAMES_V2 = FEATURE_NAMES + MORPH_BASE + MORPH_CONTEXT
 
 
 def feature_names(version: int = 1) -> list[str]:
-    return FEATURE_NAMES if version == 1 else FEATURE_NAMES_V2
+    return FEATURE_NAMES_V2 if version == 2 else FEATURE_NAMES
 
 
 def _morph_logs(rms: np.ndarray, linelen: np.ndarray, teager: np.ndarray) -> list[np.ndarray]:
@@ -146,7 +163,12 @@ def _morph_arrays(features):
 
 
 def featurize(features, version: int = 1) -> np.ndarray:
-    """Causal per-epoch feature matrix [n_epochs × len(feature_names(version))]."""
+    """Causal per-epoch feature matrix [n_epochs × len(feature_names(version))].
+
+    version 1: frozen increment-10 features; 2: + morphology (rejected, §11);
+    3: v1 features with the gated baseline (experimental)."""
+    if version == 3:
+        return _featurize_v1(features, gated=True)
     X = _featurize_v1(features)
     if version == 1 or X.shape[0] == 0:
         return X if version == 1 else np.zeros((0, len(FEATURE_NAMES_V2)))
@@ -156,13 +178,13 @@ def featurize(features, version: int = 1) -> np.ndarray:
     return np.column_stack([X, M, morph_context(M)])
 
 
-def _featurize_v1(features) -> np.ndarray:
+def _featurize_v1(features, gated: bool = False) -> np.ndarray:
     """Causal per-epoch feature matrix [n_epochs × len(FEATURE_NAMES)] for a FeatureSet."""
     rms = np.asarray(features.epoch_rms, dtype=float)
     if rms.size == 0:
         return np.zeros((0, len(FEATURE_NAMES)))
     log_rms = np.log(np.maximum(rms, 1e-6))
-    base = causal_baseline(log_rms)
+    base = causal_baseline_gated(log_rms) if gated else causal_baseline(log_rms)
     B = base_features(rms, np.asarray(features.epoch_band_conc, float),
                       np.asarray(features.epoch_domfreq, float),
                       {k: np.asarray(v, float) for k, v in features.epoch_relpow.items()}, base)
