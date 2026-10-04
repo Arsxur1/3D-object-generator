@@ -349,7 +349,7 @@ def test_critical_findings_merged_per_code():
 def test_feature_version4_appends_age():
     from neurolens.layer4_detect.ml_ictal import FEATURE_NAMES_V4, feature_names, names_for_width
 
-    f = _fake_features(n=200)
+    f = _fake_features(n=200, seizure=(100, 140))
     X4 = featurize(f, version=4, age_years=3.0)
     assert X4.shape == (200, len(FEATURE_NAMES_V4)) and feature_names(4)[-1] == "age_years"
     np.testing.assert_allclose(X4[:, :-1], featurize(f))
