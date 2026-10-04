@@ -327,3 +327,20 @@ def test_prereg10_report_and_apply_decision(tmp_path):
     doc = yaml.safe_load(cfg.read_text())
     assert doc["realtime"]["enabled"] is True and doc["offline"]["enabled"] is False
     assert "# Learned ictal detector" in cfg.read_text()  # comments preserved
+
+
+def test_critical_findings_merged_per_code():
+    from neurolens.contracts.events import DetectionResult, Event, Localization
+    from neurolens.critical.safety import scan_critical_findings
+
+    def ev(code, a, b):
+        return Event(code=code, label_ru=code, label_uz=code, group="ictal", localization=Localization(),
+                     t_start=a, t_end=b, confidence=0.7)
+
+    det = DetectionResult(events=[ev("ictal_ml", 10, 50), ev("ictal_ml", 100, 190), ev("ictal_rhythm", 300, 310)])
+    found = scan_critical_findings(det)
+    codes = [f.code for f in found]
+    assert codes.count("status_epilepticus_suspected") == 1 and "ongoing_seizure" not in codes
+    se = next(f for f in found if f.code == "status_epilepticus_suspected")
+    assert "90" in se.text.ru  # longest event's duration
+    assert set(se.grounding_refs) == {"ictal_ml"}

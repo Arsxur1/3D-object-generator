@@ -19,7 +19,8 @@ STATUS_DURATION_S = 30.0
 def scan_critical_findings(detection: DetectionResult) -> list[CriticalFinding]:
     findings: list[CriticalFinding] = []
 
-    for ev in detection.by_group("ictal"):
+    # longest first, so a merged finding's text states the longest duration
+    for ev in sorted(detection.by_group("ictal"), key=lambda e: -e.duration_s):
         dur = ev.duration_s
         if dur >= STATUS_DURATION_S:
             findings.append(
@@ -116,4 +117,20 @@ def scan_critical_findings(detection: DetectionResult) -> list[CriticalFinding]:
             )
         )
 
-    return findings
+    return _merge_by_code(findings)
+
+
+def _merge_by_code(findings: list[CriticalFinding]) -> list[CriticalFinding]:
+    """One finding per code (several events of one kind are one alarm for the
+    clinician), citing every contributing event; "ongoing seizure" is implied by
+    a status-epilepticus finding and is then dropped."""
+    merged: dict[str, CriticalFinding] = {}
+    for f in findings:
+        if f.code in merged:
+            refs = sorted(set(merged[f.code].grounding_refs) | set(f.grounding_refs))
+            merged[f.code] = merged[f.code].model_copy(update={"grounding_refs": refs})
+        else:
+            merged[f.code] = f
+    if "status_epilepticus_suspected" in merged:
+        merged.pop("ongoing_seizure", None)
+    return list(merged.values())

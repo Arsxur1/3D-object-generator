@@ -1,0 +1,1143 @@
+{
+ "overall": {
+  "offline-threshold-default": {
+   "hours": 170.15,
+   "seizures": 108,
+   "tp": 97,
+   "fp": 1664,
+   "sensitivity": 0.8981,
+   "sens_ci95": [
+    0.825,
+    0.948
+   ],
+   "fa_per_hour": 9.78,
+   "latency_median_s": 4.0
+  },
+  "offline-ml-A": {
+   "hours": 170.15,
+   "seizures": 108,
+   "tp": 101,
+   "fp": 1518,
+   "sensitivity": 0.9352,
+   "sens_ci95": [
+    0.871,
+    0.974
+   ],
+   "fa_per_hour": 8.922,
+   "latency_median_s": 6.0
+  },
+  "offline-ml-B": {
+   "hours": 170.15,
+   "seizures": 108,
+   "tp": 57,
+   "fp": 129,
+   "sensitivity": 0.5278,
+   "sens_ci95": [
+    0.429,
+    0.625
+   ],
+   "fa_per_hour": 0.758,
+   "latency_median_s": 5.0
+  },
+  "realtime-threshold-default": {
+   "hours": 170.14,
+   "seizures": 108,
+   "tp": 91,
+   "fp": 584,
+   "sensitivity": 0.8426,
+   "sens_ci95": [
+    0.76,
+    0.906
+   ],
+   "fa_per_hour": 3.433,
+   "latency_median_s": 21.0
+  },
+  "realtime-ml-A": {
+   "hours": 170.14,
+   "seizures": 108,
+   "tp": 97,
+   "fp": 694,
+   "sensitivity": 0.8981,
+   "sens_ci95": [
+    0.825,
+    0.948
+   ],
+   "fa_per_hour": 4.079,
+   "latency_median_s": 19.0
+  },
+  "realtime-ml-B": {
+   "hours": 170.14,
+   "seizures": 108,
+   "tp": 58,
+   "fp": 186,
+   "sensitivity": 0.537,
+   "sens_ci95": [
+    0.438,
+    0.633
+   ],
+   "fa_per_hour": 1.093,
+   "latency_median_s": 34.0
+  }
+ },
+ "macro_sensitivity": {
+  "offline-threshold-default": 0.9477,
+  "offline-ml-A": 0.9818,
+  "offline-ml-B": 0.7261,
+  "realtime-threshold-default": 0.9477,
+  "realtime-ml-A": 0.9705,
+  "realtime-ml-B": 0.8352
+ },
+ "by_population": {
+  "offline-threshold-default": {
+   "chbmit": {
+    "hours": 145.9,
+    "seizures": 101,
+    "tp": 90,
+    "fp": 1247,
+    "sensitivity": 0.8911,
+    "sens_ci95": [
+     0.813,
+     0.944
+    ],
+    "fa_per_hour": 8.547,
+    "latency_median_s": 5.0
+   },
+   "siena": {
+    "hours": 24.25,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 417,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 17.197,
+    "latency_median_s": -3.0
+   }
+  },
+  "offline-ml-A": {
+   "chbmit": {
+    "hours": 145.9,
+    "seizures": 101,
+    "tp": 94,
+    "fp": 1331,
+    "sensitivity": 0.9307,
+    "sens_ci95": [
+     0.862,
+     0.972
+    ],
+    "fa_per_hour": 9.123,
+    "latency_median_s": 6.0
+   },
+   "siena": {
+    "hours": 24.25,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 187,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 7.712,
+    "latency_median_s": 10.0
+   }
+  },
+  "offline-ml-B": {
+   "chbmit": {
+    "hours": 145.9,
+    "seizures": 101,
+    "tp": 51,
+    "fp": 115,
+    "sensitivity": 0.505,
+    "sens_ci95": [
+     0.404,
+     0.606
+    ],
+    "fa_per_hour": 0.788,
+    "latency_median_s": 4.0
+   },
+   "siena": {
+    "hours": 24.25,
+    "seizures": 7,
+    "tp": 6,
+    "fp": 14,
+    "sensitivity": 0.8571,
+    "sens_ci95": [
+     0.421,
+     0.996
+    ],
+    "fa_per_hour": 0.577,
+    "latency_median_s": 10.0
+   }
+  },
+  "realtime-threshold-default": {
+   "chbmit": {
+    "hours": 145.89,
+    "seizures": 101,
+    "tp": 84,
+    "fp": 395,
+    "sensitivity": 0.8317,
+    "sens_ci95": [
+     0.744,
+     0.899
+    ],
+    "fa_per_hour": 2.708,
+    "latency_median_s": 21.0
+   },
+   "siena": {
+    "hours": 24.24,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 189,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 7.796,
+    "latency_median_s": 22.0
+   }
+  },
+  "realtime-ml-A": {
+   "chbmit": {
+    "hours": 145.89,
+    "seizures": 101,
+    "tp": 90,
+    "fp": 612,
+    "sensitivity": 0.8911,
+    "sens_ci95": [
+     0.813,
+     0.944
+    ],
+    "fa_per_hour": 4.195,
+    "latency_median_s": 19.0
+   },
+   "siena": {
+    "hours": 24.24,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 82,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 3.382,
+    "latency_median_s": 22.0
+   }
+  },
+  "realtime-ml-B": {
+   "chbmit": {
+    "hours": 145.89,
+    "seizures": 101,
+    "tp": 51,
+    "fp": 166,
+    "sensitivity": 0.505,
+    "sens_ci95": [
+     0.404,
+     0.606
+    ],
+    "fa_per_hour": 1.138,
+    "latency_median_s": 33.0
+   },
+   "siena": {
+    "hours": 24.24,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 20,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 0.825,
+    "latency_median_s": 37.0
+   }
+  }
+ },
+ "by_subject": {
+  "offline-threshold-default": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 3,
+    "fp": 151,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.194,
+     0.994
+    ],
+    "fa_per_hour": 6.665,
+    "latency_median_s": 5.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 412,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 19.581,
+    "latency_median_s": 2.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 143,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 7.218,
+    "latency_median_s": 6.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 70,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 3.496,
+    "latency_median_s": -1.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 33,
+    "fp": 118,
+    "sensitivity": 0.825,
+    "sens_ci95": [
+     0.672,
+     0.927
+    ],
+    "fa_per_hour": 7.521,
+    "latency_median_s": 27.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 17,
+    "fp": 106,
+    "sensitivity": 0.85,
+    "sens_ci95": [
+     0.621,
+     0.968
+    ],
+    "fa_per_hour": 6.232,
+    "latency_median_s": 10.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 178,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 10.074,
+    "latency_median_s": 1.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 16,
+    "fp": 69,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.794,
+     1.0
+    ],
+    "fa_per_hour": 5.75,
+    "latency_median_s": 3.0
+   },
+   "PN07": {
+    "hours": 8.74,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 223,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 25.527,
+    "latency_median_s": -25.0
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 58,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 8.471,
+    "latency_median_s": 13.0
+   },
+   "PN13": {
+    "hours": 8.67,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 136,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 15.694,
+    "latency_median_s": -18.0
+   }
+  },
+  "offline-ml-A": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 106,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 4.679,
+    "latency_median_s": 12.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 303,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 14.4,
+    "latency_median_s": -1.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 82,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 4.139,
+    "latency_median_s": 5.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 547,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 27.317,
+    "latency_median_s": 4.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 34,
+    "fp": 60,
+    "sensitivity": 0.85,
+    "sens_ci95": [
+     0.702,
+     0.943
+    ],
+    "fa_per_hour": 3.824,
+    "latency_median_s": 27.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 19,
+    "fp": 94,
+    "sensitivity": 0.95,
+    "sens_ci95": [
+     0.751,
+     0.999
+    ],
+    "fa_per_hour": 5.526,
+    "latency_median_s": 6.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 98,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 5.546,
+    "latency_median_s": -7.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 16,
+    "fp": 41,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.794,
+     1.0
+    ],
+    "fa_per_hour": 3.417,
+    "latency_median_s": 5.0
+   },
+   "PN07": {
+    "hours": 8.74,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 73,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 8.356,
+    "latency_median_s": 17.0
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 10,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 1.46,
+    "latency_median_s": 10.0
+   },
+   "PN13": {
+    "hours": 8.67,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 104,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 12.001,
+    "latency_median_s": 9.0
+   }
+  },
+  "offline-ml-B": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 3,
+    "fp": 2,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.194,
+     0.994
+    ],
+    "fa_per_hour": 0.088,
+    "latency_median_s": 2.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 18,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 0.855,
+    "latency_median_s": -1.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 6,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 0.303,
+    "latency_median_s": 5.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 68,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 3.396,
+    "latency_median_s": 4.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 7,
+    "fp": 5,
+    "sensitivity": 0.175,
+    "sens_ci95": [
+     0.073,
+     0.328
+    ],
+    "fa_per_hour": 0.319,
+    "latency_median_s": 25.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 15,
+    "fp": 7,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.509,
+     0.913
+    ],
+    "fa_per_hour": 0.412,
+    "latency_median_s": 9.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 8,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 0.453,
+    "latency_median_s": -7.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 5,
+    "fp": 1,
+    "sensitivity": 0.3125,
+    "sens_ci95": [
+     0.11,
+     0.587
+    ],
+    "fa_per_hour": 0.083,
+    "latency_median_s": 4.0
+   },
+   "PN07": {
+    "hours": 8.74,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.458,
+    "latency_median_s": null
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 10.0
+   },
+   "PN13": {
+    "hours": 8.67,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 10,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 1.154,
+    "latency_median_s": 9.0
+   }
+  },
+  "realtime-threshold-default": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 27,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 1.192,
+    "latency_median_s": 19.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 177,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 8.412,
+    "latency_median_s": 40.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 21,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 1.06,
+    "latency_median_s": 21.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 13,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 0.649,
+    "latency_median_s": 14.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 29,
+    "fp": 34,
+    "sensitivity": 0.725,
+    "sens_ci95": [
+     0.561,
+     0.854
+    ],
+    "fa_per_hour": 2.167,
+    "latency_median_s": 41.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 14,
+    "fp": 30,
+    "sensitivity": 0.7,
+    "sens_ci95": [
+     0.457,
+     0.881
+    ],
+    "fa_per_hour": 1.764,
+    "latency_median_s": 22.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 73,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 4.132,
+    "latency_median_s": 15.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 16,
+    "fp": 20,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.794,
+     1.0
+    ],
+    "fa_per_hour": 1.667,
+    "latency_median_s": 19.0
+   },
+   "PN07": {
+    "hours": 8.73,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 108,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 12.364,
+    "latency_median_s": -9.0
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 28,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 4.091,
+    "latency_median_s": 28.0
+   },
+   "PN13": {
+    "hours": 8.66,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 53,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 6.117,
+    "latency_median_s": 22.0
+   }
+  },
+  "realtime-ml-A": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 38,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 1.677,
+    "latency_median_s": 24.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 125,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 5.941,
+    "latency_median_s": 13.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 40,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 2.019,
+    "latency_median_s": 17.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 278,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 13.885,
+    "latency_median_s": 7.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 31,
+    "fp": 30,
+    "sensitivity": 0.775,
+    "sens_ci95": [
+     0.615,
+     0.892
+    ],
+    "fa_per_hour": 1.912,
+    "latency_median_s": 40.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 18,
+    "fp": 43,
+    "sensitivity": 0.9,
+    "sens_ci95": [
+     0.683,
+     0.988
+    ],
+    "fa_per_hour": 2.528,
+    "latency_median_s": 22.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 36,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 2.037,
+    "latency_median_s": 6.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 16,
+    "fp": 22,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.794,
+     1.0
+    ],
+    "fa_per_hour": 1.833,
+    "latency_median_s": 19.0
+   },
+   "PN07": {
+    "hours": 8.73,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 25,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 2.862,
+    "latency_median_s": 20.0
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 3,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 0.438,
+    "latency_median_s": 23.0
+   },
+   "PN13": {
+    "hours": 8.66,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 54,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 6.233,
+    "latency_median_s": 22.0
+   }
+  },
+  "realtime-ml-B": {
+   "chb04": {
+    "hours": 22.65,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 3,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 0.132,
+    "latency_median_s": 43.0
+   },
+   "chb07": {
+    "hours": 21.04,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 24,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 1.141,
+    "latency_median_s": 28.0
+   },
+   "chb09": {
+    "hours": 19.81,
+    "seizures": 4,
+    "tp": 4,
+    "fp": 7,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.398,
+     1.0
+    ],
+    "fa_per_hour": 0.353,
+    "latency_median_s": 33.0
+   },
+   "chb10": {
+    "hours": 20.02,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 109,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 5.444,
+    "latency_median_s": 32.0
+   },
+   "chb12": {
+    "hours": 15.69,
+    "seizures": 40,
+    "tp": 7,
+    "fp": 6,
+    "sensitivity": 0.175,
+    "sens_ci95": [
+     0.073,
+     0.328
+    ],
+    "fa_per_hour": 0.382,
+    "latency_median_s": 54.0
+   },
+   "chb15": {
+    "hours": 17.01,
+    "seizures": 20,
+    "tp": 14,
+    "fp": 7,
+    "sensitivity": 0.7,
+    "sens_ci95": [
+     0.457,
+     0.881
+    ],
+    "fa_per_hour": 0.412,
+    "latency_median_s": 38.0
+   },
+   "chb23": {
+    "hours": 17.67,
+    "seizures": 7,
+    "tp": 7,
+    "fp": 8,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.59,
+     1.0
+    ],
+    "fa_per_hour": 0.453,
+    "latency_median_s": 21.0
+   },
+   "chb24": {
+    "hours": 12.0,
+    "seizures": 16,
+    "tp": 5,
+    "fp": 2,
+    "sensitivity": 0.3125,
+    "sens_ci95": [
+     0.11,
+     0.587
+    ],
+    "fa_per_hour": 0.167,
+    "latency_median_s": 33.0
+   },
+   "PN07": {
+    "hours": 8.73,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 6,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 0.687,
+    "latency_median_s": 36.0
+   },
+   "PN09": {
+    "hours": 6.85,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 39.0
+   },
+   "PN13": {
+    "hours": 8.66,
+    "seizures": 3,
+    "tp": 3,
+    "fp": 14,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.292,
+     1.0
+    ],
+    "fa_per_hour": 1.616,
+    "latency_median_s": 37.0
+   }
+  }
+ },
+ "hypotheses": {
+  "H1_realtime_mlA_noninferior_sens_and_no_more_FA": false,
+  "H2_offline_mlA_noninferior_sens_and_no_more_FA": true,
+  "H3_realtime_mlB_quiet_FA_le_1_and_sens_ge_0.6": false,
+  "H4_realtime_mlA_macro_sens_noninferior": true
+ },
+ "decision": {
+  "ml_becomes_default_realtime_seizure_detector": false,
+  "ml_becomes_default_offline_ictal_detector": true,
+  "quiet_mode_B_offered": false
+ }
+}
