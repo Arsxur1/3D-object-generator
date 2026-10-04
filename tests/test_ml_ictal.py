@@ -366,3 +366,42 @@ def test_subject_ages_parsing(tmp_path):
     fetch = lambda url: texts[url.rsplit("/", 1)[1]]
     assert PhysioNetClient("chbmit", tmp_path, fetch_text=fetch).subject_ages() == {"chb01": 11.0, "chb06": 1.5}
     assert PhysioNetClient("siena", tmp_path, fetch_text=fetch).subject_ages() == {"PN00": 55.0, "PN10": 25.0}
+
+
+def test_prereg11_assessment_decisions_and_apply(tmp_path):
+    import shutil
+
+    import yaml
+
+    from neurolens.evaluation.prereg11 import apply_decision, assess, markdown_report
+
+    def rec(file, n, tp, fp):
+        return {"file": file, "hours": 10.0, "n_seizures": n, "tp": tp, "fp": fp, "latencies_s": [5.0] * tp}
+
+    def mode(name, tp, fp):
+        return {"mode": name, "records": [rec("chb06/a.edf", 10, tp, fp), rec("PN10/b.edf", 10, 10, fp)]}
+
+    def metrics(rt_ml_fp, off_ml_tp):
+        return {"results": [
+            mode("offline-threshold-default", 9, 50), mode("offline-cmp-A", 9, 45), mode("offline-ml-A", off_ml_tp, 40),
+            mode("realtime-threshold-default", 8, 20), mode("realtime-cmp-A", 9, 25), mode("realtime-ml-A", 9, rt_ml_fp)]}
+
+    a = assess(metrics(rt_ml_fp=18, off_ml_tp=9))
+    assert a["decision"] == {"realtime_default": "learned_v2", "offline_default": "learned_v2"}
+    assert "обученный v2 (31 пациент), A" in markdown_report(a)
+    b = assess(metrics(rt_ml_fp=22, off_ml_tp=5))   # v2 offline much worse -> fall back to v1
+    assert b["decision"] == {"realtime_default": "threshold", "offline_default": "learned_v1"}
+    fz11 = {m: {"A_replacement": {"params": {"threshold": 0.35, "min_epochs": 12}},
+                "model": {"path": f"configs/models/ictal_gbm_{m}_v2.json"}} for m in ("offline", "realtime")}
+    fz10 = {m: {"A_replacement": {"params": {"threshold": 0.4, "min_epochs": 5}},
+                "model": {"path": f"configs/models/ictal_gbm_{m}_v1.json"}} for m in ("offline", "realtime")}
+    cfg = tmp_path / "ml.yaml"
+    shutil.copy("configs/ml.yaml", cfg)
+    apply_decision(a, fz11, fz10, str(cfg))
+    doc = yaml.safe_load(cfg.read_text())
+    assert doc["realtime"]["enabled"] is True and doc["realtime"]["model"].endswith("realtime_v2.json")
+    assert doc["offline"]["threshold"] == 0.35 and doc["offline"]["min_epochs"] == 12
+    apply_decision(b, fz11, fz10, str(cfg))
+    doc = yaml.safe_load(cfg.read_text())
+    assert doc["realtime"]["enabled"] is False and doc["offline"]["model"].endswith("offline_v1.json")
+    assert "calibration" in doc["offline"]  # untouched keys and comments survive

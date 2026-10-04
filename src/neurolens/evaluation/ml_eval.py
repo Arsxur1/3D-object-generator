@@ -61,12 +61,16 @@ def evaluate_ml_test(
     realtime: bool = True,
     progress: Optional[Callable[[str], None]] = None,
     rules: ScoringRules | None = None,
+    compare: dict | None = None,
 ) -> list[EvalResult]:
+    """``compare``: a second frozen set (e.g. the previous increment's models),
+    scored as modes ``*-cmp-A`` on the same records."""
     rules = rules or ScoringRules()
-    for mode in ("offline", "realtime") if realtime else ("offline",):
-        m = frozen[mode]["model"]
-        if _sha(m["path"]) != m["sha256"]:
-            raise RuntimeError(f"{m['path']} does not match the frozen sha256")
+    for fz in (frozen, compare) if compare else (frozen,):
+        for mode in ("offline", "realtime") if realtime else ("offline",):
+            m = fz[mode]["model"]
+            if _sha(m["path"]) != m["sha256"]:
+                raise RuntimeError(f"{m['path']} does not match the frozen sha256")
     results: list[EvalResult] = []
 
     recs = prepare_records(items, cfg, feature_cache, progress=progress, workers=workers)
@@ -76,8 +80,12 @@ def evaluate_ml_test(
     ds = Dataset.build(recs, rules)
     model = load_model(frozen["offline"]["model"]["path"])
     for op in ("A_replacement", "B_quiet"):
-        results.append(_ml_result(f"offline-ml-{op[0]}", ds, model, frozen["offline"][op]["params"],
-                                  False, rules))
+        if op in frozen["offline"]:
+            results.append(_ml_result(f"offline-ml-{op[0]}", ds, model, frozen["offline"][op]["params"],
+                                      False, rules))
+    if compare:
+        results.append(_ml_result("offline-cmp-A", ds, load_model(compare["offline"]["model"]["path"]),
+                                  compare["offline"]["A_replacement"]["params"], False, rules))
 
     if realtime:
         got: dict[str, tuple[PreparedRecord, object]] = {}
@@ -98,14 +106,20 @@ def evaluate_ml_test(
         rds = Dataset.build(srecs, rules)
         rmodel = load_model(frozen["realtime"]["model"]["path"])
         for op in ("A_replacement", "B_quiet"):
-            results.append(_ml_result(f"realtime-ml-{op[0]}", rds, rmodel,
-                                      frozen["realtime"][op]["params"], True, rules))
+            if op in frozen["realtime"]:
+                results.append(_ml_result(f"realtime-ml-{op[0]}", rds, rmodel,
+                                          frozen["realtime"][op]["params"], True, rules))
+        if compare:
+            results.append(_ml_result("realtime-cmp-A", rds, load_model(compare["realtime"]["model"]["path"]),
+                                      compare["realtime"]["A_replacement"]["params"], True, rules))
     return results
 
 
-def run_and_save(items, cfg, frozen_path: str | Path, out_dir: str | Path, **kw) -> dict:
+def run_and_save(items, cfg, frozen_path: str | Path, out_dir: str | Path,
+                 compare_path: str | Path | None = None, **kw) -> dict:
     frozen = json.loads(Path(frozen_path).read_text(encoding="utf-8"))
-    results = evaluate_ml_test(items, cfg, frozen, **kw)
+    compare = json.loads(Path(compare_path).read_text(encoding="utf-8")) if compare_path else None
+    results = evaluate_ml_test(items, cfg, frozen, compare=compare, **kw)
     paths = save_results(results, out_dir, title="Increment 10 held-out evaluation",
                          extra={"frozen": str(frozen_path),
                                 "test_records": [a.file for a, _ in items]})

@@ -308,12 +308,16 @@ def _ml_eval(args) -> int:
     if not items:
         print("No cached test records — run `neurolens physionet fetch` first.")
         return 2
-    out = run_and_save(items, cfg, args.frozen, args.out, feature_cache=args.feature_cache,
-                       workers=args.workers, realtime=not args.offline_only, progress=print)
+    out = run_and_save(items, cfg, args.frozen, args.out, compare_path=args.compare,
+                       feature_cache=args.feature_cache, workers=args.workers,
+                       realtime=not args.offline_only, progress=print)
     for r in out["results"]:
         print(_fmt_score(r.mode, r))
     if args.assess:
-        from .evaluation.prereg10 import assess, markdown_report
+        if args.analysis == "prereg11":
+            from .evaluation.prereg11 import assess, markdown_report
+        else:
+            from .evaluation.prereg10 import assess, markdown_report
 
         metrics = json.loads(out["paths"]["json"].read_text(encoding="utf-8"))
         a = assess(metrics)
@@ -433,7 +437,9 @@ def build_parser() -> argparse.ArgumentParser:
     me.add_argument("--feature-cache", default="data/physionet/.features", dest="feature_cache")
     me.add_argument("--workers", type=int, default=3)
     me.add_argument("--offline-only", action="store_true", dest="offline_only")
-    me.add_argument("--assess", action="store_true", help="Apply the increment-10 pre-registered analysis.")
+    me.add_argument("--assess", action="store_true", help="Apply the pre-registered analysis (--analysis).")
+    me.add_argument("--analysis", default="prereg10", choices=["prereg10", "prereg11"])
+    me.add_argument("--compare", default=None, help="Second frozen set scored as *-cmp-A (e.g. previous models).")
     me.add_argument("--out", default="out_eval/ml_eval")
     me.set_defaults(func=_ml_eval)
 
