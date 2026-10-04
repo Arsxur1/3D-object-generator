@@ -142,8 +142,16 @@ def _download_resumable(
                     cl = resp.headers.get("Content-Length")
                     total = int(cl) + have if cl else None
                 with open(dest, "ab") as fh:
-                    while chunk := resp.read(1 << 20):
+                    # never write past the requested range, even if a server or
+                    # proxy ignores the range end and keeps sending
+                    left = None if total is None else total - have
+                    while left is None or left > 0:
+                        chunk = resp.read(1 << 20 if left is None else min(1 << 20, left))
+                        if not chunk:
+                            break
                         fh.write(chunk)
+                        if left is not None:
+                            left -= len(chunk)
             failures = 0
             if total is None:  # no length known: trust a clean end of stream
                 return

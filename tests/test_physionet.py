@@ -470,3 +470,32 @@ def _sleep_echo(i):
 
     time.sleep(0.05)
     return i
+
+
+def test_segmented_download_ignores_overlong_range_responses(tmp_path, monkeypatch):
+    import io
+
+    import neurolens.datasets.physionet as pn
+
+    payload = bytes((i * 13) % 251 for i in range(8_000))
+
+    class Resp(io.BytesIO):
+        def __init__(self, body, status, length):
+            super().__init__(body)
+            self.status, self.headers = status, {"Content-Length": str(length)}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout=None):
+        a = int(req.headers.get("Range").split("=")[1].split("-")[0])
+        body = payload[a:]  # server ignores the range END and sends to EOF
+        return Resp(body, 206, len(body))
+
+    monkeypatch.setattr(pn.urllib.request, "urlopen", fake_urlopen)
+    dest = tmp_path / "f.part"
+    pn._download_segmented("https://x/f", dest, len(payload), segments=4)
+    assert dest.read_bytes() == payload
