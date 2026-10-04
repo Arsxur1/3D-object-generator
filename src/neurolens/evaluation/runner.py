@@ -160,7 +160,11 @@ def prepare_records(
     cdir = Path(cache_dir) if cache_dir else None
     if cdir:
         cdir.mkdir(parents=True, exist_ok=True)
-    fkey = hashlib.sha1(cfg.filters.model_dump_json().encode()).hexdigest()[:10]
+    from ..layer3_features.feature_set import FEATURE_VERSION
+
+    fkey = hashlib.sha1(
+        (cfg.filters.model_dump_json() + f"|fv{FEATURE_VERSION}").encode()
+    ).hexdigest()[:10]
 
     def cache_path(path: Path) -> Optional[Path]:
         if not cdir:

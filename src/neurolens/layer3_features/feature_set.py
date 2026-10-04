@@ -29,6 +29,10 @@ HOMOLOGOUS_PAIRS = [
 ]
 
 
+# Bump when epoch features change, so derived caches are recomputed.
+FEATURE_VERSION = 2  # v2: + epoch line length and Teager energy (morphology)
+
+
 @dataclass
 class FeatureSet:
     fs: float
@@ -107,6 +111,8 @@ def compute_features(
     rms = np.zeros((n_ep, n_ch))
     domf = np.zeros((n_ep, n_ch))
     conc = np.zeros((n_ep, n_ch))
+    linelen = np.zeros((n_ep, n_ch))   # morphology: mean |dx| per sample (µV)
+    teager = np.zeros((n_ep, n_ch))    # morphology: mean Teager-Kaiser energy (µV²)
     times = np.zeros(n_ep)
 
     for ei, (s0, s1) in enumerate(spans):
@@ -121,6 +127,9 @@ def compute_features(
             d, c = _dom_and_conc(freqs, psd)
             domf[ei, ci] = d
             conc[ei, ci] = c
+            if seg.size > 2:
+                linelen[ei, ci] = float(np.mean(np.abs(np.diff(seg))))
+                teager[ei, ci] = float(np.mean(seg[1:-1] ** 2 - seg[:-2] * seg[2:]))
 
     # --- per-channel summary ---
     summary: dict[str, dict[str, float]] = {}
@@ -188,4 +197,6 @@ def compute_features(
         dsa=dsa,
         burst=burst,
         representative_channel=rep,
+        extra={"epoch_linelen": linelen, "epoch_teager": teager,
+               "feature_version": FEATURE_VERSION},
     )

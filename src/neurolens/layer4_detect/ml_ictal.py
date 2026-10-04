@@ -110,7 +110,53 @@ def context_features(B: np.ndarray) -> np.ndarray:
     return np.column_stack(cols)
 
 
-def featurize(features) -> np.ndarray:
+# --- feature set v2: + waveform morphology (line length, Teager energy) ---------
+MORPH_BASE = ["ll_z_max", "ll_z_top3", "ll_z_mean", "te_z_max", "te_z_top3", "shape_z_top3"]
+MORPH_CONTEXT = ["ll_z_top3_m5", "ll_z_top3_m15"]
+FEATURE_NAMES_V2 = FEATURE_NAMES + MORPH_BASE + MORPH_CONTEXT
+
+
+def feature_names(version: int = 1) -> list[str]:
+    return FEATURE_NAMES if version == 1 else FEATURE_NAMES_V2
+
+
+def _morph_logs(rms: np.ndarray, linelen: np.ndarray, teager: np.ndarray) -> list[np.ndarray]:
+    ll = np.log(np.maximum(linelen, 1e-6))
+    te = np.log(np.maximum(teager, 1e-6))
+    shape = ll - np.log(np.maximum(rms, 1e-6))  # sharpness: line length per unit amplitude
+    return [ll, te, shape]
+
+
+def morph_base(logs: list[np.ndarray], bases: list[np.ndarray]) -> np.ndarray:
+    zl, zt, zs = (x - b for x, b in zip(logs, bases))
+    return np.column_stack([zl.max(axis=1), _top3_mean(zl), zl.mean(axis=1),
+                            zt.max(axis=1), _top3_mean(zt), _top3_mean(zs)])
+
+
+def morph_context(M: np.ndarray) -> np.ndarray:
+    zl = M[:, MORPH_BASE.index("ll_z_top3")]
+    return np.column_stack([_causal_mean(zl, 5), _causal_mean(zl, 15)])
+
+
+def _morph_arrays(features):
+    extra = getattr(features, "extra", None) or {}
+    if "epoch_linelen" not in extra:
+        raise ValueError("feature set v2 needs epoch_linelen/epoch_teager (Layer-3 FEATURE_VERSION >= 2)")
+    return np.asarray(extra["epoch_linelen"], float), np.asarray(extra["epoch_teager"], float)
+
+
+def featurize(features, version: int = 1) -> np.ndarray:
+    """Causal per-epoch feature matrix [n_epochs × len(feature_names(version))]."""
+    X = _featurize_v1(features)
+    if version == 1 or X.shape[0] == 0:
+        return X if version == 1 else np.zeros((0, len(FEATURE_NAMES_V2)))
+    ll, te = _morph_arrays(features)
+    logs = _morph_logs(np.asarray(features.epoch_rms, float), ll, te)
+    M = morph_base(logs, [causal_baseline(x) for x in logs])
+    return np.column_stack([X, M, morph_context(M)])
+
+
+def _featurize_v1(features) -> np.ndarray:
     """Causal per-epoch feature matrix [n_epochs × len(FEATURE_NAMES)] for a FeatureSet."""
     rms = np.asarray(features.epoch_rms, dtype=float)
     if rms.size == 0:
@@ -171,6 +217,47 @@ class StreamingFeaturizer:
         if self._B.shape[0] > self._KEEP:
             self._B = self._B[-self._TRIM_TO:]
         return X
+
+
+class StreamingFeaturizerV2:
+    """Streaming twin of ``featurize(version=2)``: the unchanged v1 streaming
+    featurizer plus morphology columns with the same warm-up and EMA logic."""
+
+    _KEEP = 256
+    _TRIM_TO = 128
+
+    def __init__(self) -> None:
+        self._v1 = StreamingFeaturizer()
+        self._pending: list[tuple] = []
+        self._n_pending = 0
+        self._ema: Optional[list[np.ndarray]] = None
+        self._M: Optional[np.ndarray] = None
+
+    def push(self, rms, conc, domf, relpow: dict, linelen, teager) -> np.ndarray:
+        X1 = self._v1.push(rms, conc, domf, relpow)
+        chunk = tuple(np.atleast_2d(np.asarray(a, float)) for a in (rms, linelen, teager))
+        if chunk[0].shape[0] == 0:
+            return np.zeros((0, len(FEATURE_NAMES_V2)))
+        if self._ema is None:
+            self._pending.append(chunk)
+            self._n_pending += chunk[0].shape[0]
+            if self._n_pending < INIT_EPOCHS:
+                return np.zeros((0, len(FEATURE_NAMES_V2)))
+            chunk = tuple(np.vstack([c[i] for c in self._pending]) for i in range(3))
+            self._pending = []
+            self._ema = [np.median(x[:INIT_EPOCHS], axis=0) for x in _morph_logs(*chunk)]
+        logs = _morph_logs(*chunk)
+        bases = [causal_baseline(x, init=e) for x, e in zip(logs, self._ema)]
+        a = 1.0 / EMA_TAU_EPOCHS
+        self._ema = [(1.0 - a) * b[-1] + a * x[-1] for b, x in zip(bases, logs)]
+        M_new = morph_base(logs, bases)
+        self._M = M_new if self._M is None else np.vstack([self._M, M_new])
+        Mx = np.column_stack([self._M, morph_context(self._M)])[-M_new.shape[0]:]
+        if self._M.shape[0] > self._KEEP:
+            self._M = self._M[-self._TRIM_TO:]
+        if X1.shape[0] != Mx.shape[0]:
+            raise RuntimeError("v1/v2 streaming featurizers out of step")
+        return np.column_stack([X1, Mx])
 
 
 # ---------------------------------------------------------------------------

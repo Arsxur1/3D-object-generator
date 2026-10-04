@@ -23,6 +23,7 @@ import numpy as np
 
 from ..layer4_detect.ml_ictal import (
     FEATURE_NAMES,
+    FEATURE_NAMES_V2,
     LogisticModel,
     TreeEnsembleModel,
     export_hist_gbm,
@@ -44,10 +45,10 @@ def subject_key(rec: PreparedRecord) -> str:
     return f"{rec.annotation.database}:{rec.annotation.subject}"
 
 
-def record_xy(rec: PreparedRecord, rules: ScoringRules | None = None):
+def record_xy(rec: PreparedRecord, rules: ScoringRules | None = None, version: int = 1):
     """(X, y, train_mask, epoch_times) for one record."""
     rules = rules or ScoringRules()
-    X = featurize(rec.features)
+    X = featurize(rec.features, version)
     t = np.asarray(rec.features.epoch_times, float)
     y = np.zeros(t.size)
     keep = np.ones(t.size, bool)
@@ -67,8 +68,9 @@ class Dataset:
     times: list[np.ndarray]
 
     @classmethod
-    def build(cls, records: list[PreparedRecord], rules: ScoringRules | None = None) -> "Dataset":
-        parts = [record_xy(r, rules) for r in records]
+    def build(cls, records: list[PreparedRecord], rules: ScoringRules | None = None,
+              version: int = 1) -> "Dataset":
+        parts = [record_xy(r, rules, version) for r in records]
         return cls(records, [p[0] for p in parts], [p[1] for p in parts],
                    [p[2] for p in parts], [p[3] for p in parts])
 
@@ -89,7 +91,8 @@ def fit_gbm(X: np.ndarray, y: np.ndarray, params: dict | None = None) -> TreeEns
     clf = HistGradientBoostingClassifier(class_weight="balanced", **p).fit(X, y)
     import sklearn
 
-    return export_hist_gbm(clf, FEATURE_NAMES, {
+    names = FEATURE_NAMES if X.shape[1] == len(FEATURE_NAMES) else FEATURE_NAMES_V2
+    return export_hist_gbm(clf, names, {
         "trainer": f"sklearn {sklearn.__version__} HistGradientBoostingClassifier",
         "params": p, "n_train": int(len(y)), "n_pos": int(np.sum(y)),
     })

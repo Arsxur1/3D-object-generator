@@ -62,8 +62,10 @@ def build_traces(
     if cdir:
         cdir.mkdir(parents=True, exist_ok=True)
     rt = cfg.realtime
+    from ..layer3_features.feature_set import FEATURE_VERSION
+
     ckey = hashlib.sha1(
-        (cfg.filters.model_dump_json() + f"{rt.window_s}:{rt.step_s}").encode()
+        (cfg.filters.model_dump_json() + f"{rt.window_s}:{rt.step_s}|fv{FEATURE_VERSION}").encode()
     ).hexdigest()[:10]
     def cache_path(path: Path) -> Optional[Path]:
         if not cdir:

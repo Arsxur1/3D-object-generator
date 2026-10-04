@@ -208,3 +208,46 @@ def test_pipeline_and_monitor_with_learned_detector(demo_edf, configs):
     assert summary.n_windows > 0
     # default config keeps the threshold detector (pre-registered decision pending)
     assert RealtimeMonitor(cfg)._ml is None
+
+
+def _with_morph(f, seed=0):
+    rng = np.random.default_rng(seed)
+    ll = f.epoch_rms * 0.3 * np.exp(rng.normal(0, 0.05, size=f.epoch_rms.shape))
+    te = (f.epoch_rms ** 2) * 0.05
+    f.extra = {"epoch_linelen": ll, "epoch_teager": te}
+    return f
+
+
+def test_feature_set_v2_morphology_and_streaming():
+    from neurolens.layer4_detect.ml_ictal import FEATURE_NAMES_V2, StreamingFeaturizerV2, feature_names
+
+    f = _with_morph(_fake_features(n=500))
+    X1, X2 = featurize(f), featurize(f, version=2)
+    assert X2.shape == (500, len(FEATURE_NAMES_V2)) == (500, len(feature_names(2)))
+    np.testing.assert_allclose(X2[:, :len(FEATURE_NAMES)], X1)  # v1 columns unchanged
+    sf = StreamingFeaturizerV2()
+    parts = [sf.push(f.epoch_rms[a:a + 5], f.epoch_band_conc[a:a + 5], f.epoch_domfreq[a:a + 5],
+                     {k: v[a:a + 5] for k, v in f.epoch_relpow.items()},
+                     f.extra["epoch_linelen"][a:a + 5], f.extra["epoch_teager"][a:a + 5])
+             for a in range(0, 500, 5)]
+    np.testing.assert_allclose(np.vstack(parts), X2, atol=1e-10)
+    ll = FEATURE_NAMES_V2.index("ll_z_top3")
+    assert X2[230, ll] > X2[150, ll] + 0.5  # seizure line length stands out vs own baseline
+
+
+def test_feature_set_v2_requires_layer3_morphology():
+    with pytest.raises(ValueError):
+        featurize(_fake_features(n=100), version=2)
+
+
+def test_layer3_emits_morphology(demo_edf, configs):
+    from neurolens.layer1_ingest.registry import ingest
+    from neurolens.layer2_preprocess.filters import apply_filters
+    from neurolens.layer2_preprocess.reref import rereference
+    from neurolens.layer3_features.feature_set import FEATURE_VERSION, compute_features
+
+    sig = rereference(apply_filters(ingest(demo_edf), configs.filters), "average")
+    f = compute_features(sig, configs.filters)
+    assert f.extra["feature_version"] == FEATURE_VERSION >= 2
+    assert f.extra["epoch_linelen"].shape == f.epoch_rms.shape
+    assert np.all(f.extra["epoch_linelen"] > 0)
