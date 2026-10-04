@@ -313,12 +313,13 @@ def _ml_eval(args) -> int:
     for r in out["results"]:
         print(_fmt_score(r.mode, r))
     if args.assess:
-        from .evaluation.prereg10 import assess
+        from .evaluation.prereg10 import assess, markdown_report
 
         metrics = json.loads(out["paths"]["json"].read_text(encoding="utf-8"))
         a = assess(metrics)
         path = out["paths"]["json"].with_name("prereg_assessment.json")
         path.write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
+        out["paths"]["json"].with_name("prereg_report.md").write_text(markdown_report(a), encoding="utf-8")
         print(json.dumps({"hypotheses": a["hypotheses"], "decision": a["decision"],
                           "macro_sensitivity": a["macro_sensitivity"]}, indent=1))
     print(f"Saved: {out['paths']['json']}")

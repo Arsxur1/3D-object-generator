@@ -299,3 +299,31 @@ def test_monitor_learned_alarm_not_regated_on_confidence(demo_edf, configs, monk
     assert seiz, "learned-detector run must raise a seizure alarm"
     if cfg.ml.realtime.calibration:
         assert seiz[0].confidence < 0.2   # shown as calibrated probability
+
+
+def test_prereg10_report_and_apply_decision(tmp_path):
+    import shutil
+
+    import yaml
+
+    from neurolens.evaluation.prereg10 import apply_decision, assess, markdown_report
+
+    def rec(file, n, tp, fp, hours=5.0):
+        return {"file": file, "hours": hours, "n_seizures": n, "tp": tp, "fp": fp, "latencies_s": [5.0] * tp}
+
+    def mode(name, tp, fp):
+        return {"mode": name, "records": [rec("chb04/a.edf", 10, tp, fp), rec("PN07/b.edf", 2, 2, fp)]}
+
+    metrics = {"results": [mode("offline-threshold-default", 9, 40), mode("offline-ml-A", 6, 30),
+                           mode("offline-ml-B", 5, 3), mode("realtime-threshold-default", 8, 20),
+                           mode("realtime-ml-A", 8, 15), mode("realtime-ml-B", 7, 2)]}
+    a = assess(metrics)
+    md = markdown_report(a)
+    assert "| real-time | обученный, точка A | 10/12 |" in md and "PN07" in md and "Гипотезы" in md
+    cfg = tmp_path / "ml.yaml"
+    shutil.copy("configs/ml.yaml", cfg)
+    flags = apply_decision(a, str(cfg))
+    assert flags == {"realtime": True, "offline": False}   # H1 true (8+2 vs 8+2, fewer FA); H2 false
+    doc = yaml.safe_load(cfg.read_text())
+    assert doc["realtime"]["enabled"] is True and doc["offline"]["enabled"] is False
+    assert "# Learned ictal detector" in cfg.read_text()  # comments preserved
