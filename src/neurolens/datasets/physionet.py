@@ -246,6 +246,28 @@ class PhysioNetClient:
             return _resolve_files(anns, [r for r in self.records() if r.startswith(subject + "/")])
         raise NotImplementedError(self.name)
 
+    def subject_ages(self) -> dict[str, float]:
+        """Patient age in years per subject (CHB-MIT SUBJECT-INFO, Siena
+        subject_info.csv). Subjects without a listed age are absent."""
+        ages: dict[str, float] = {}
+        if self.name == "chbmit":
+            for line in self.text("SUBJECT-INFO").splitlines():
+                parts = line.split("\t")
+                if len(parts) >= 3 and parts[0].strip().startswith("chb"):
+                    try:
+                        ages[parts[0].strip()] = float(parts[2])
+                    except ValueError:
+                        pass
+        elif self.name == "siena":
+            for line in self.text("subject_info.csv").splitlines()[1:]:
+                parts = [x.strip() for x in line.split(",")]
+                if len(parts) >= 2 and parts[0].startswith("PN"):
+                    try:
+                        ages[parts[0]] = float(parts[1])
+                    except ValueError:
+                        pass
+        return ages
+
     # -- binary files ------------------------------------------------------
     def local_path(self, rel: str) -> Path:
         return self.cache / rel

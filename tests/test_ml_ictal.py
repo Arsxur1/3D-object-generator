@@ -344,3 +344,25 @@ def test_critical_findings_merged_per_code():
     se = next(f for f in found if f.code == "status_epilepticus_suspected")
     assert "90" in se.text.ru  # longest event's duration
     assert set(se.grounding_refs) == {"ictal_ml"}
+
+
+def test_feature_version4_appends_age():
+    from neurolens.layer4_detect.ml_ictal import FEATURE_NAMES_V4, feature_names, names_for_width
+
+    f = _fake_features(n=200)
+    X4 = featurize(f, version=4, age_years=3.0)
+    assert X4.shape == (200, len(FEATURE_NAMES_V4)) and feature_names(4)[-1] == "age_years"
+    np.testing.assert_allclose(X4[:, :-1], featurize(f))
+    assert np.all(X4[:, -1] == 3.0)
+    assert np.isnan(featurize(f, version=4)[:, -1]).all()  # unknown age -> missing
+    assert names_for_width(len(FEATURE_NAMES_V4)) == FEATURE_NAMES_V4
+
+
+def test_subject_ages_parsing(tmp_path):
+    from neurolens.datasets import PhysioNetClient
+
+    texts = {"SUBJECT-INFO": b"Case\tGender\tAge (years)\n\nchb01\tF\t11\nchb06\tF\t 1.5\n",
+             "subject_info.csv": b"patient_id, age_years, gender\nPN00,55,Male\nPN10,25,Male\n"}
+    fetch = lambda url: texts[url.rsplit("/", 1)[1]]
+    assert PhysioNetClient("chbmit", tmp_path, fetch_text=fetch).subject_ages() == {"chb01": 11.0, "chb06": 1.5}
+    assert PhysioNetClient("siena", tmp_path, fetch_text=fetch).subject_ages() == {"PN00": 55.0, "PN10": 25.0}

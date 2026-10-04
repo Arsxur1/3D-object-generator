@@ -133,8 +133,18 @@ MORPH_CONTEXT = ["ll_z_top3_m5", "ll_z_top3_m15"]
 FEATURE_NAMES_V2 = FEATURE_NAMES + MORPH_BASE + MORPH_CONTEXT
 
 
+FEATURE_NAMES_V4 = FEATURE_NAMES + ["age_years"]
+
+
 def feature_names(version: int = 1) -> list[str]:
-    return FEATURE_NAMES_V2 if version == 2 else FEATURE_NAMES
+    return {2: FEATURE_NAMES_V2, 4: FEATURE_NAMES_V4}.get(version, FEATURE_NAMES)
+
+
+def names_for_width(n: int) -> list[str]:
+    for names in (FEATURE_NAMES, FEATURE_NAMES_V4, FEATURE_NAMES_V2):
+        if len(names) == n:
+            return names
+    return [f"f{i}" for i in range(n)]
 
 
 def _morph_logs(rms: np.ndarray, linelen: np.ndarray, teager: np.ndarray) -> list[np.ndarray]:
@@ -162,13 +172,18 @@ def _morph_arrays(features):
     return np.asarray(extra["epoch_linelen"], float), np.asarray(extra["epoch_teager"], float)
 
 
-def featurize(features, version: int = 1) -> np.ndarray:
+def featurize(features, version: int = 1, age_years: Optional[float] = None) -> np.ndarray:
     """Causal per-epoch feature matrix [n_epochs × len(feature_names(version))].
 
     version 1: frozen increment-10 features; 2: + morphology (rejected, §11);
-    3: v1 features with the gated baseline (experimental)."""
+    3: v1 with the gated baseline (not adopted, §14); 4: v1 + patient age in
+    years (NaN when unknown — the trees route missing values)."""
     if version == 3:
         return _featurize_v1(features, gated=True)
+    if version == 4:
+        X = _featurize_v1(features)
+        age = np.nan if age_years is None else float(age_years)
+        return np.column_stack([X, np.full(X.shape[0], age)])
     X = _featurize_v1(features)
     if version == 1 or X.shape[0] == 0:
         return X if version == 1 else np.zeros((0, len(FEATURE_NAMES_V2)))

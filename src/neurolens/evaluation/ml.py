@@ -29,6 +29,7 @@ from ..layer4_detect.ml_ictal import (
     export_hist_gbm,
     featurize,
     fit_logistic,
+    names_for_width,
     probability_runs,
 )
 from .matching import Detection, aggregate, score_record
@@ -45,10 +46,11 @@ def subject_key(rec: PreparedRecord) -> str:
     return f"{rec.annotation.database}:{rec.annotation.subject}"
 
 
-def record_xy(rec: PreparedRecord, rules: ScoringRules | None = None, version: int = 1):
+def record_xy(rec: PreparedRecord, rules: ScoringRules | None = None, version: int = 1,
+              age_years: float | None = None):
     """(X, y, train_mask, epoch_times) for one record."""
     rules = rules or ScoringRules()
-    X = featurize(rec.features, version)
+    X = featurize(rec.features, version, age_years=age_years) if version == 4 else featurize(rec.features, version)
     t = np.asarray(rec.features.epoch_times, float)
     y = np.zeros(t.size)
     keep = np.ones(t.size, bool)
@@ -69,8 +71,10 @@ class Dataset:
 
     @classmethod
     def build(cls, records: list[PreparedRecord], rules: ScoringRules | None = None,
-              version: int = 1) -> "Dataset":
-        parts = [record_xy(r, rules, version) for r in records]
+              version: int = 1, ages: dict[str, float] | None = None) -> "Dataset":
+        """``ages``: subject key ("db:subject") -> age in years (feature version 4)."""
+        ages = ages or {}
+        parts = [record_xy(r, rules, version, ages.get(subject_key(r))) for r in records]
         return cls(records, [p[0] for p in parts], [p[1] for p in parts],
                    [p[2] for p in parts], [p[3] for p in parts])
 
@@ -91,7 +95,7 @@ def fit_gbm(X: np.ndarray, y: np.ndarray, params: dict | None = None) -> TreeEns
     clf = HistGradientBoostingClassifier(class_weight="balanced", **p).fit(X, y)
     import sklearn
 
-    names = FEATURE_NAMES if X.shape[1] == len(FEATURE_NAMES) else FEATURE_NAMES_V2
+    names = names_for_width(X.shape[1])
     return export_hist_gbm(clf, names, {
         "trainer": f"sklearn {sklearn.__version__} HistGradientBoostingClassifier",
         "params": p, "n_train": int(len(y)), "n_pos": int(np.sum(y)),
@@ -194,3 +198,14 @@ def realtime_records(traces) -> list[PreparedRecord]:
     return [PreparedRecord(annotation=tr.annotation, path=Path(tr.annotation.file),
                            duration_s=tr.duration_s, features=stream_from_trace(tr))
             for tr in traces]
+
+
+def dataset_ages() -> dict[str, float]:
+    """Subject key -> age for both PhysioNet databases (feature version 4)."""
+    from ..datasets.physionet import PhysioNetClient
+
+    out = {}
+    for db in ("chbmit", "siena"):
+        for sub, age in PhysioNetClient(db).subject_ages().items():
+            out[f"{db}:{sub}"] = age
+    return out
