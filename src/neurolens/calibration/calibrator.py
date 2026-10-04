@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..contracts.events import DetectionResult
-from .temperature import apply_temperature
+from .temperature import apply_platt, apply_temperature
 
 
 class ConfidenceCalibrator:
@@ -23,8 +23,11 @@ class ConfidenceCalibrator:
         default: float = 1.0,
         metrics: dict[str, Any] | None = None,
         version: str = "0.1.0",
+        platt: dict[str, list[float]] | None = None,
     ):
         self.temperatures = dict(temperatures or {})
+        # per-code Platt parameters [a, b]; take precedence over temperatures
+        self.platt = {k: [float(v[0]), float(v[1])] for k, v in (platt or {}).items()}
         self.default = float(default)
         self.metrics = dict(metrics or {})
         self.version = version
@@ -41,6 +44,7 @@ class ConfidenceCalibrator:
             default=data.get("default", 1.0),
             metrics=data.get("metrics", {}),
             version=data.get("version", "0.1.0"),
+            platt=data.get("platt", {}),
         )
 
     def save(self, path: str | Path) -> Path:
@@ -49,7 +53,9 @@ class ConfidenceCalibrator:
         path.write_text(
             json.dumps(
                 {"version": self.version, "default": self.default,
-                 "temperatures": self.temperatures, "metrics": self.metrics},
+                 "temperatures": self.temperatures,
+                 **({"platt": self.platt} if self.platt else {}),
+                 "metrics": self.metrics},
                 ensure_ascii=False, indent=2,
             ) + "\n",
             encoding="utf-8",
@@ -60,6 +66,9 @@ class ConfidenceCalibrator:
         return self.temperatures.get(code, self.default)
 
     def calibrate(self, code: str, confidence: float) -> float:
+        if code in self.platt:
+            a, b = self.platt[code]
+            return float(apply_platt([confidence], a, b)[0])
         return float(apply_temperature([confidence], self.temperature_for(code))[0])
 
     def apply_to_detection(self, detection: DetectionResult) -> None:
@@ -74,4 +83,5 @@ class ConfidenceCalibrator:
 
     @property
     def is_identity(self) -> bool:
-        return self.default == 1.0 and all(t == 1.0 for t in self.temperatures.values())
+        return (self.default == 1.0 and all(t == 1.0 for t in self.temperatures.values())
+                and not self.platt)

@@ -73,6 +73,7 @@ class RealtimeMonitor:
         ml_mode = self.cfg.ml.realtime
         use_ml = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
         self._ml = None
+        self._ml_cal = None
         self._rt = self.cfg.realtime
         if use_ml:
             if ml_mode is None:
@@ -82,9 +83,17 @@ class RealtimeMonitor:
 
             self._ml = StreamingIctalML(load_model(self.cfg.ml_model_path(ml_mode.model)),
                                         ml_mode.threshold, ml_mode.min_epochs)
+            if ml_mode.calibration:
+                from ..calibration.calibrator import ConfidenceCalibrator
+
+                self._ml_cal = ConfidenceCalibrator.load(self.cfg.ml_model_path(ml_mode.calibration))
             self.detectors = [d for d in self.detectors if not isinstance(d, IctalRhythmDetector)]
+            # the learned detector's own gate is "run of min_epochs above threshold" (as
+            # evaluated); the alarm manager must not re-gate on confidence, which is
+            # a calibrated probability (~0.1-0.2 at the high-sensitivity point)
             rule = self._rt.rule_for(AlarmType.SEIZURE.value).model_copy(
-                update={"persistence_windows": ml_mode.alarm_persistence_windows})
+                update={"persistence_windows": ml_mode.alarm_persistence_windows,
+                        "min_confidence": 0.0})
             self._rt = self._rt.model_copy(update={"alarms": {**self._rt.alarms, AlarmType.SEIZURE.value: rule}})
         self.out_dir = Path(out_dir) if out_dir else None
         self._seizure_intervals: list[tuple[float, float]] = []
@@ -159,7 +168,12 @@ class RealtimeMonitor:
 
         det = run_detectors(analysis, feats, self.thresholds, detectors=self.detectors)
         if self._ml is not None:
-            det.events.extend(self._ml.update(t0, feats))
+            ml_events = self._ml.update(t0, feats)
+            if self._ml_cal is not None:
+                for e in ml_events:
+                    e.metadata["confidence_raw"] = round(e.confidence, 4)
+                    e.confidence = round(self._ml_cal.calibrate(e.code, e.confidence), 4)
+            det.events.extend(ml_events)
 
         self._baseline = (1 - self._baseline_alpha) * self._baseline + self._baseline_alpha * win_med
         return det, analysis

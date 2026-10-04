@@ -208,6 +208,11 @@ class LearnedDetectorMode(BaseModel):
         default=1, ge=1,
         description="Seizure-alarm persistence when this detector drives the monitor "
                     "(the run of min_epochs already provides persistence).")
+    calibration: Optional[str] = Field(
+        default=None,
+        description="Calibration JSON (Platt/temperature for code ictal_ml), repo-relative. "
+                    "Calibrated values are what reports and alarms show; detection itself is "
+                    "gated only by threshold/min_epochs.")
 
 
 class LearnedDetectorConfig(BaseModel):

@@ -251,3 +251,51 @@ def test_layer3_emits_morphology(demo_edf, configs):
     assert f.extra["feature_version"] == FEATURE_VERSION >= 2
     assert f.extra["epoch_linelen"].shape == f.epoch_rms.shape
     assert np.all(f.extra["epoch_linelen"] > 0)
+
+
+def test_platt_scaling_recovers_low_precision(tmp_path):
+    from neurolens.calibration.calibrator import ConfidenceCalibrator
+    from neurolens.calibration.metrics import expected_calibration_error
+    from neurolens.calibration.temperature import PlattScaler, TemperatureScaler
+
+    rng = np.random.default_rng(3)
+    conf = rng.uniform(0.5, 0.99, size=3000)            # detector never says < 0.5
+    y = (rng.random(3000) < 0.05 + 0.15 * (conf - 0.5) / 0.49).astype(float)  # ~12% true
+    t = TemperatureScaler().fit(conf, y).transform(conf)
+    pl = PlattScaler().fit(conf, y)
+    p = pl.transform(conf)
+    assert abs(p.mean() - y.mean()) < 0.02 and t.min() >= 0.5   # temperature cannot go below 0.5
+    assert expected_calibration_error(p, y) < 0.05 < expected_calibration_error(t, y)
+    cal = ConfidenceCalibrator(platt={"ictal_ml": [pl.a, pl.b]})
+    path = cal.save(tmp_path / "c.json")
+    cal2 = ConfidenceCalibrator.load(path)
+    assert abs(cal2.calibrate("ictal_ml", 0.8) - float(pl.transform([0.8])[0])) < 1e-9
+    assert cal2.calibrate("ictal_rhythm", 0.8) == pytest.approx(0.8)   # other codes untouched
+    assert not cal2.is_identity
+
+
+def test_monitor_learned_alarm_not_regated_on_confidence(demo_edf, configs, monkeypatch):
+    """Regression: a run above threshold (raw p 0.35 at threshold 0.3) must alarm even though
+    the generic seizure rule gates at min_confidence 0.6 for the threshold detector."""
+    import copy
+
+    import neurolens.layer4_detect.ml_ictal as mli
+    from neurolens.contracts.alarms import AlarmType
+    from neurolens.realtime.monitor import RealtimeMonitor
+    from neurolens.realtime.stream import EdfReplaySource
+
+    class Const:
+        meta = {}
+
+        def predict_proba(self, X):
+            return np.full(len(X), 0.35)
+
+    monkeypatch.setattr(mli, "load_model", lambda path: Const())
+    cfg = copy.deepcopy(configs)
+    mon = RealtimeMonitor(cfg, learned=True)
+    assert mon._rt.rule_for("seizure").min_confidence == 0.0
+    summary = mon.run(EdfReplaySource(demo_edf, chunk_s=cfg.realtime.step_s))
+    seiz = [a for a in summary.alarms if a.type == AlarmType.SEIZURE]
+    assert seiz, "learned-detector run must raise a seizure alarm"
+    if cfg.ml.realtime.calibration:
+        assert seiz[0].confidence < 0.2   # shown as calibrated probability

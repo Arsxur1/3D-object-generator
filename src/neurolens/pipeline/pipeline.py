@@ -97,6 +97,18 @@ class Pipeline:
             from ..calibration.calibrator import ConfidenceCalibrator
 
             self.calibrator = ConfidenceCalibrator.load(calibration_file)
+        # learned detector's own calibration (ictal_ml), merged unless already present
+        if self.learned and ml_mode is not None and ml_mode.calibration:
+            from ..calibration.calibrator import ConfidenceCalibrator
+
+            ml_cal = ConfidenceCalibrator.load(self.cfg.ml_model_path(ml_mode.calibration))
+            if self.calibrator is None:
+                self.calibrator = ml_cal
+            else:
+                for code, ab in ml_cal.platt.items():
+                    self.calibrator.platt.setdefault(code, ab)
+                for code, t in ml_cal.temperatures.items():
+                    self.calibrator.temperatures.setdefault(code, t)
 
     # -- entry points ----------------------------------------------------
     def analyze_file(

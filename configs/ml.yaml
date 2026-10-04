@@ -8,11 +8,13 @@ offline:
   model: configs/models/ictal_gbm_offline_v1.json
   threshold: 0.4
   min_epochs: 5
+  calibration: configs/calibration.ml_offline.json   # Platt, LOSO events (precision ~9% at point A)
 realtime:
   enabled: false
   model: configs/models/ictal_gbm_realtime_v1.json
   threshold: 0.3
   min_epochs: 15
   alarm_persistence_windows: 1
+  calibration: configs/calibration.ml_realtime.json  # Platt, LOSO events (precision ~14% at point A)
 provenance:
   preregistration: docs/preregistration_increment10.md
