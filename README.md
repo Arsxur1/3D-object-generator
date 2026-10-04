@@ -168,6 +168,33 @@ neurolens monitor rec.edf --overrides configs/thresholds.physionet.yaml
 **не рекомендуется**. Подробно: `docs/validation_physionet.md`,
 `docs/preregistration_increment9.md`.
 
+### Обученный детектор приступов (§7.3, §13)
+
+Градиентный бустинг по 23 каузальным признакам эпох (амплитуда относительно
+собственной базовой линии канала, ритмичность, частота, мощности, распространённость),
+обученный на 20 пациентах PhysioNet. Модель хранится в JSON и исполняется numpy;
+scikit-learn нужен только для обучения (`pip install -e '.[ml]'`). Один и тот же
+детектор работает оффлайн и в мониторе (потоковые признаки побитово совпадают с
+оффлайн).
+
+```bash
+# пре-регистрированная проверка на новых пациентах (модели заморожены, SHA-256)
+neurolens ml-eval --test chb04,chb07,siena:PN07 --assess --out out_eval/ml
+```
+
+```python
+from neurolens.pipeline.pipeline import Pipeline
+from neurolens.realtime.monitor import RealtimeMonitor
+Pipeline(learned=True)          # оффлайн: обученный детектор вместо порогового
+RealtimeMonitor(learned=True)   # монитор: обученный детектор на потоке эпох
+```
+
+По умолчанию включение задаёт `configs/ml.yaml` (`enabled` — по пре-регистрированному
+правилу решения). Метод и внутренняя проверка (leave-one-subject-out: 0.90
+чувствительности при 4.0 FA/ч в мониторе против 0.81 при 4.1 FA/ч у порогового) —
+`docs/learned_detector.md`; проверка на новых пациентах —
+`docs/preregistration_increment10.md` и `docs/validation_physionet.md`.
+
 ### Реальный LLM (Anthropic)
 
 ```bash
