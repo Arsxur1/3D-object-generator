@@ -43,7 +43,9 @@ class EdfReplaySource(StreamSource):
 
     def __init__(self, path: str | Path, chunk_s: float = 5.0, realtime: bool = False):
         sig = ingest(path)
-        self._data = sig.signal.astype(np.float64)
+        # keep float32 (as ingested); the window buffer is float64 and the monitor
+        # re-casts windows to float32, so values are identical at half the memory
+        self._data = sig.signal
         self.channel_names = list(sig.channel_names)
         self.sampling_rate_hz = float(sig.sampling_rate_hz)
         self.reference = sig.reference

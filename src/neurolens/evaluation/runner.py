@@ -77,9 +77,69 @@ class EvalResult:
         }
 
 
+# Records longer than this are featurised block-wise to bound memory: a 9.7 h,
+# 512 Hz, 35-channel Siena record needs ~23 GB processed whole.
+LONG_RECORD_S = 2 * 3600.0
+BLOCK_S = 3600
+PAD_S = 60  # filter context on each side of a block (>> filter transients and one epoch)
+
+
+def blockwise_epoch_features(sig, cfg: ConfigBundle, block_s: int = BLOCK_S, pad_s: int = PAD_S):
+    """Epoch features of a long record computed in padded blocks.
+
+    Blocks start on whole seconds, so block epochs fall on the same 1-s grid as
+    whole-record epochs; each epoch is taken from the one block whose core
+    contains its start. Average reference and epoch features are local, so the
+    only difference to whole-record processing is filter edge effects, which the
+    padding absorbs (tested). Returns the epoch-level fields the detectors use.
+    """
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    fs = float(sig.sampling_rate_hz)
+    n = sig.signal.shape[1]
+    blk, pad = int(round(block_s * fs)), int(round(pad_s * fs))
+    parts: dict[str, list] = {"t": [], "rms": [], "conc": [], "domf": [], "ll": [], "te": []}
+    rp: dict[str, list] = {}
+    channels, epoch_s = None, 2.0
+    for b0 in range(0, n, blk):
+        b1 = min(n, b0 + blk)
+        lo, hi = max(0, b0 - pad), min(n, b1 + pad)
+        sub = sig.with_signal(sig.signal[:, lo:hi], duration_s=None)
+        f = compute_features(rereference(apply_filters(sub, cfg.filters), "average"), cfg.filters)
+        win = int(round(f.epoch_s * fs))
+        starts = np.rint(np.asarray(f.epoch_times) * fs - win / 2).astype(np.int64) + lo
+        keep = (starts >= b0) & (starts < b1)
+        channels, epoch_s = list(f.eeg_channels), float(f.epoch_s)
+        parts["t"].append(np.asarray(f.epoch_times)[keep] + lo / fs)
+        parts["rms"].append(np.asarray(f.epoch_rms)[keep])
+        parts["conc"].append(np.asarray(f.epoch_band_conc)[keep])
+        parts["domf"].append(np.asarray(f.epoch_domfreq)[keep])
+        parts["ll"].append(np.asarray(f.extra["epoch_linelen"])[keep])
+        parts["te"].append(np.asarray(f.extra["epoch_teager"])[keep])
+        for k, v in f.epoch_relpow.items():
+            rp.setdefault(k, []).append(np.asarray(v)[keep])
+        del sub, f
+    from ..layer3_features.feature_set import FEATURE_VERSION
+
+    return SimpleNamespace(
+        fs=fs, duration_s=n / fs, eeg_channels=channels or [], epoch_s=epoch_s,
+        epoch_times=np.concatenate(parts["t"]), epoch_rms=np.vstack(parts["rms"]),
+        epoch_band_conc=np.vstack(parts["conc"]), epoch_domfreq=np.vstack(parts["domf"]),
+        epoch_relpow={k: np.vstack(v) for k, v in rp.items()},
+        extra={"epoch_linelen": np.vstack(parts["ll"]), "epoch_teager": np.vstack(parts["te"]),
+               "feature_version": FEATURE_VERSION, "blockwise": {"block_s": block_s, "pad_s": pad_s}},
+    )
+
+
 def prepare_record(ann: RecordAnnotation, path: Path, cfg: ConfigBundle) -> PreparedRecord:
     sig = ingest(path)
     duration_s, flags = sig.duration_s, list(sig.quality.flags)
+    if duration_s > LONG_RECORD_S:
+        feats = blockwise_epoch_features(sig, cfg)
+        return PreparedRecord(annotation=ann, path=path, duration_s=duration_s, features=feats,
+                              signal=None, flags=flags + ["features:blockwise"])
     filt = apply_filters(sig, cfg.filters)
     del sig  # long multi-channel records: free each stage as soon as possible
     analysis = rereference(filt, "average")
@@ -96,6 +156,13 @@ def prepare_record(ann: RecordAnnotation, path: Path, cfg: ConfigBundle) -> Prep
 # Peak resident memory per byte of EDF observed when processing a whole record
 # (int16 on disk -> float64 working copies through filtering/re-referencing).
 MEM_PER_EDF_BYTE = 16.0
+
+
+def _mem_estimate(path: Path) -> int:
+    """Peak bytes for prepare_record: whole-record processing ~16x the EDF size;
+    block-wise (long records) ~ float32 copy of the record + one padded block."""
+    size = path.stat().st_size
+    return int(min(size * MEM_PER_EDF_BYTE, size * 3 + 3e9))
 
 
 def memory_budget_bytes(fraction: float = 0.6) -> int:
@@ -187,7 +254,7 @@ def prepare_records(
         t0 = perf_counter()
         run_memory_bounded(
             prepare_record, [(a, p, cfg) for a, p in todo],
-            [int(p.stat().st_size * MEM_PER_EDF_BYTE) for _, p in todo],
+            [_mem_estimate(p) for _, p in todo],
             min(workers, len(todo)), lambda rec: done(rec, perf_counter() - t0),
         )
     else:

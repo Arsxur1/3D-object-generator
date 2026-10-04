@@ -499,3 +499,33 @@ def test_segmented_download_ignores_overlong_range_responses(tmp_path, monkeypat
     dest = tmp_path / "f.part"
     pn._download_segmented("https://x/f", dest, len(payload), segments=4)
     assert dest.read_bytes() == payload
+
+
+def test_blockwise_features_match_whole_record(demo_edf, configs):
+    import numpy as np
+
+    from neurolens.evaluation.runner import blockwise_epoch_features
+    from neurolens.layer1_ingest.registry import ingest
+    from neurolens.layer2_preprocess.filters import apply_filters
+    from neurolens.layer2_preprocess.reref import rereference
+    from neurolens.layer3_features.feature_set import compute_features
+    from neurolens.layer4_detect.ml_ictal import featurize
+
+    sig = ingest(demo_edf)
+    whole = compute_features(rereference(apply_filters(sig, configs.filters), "average"), configs.filters)
+    blk = blockwise_epoch_features(sig, configs, block_s=60, pad_s=30)
+    np.testing.assert_allclose(blk.epoch_times, whole.epoch_times)
+    np.testing.assert_allclose(blk.epoch_rms, whole.epoch_rms, rtol=1e-6)
+    np.testing.assert_allclose(featurize(blk), featurize(whole), atol=1e-5)
+
+
+def test_edf_replay_keeps_float32_and_identical_values(demo_edf):
+    import numpy as np
+
+    from neurolens.layer1_ingest.registry import ingest
+    from neurolens.realtime.stream import EdfReplaySource
+
+    src = EdfReplaySource(demo_edf, chunk_s=5.0)
+    assert src._data.dtype == np.float32
+    data = np.hstack([c.data for c in src.chunks()])
+    np.testing.assert_array_equal(data, ingest(demo_edf).signal)
