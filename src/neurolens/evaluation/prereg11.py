@@ -82,9 +82,14 @@ def markdown_report(a: dict) -> str:
     return text
 
 
+V1_CALIBRATION = "configs/calibration.ml_{mode}.json"  # increment-10 Platt files (v1 models)
+
+
 def apply_decision(a: dict, frozen11: dict, frozen10: dict, ml_yaml: str = "configs/ml.yaml") -> dict:
     """Rewrite configs/ml.yaml per the pre-registered rules (comments preserved):
-    model path / threshold / min_epochs / enabled for each section."""
+    model path / threshold / min_epochs / calibration / enabled for each section.
+    The calibration file always follows the chosen model (v2 models have their
+    own Platt files, frozen with them)."""
     d = a["decision"]
     plan: dict[str, dict] = {}
     for mode, choice in (("offline", d["offline_default"]), ("realtime", d["realtime_default"])):
@@ -98,8 +103,10 @@ def apply_decision(a: dict, frozen11: dict, frozen10: dict, ml_yaml: str = "conf
             plan[mode] = {"enabled": False}
         else:
             prm = src["A_replacement"]["params"]
+            cal = src.get("calibration", {}).get("path") or V1_CALIBRATION.format(mode=mode)
             plan[mode] = {"enabled": True, "model": src["model"]["path"],
-                          "threshold": prm["threshold"], "min_epochs": prm["min_epochs"]}
+                          "threshold": prm["threshold"], "min_epochs": prm["min_epochs"],
+                          "calibration": cal}
     p = Path(ml_yaml)
     out, section = [], None
     for line in p.read_text(encoding="utf-8").splitlines(keepends=True):
@@ -107,7 +114,8 @@ def apply_decision(a: dict, frozen11: dict, frozen10: dict, ml_yaml: str = "conf
         if top:
             section = top.group(1)
         elif section in plan:
-            m = re.match(r"^(\s+)(enabled|model|threshold|min_epochs):(\s*)([^#\n]*?)(\s*#.*)?$", line.rstrip("\n"))
+            m = re.match(r"^(\s+)(enabled|model|threshold|min_epochs|calibration):(\s*)([^#\n]*?)(\s*#.*)?$",
+                         line.rstrip("\n"))
             if m and m.group(2) in plan[section]:
                 val = plan[section][m.group(2)]
                 val = str(val).lower() if isinstance(val, bool) else val

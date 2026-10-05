@@ -1,0 +1,31 @@
+{
+  "version": "0.1.0",
+  "default": 1.0,
+  "temperatures": {},
+  "platt": {
+    "ictal_ml": [
+      2.143,
+      -5.0912
+    ]
+  },
+  "metrics": {
+    "ictal_ml": {
+      "n_events": 1795,
+      "true_events": 284,
+      "precision": 0.1582,
+      "platt": [
+        2.143,
+        -5.0912
+      ],
+      "ece_before": 0.6443,
+      "ece_after": 0.0322,
+      "ece_loso": 0.0399,
+      "brier_before": 0.5351,
+      "brier_after": 0.1035,
+      "brier_loso": 0.1073,
+      "mean_conf_before": 0.803,
+      "mean_conf_after": 0.158,
+      "source": "LOSO out-of-fold events, 31 training patients, v2 operating point A"
+    }
+  }
+}

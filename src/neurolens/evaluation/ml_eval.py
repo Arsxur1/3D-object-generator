@@ -120,7 +120,7 @@ def run_and_save(items, cfg, frozen_path: str | Path, out_dir: str | Path,
     frozen = json.loads(Path(frozen_path).read_text(encoding="utf-8"))
     compare = json.loads(Path(compare_path).read_text(encoding="utf-8")) if compare_path else None
     results = evaluate_ml_test(items, cfg, frozen, compare=compare, **kw)
-    paths = save_results(results, out_dir, title="Increment 10 held-out evaluation",
-                         extra={"frozen": str(frozen_path),
+    paths = save_results(results, out_dir, title=f"Held-out evaluation of the learned detector ({Path(frozen_path).name})",
+                         extra={"frozen": str(frozen_path), "compare": str(compare_path) if compare_path else None,
                                 "test_records": [a.file for a, _ in items]})
     return {"results": results, "paths": paths}

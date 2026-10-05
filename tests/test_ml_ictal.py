@@ -392,7 +392,8 @@ def test_prereg11_assessment_decisions_and_apply(tmp_path):
     b = assess(metrics(rt_ml_fp=22, off_ml_tp=5))   # v2 offline much worse -> fall back to v1
     assert b["decision"] == {"realtime_default": "threshold", "offline_default": "learned_v1"}
     fz11 = {m: {"A_replacement": {"params": {"threshold": 0.35, "min_epochs": 12}},
-                "model": {"path": f"configs/models/ictal_gbm_{m}_v2.json"}} for m in ("offline", "realtime")}
+                "model": {"path": f"configs/models/ictal_gbm_{m}_v2.json"},
+                "calibration": {"path": f"configs/calibration.ml_{m}_v2.json"}} for m in ("offline", "realtime")}
     fz10 = {m: {"A_replacement": {"params": {"threshold": 0.4, "min_epochs": 5}},
                 "model": {"path": f"configs/models/ictal_gbm_{m}_v1.json"}} for m in ("offline", "realtime")}
     cfg = tmp_path / "ml.yaml"
@@ -401,7 +402,10 @@ def test_prereg11_assessment_decisions_and_apply(tmp_path):
     doc = yaml.safe_load(cfg.read_text())
     assert doc["realtime"]["enabled"] is True and doc["realtime"]["model"].endswith("realtime_v2.json")
     assert doc["offline"]["threshold"] == 0.35 and doc["offline"]["min_epochs"] == 12
+    assert doc["offline"]["calibration"] == "configs/calibration.ml_offline_v2.json"  # follows the model
+    assert "# Platt" in cfg.read_text()  # comments survive
     apply_decision(b, fz11, fz10, str(cfg))
     doc = yaml.safe_load(cfg.read_text())
     assert doc["realtime"]["enabled"] is False and doc["offline"]["model"].endswith("offline_v1.json")
-    assert "calibration" in doc["offline"]  # untouched keys and comments survive
+    assert doc["offline"]["calibration"] == "configs/calibration.ml_offline.json"  # v1 keeps its own Platt file
+    assert doc["realtime"]["alarm_persistence_windows"] == 1  # untouched keys survive

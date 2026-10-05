@@ -1,0 +1,104 @@
+{
+ "training": "31 used patients (increments 8-10): 20 + chb04,chb07,chb09,chb10,chb12,chb15,chb23,chb24,PN07,PN09,PN13",
+ "feature_set": 1,
+ "grid": {
+  "threshold": [
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   0.97,
+   0.99
+  ],
+  "min_epochs": [
+   5,
+   10,
+   15,
+   20,
+   30,
+   45
+  ]
+ },
+ "offline": {
+  "threshold_detector_fa_per_hour_same_data": 9.62,
+  "A_replacement": {
+   "params": {
+    "threshold": 0.3,
+    "min_epochs": 15
+   },
+   "loso": {
+    "n_records": 228,
+    "hours": 321.7897,
+    "n_seizures": 208,
+    "tp": 191,
+    "fn": 17,
+    "fp": 2233,
+    "sensitivity": 0.9183,
+    "fa_per_hour": 6.9393,
+    "latency_median_s": 5.0,
+    "latency_p90_s": 29.0,
+    "f1_event": 0.1451
+   },
+   "fa_budget": 9.62
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_offline_v2.json",
+   "sha256": "adcf1f290e903e5518464310a4997e057d336f1a17a7842b89e4c30e97a0a7fe",
+   "n_trees": 200
+  },
+  "calibration": {
+   "path": "configs/calibration.ml_offline_v2.json",
+   "sha256": "f5d737ea8f9e60273bda5f49da1ae9305458bdb54c71a9909088e8e9fba2a7e5",
+   "platt": [
+    2.3389,
+    -3.603
+   ],
+   "ece_loso": 0.0111,
+   "precision": 0.0852
+  }
+ },
+ "realtime": {
+  "threshold_monitor_fa_per_hour_same_data": 3.7606,
+  "threshold_monitor_sens_same_data": 0.8269,
+  "A_replacement": {
+   "params": {
+    "threshold": 0.7,
+    "min_epochs": 5
+   },
+   "loso": {
+    "n_records": 228,
+    "hours": 321.7528,
+    "n_seizures": 208,
+    "tp": 179,
+    "fn": 29,
+    "fp": 1198,
+    "sensitivity": 0.8606,
+    "fa_per_hour": 3.7234,
+    "latency_median_s": 14.0,
+    "latency_p90_s": 37.2,
+    "f1_event": 0.2259
+   },
+   "fa_budget": 3.7606
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_realtime_v2.json",
+   "sha256": "7470b5772fb22dedbc5e9da06ac36ae97572851515a00d507830d6feacc2a722",
+   "n_trees": 200
+  },
+  "calibration": {
+   "path": "configs/calibration.ml_realtime_v2.json",
+   "sha256": "a2eb3f57b265f8f38c668003e9b3d3320c37ae715bad30ea46596232c2421255",
+   "platt": [
+    2.143,
+    -5.0912
+   ],
+   "ece_loso": 0.0399,
+   "precision": 0.1582
+  }
+ }
+}
