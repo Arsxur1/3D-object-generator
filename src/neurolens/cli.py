@@ -310,7 +310,8 @@ def _ml_eval(args) -> int:
         return 2
     out = run_and_save(items, cfg, args.frozen, args.out, compare_path=args.compare,
                        feature_cache=args.feature_cache, workers=args.workers,
-                       realtime=not args.offline_only, progress=print)
+                       realtime=not args.offline_only, progress=print,
+                       stream_cache=args.stream_cache or None)
     for r in out["results"]:
         print(_fmt_score(r.mode, r))
     if args.assess:
@@ -440,6 +441,9 @@ def build_parser() -> argparse.ArgumentParser:
     me.add_argument("--assess", action="store_true", help="Apply the pre-registered analysis (--analysis).")
     me.add_argument("--analysis", default="prereg10", choices=["prereg10", "prereg11"])
     me.add_argument("--compare", default=None, help="Second frozen set scored as *-cmp-A (e.g. previous models).")
+    me.add_argument("--stream-cache", default="data/physionet/.features/streams", dest="stream_cache",
+                    help="Save each record's monitor replay as it finishes; an interrupted run resumes "
+                         "('' disables).")
     me.add_argument("--out", default="out_eval/ml_eval")
     me.set_defaults(func=_ml_eval)
 

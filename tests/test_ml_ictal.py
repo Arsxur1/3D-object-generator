@@ -409,3 +409,29 @@ def test_prereg11_assessment_decisions_and_apply(tmp_path):
     assert doc["realtime"]["enabled"] is False and doc["offline"]["model"].endswith("offline_v1.json")
     assert doc["offline"]["calibration"] == "configs/calibration.ml_offline.json"  # v1 keeps its own Platt file
     assert doc["realtime"]["alarm_persistence_windows"] == 1  # untouched keys survive
+
+
+def test_ml_eval_stream_cache_resumes(demo_edf, configs, tmp_path, monkeypatch):
+    """An interrupted held-out run resumes from per-record replay results and
+    gives the same metrics as an uninterrupted one."""
+    from neurolens.datasets.annotations import RecordAnnotation, SeizureInterval
+    from neurolens.evaluation import ml_eval
+
+    frozen = json.loads(open("docs/preregistration_increment10_frozen.json", encoding="utf-8").read())
+    ann = RecordAnnotation(database="chbmit", subject="demo", file="demo/demo.edf",
+                           seizures=[SeizureInterval(60.0, 90.0)])
+    items = [(ann, demo_edf)]
+    cache = tmp_path / "streams"
+    first = ml_eval.evaluate_ml_test(items, configs, frozen, feature_cache=tmp_path / "feat",
+                                     workers=1, stream_cache=cache)
+    assert len(list(cache.glob("stream_demo_*.pkl"))) == 1
+
+    def no_replay(fn, tasks, *a, **k):
+        assert tasks == [], "cached records must not be replayed again"
+
+    monkeypatch.setattr(ml_eval, "run_memory_bounded", no_replay)
+    second = ml_eval.evaluate_ml_test(items, configs, frozen, feature_cache=tmp_path / "feat",
+                                      workers=1, stream_cache=cache)
+    assert [r.mode for r in first] == [r.mode for r in second]
+    for a, b in zip(first, second):
+        assert a.total.as_dict() == b.total.as_dict()

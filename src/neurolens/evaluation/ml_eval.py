@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import pickle
 from pathlib import Path
 from time import perf_counter
 from typing import Callable, Optional
@@ -40,6 +42,19 @@ def stream_and_default(ann: RecordAnnotation, path: Path, cfg: ConfigBundle):
     return realtime_records([tr])[0], score
 
 
+def stream_cache_path(cache_dir: str | Path, path: Path, cfg: ConfigBundle) -> Path:
+    """Per-record cache file for :func:`stream_and_default` results. The key
+    covers the EDF (name, size, mtime) and everything the result depends on:
+    filters, monitor/alarm settings, detector thresholds, feature version."""
+    from ..layer3_features.feature_set import FEATURE_VERSION
+
+    st = path.stat()
+    cfg_key = (cfg.filters.model_dump_json() + cfg.realtime.model_dump_json()
+               + cfg.thresholds.model_dump_json() + f"|fv{FEATURE_VERSION}")
+    key = hashlib.sha1(f"{path.name}:{st.st_size}:{st.st_mtime_ns}:{cfg_key}".encode()).hexdigest()[:16]
+    return Path(cache_dir) / f"stream_{path.stem}_{key}.pkl"
+
+
 def _ml_result(mode: str, ds: Dataset, model, params: dict, causal: bool,
                rules: ScoringRules) -> EvalResult:
     t0 = perf_counter()
@@ -62,9 +77,15 @@ def evaluate_ml_test(
     progress: Optional[Callable[[str], None]] = None,
     rules: ScoringRules | None = None,
     compare: dict | None = None,
+    stream_cache: str | Path | None = None,
 ) -> list[EvalResult]:
     """``compare``: a second frozen set (e.g. the previous increment's models),
-    scored as modes ``*-cmp-A`` on the same records."""
+    scored as modes ``*-cmp-A`` on the same records.
+
+    ``stream_cache``: directory where each record's monitor replay result is
+    saved as soon as it finishes, so an interrupted run (e.g. a machine
+    restart during hours of replay) resumes instead of starting over. Results
+    are identical with or without it (the replay is deterministic)."""
     rules = rules or ScoringRules()
     for fz in (frozen, compare) if compare else (frozen,):
         for mode in ("offline", "realtime") if realtime else ("offline",):
@@ -89,16 +110,31 @@ def evaluate_ml_test(
 
     if realtime:
         got: dict[str, tuple[PreparedRecord, object]] = {}
+        cpath = {a.file: stream_cache_path(stream_cache, p, cfg) for a, p in items} if stream_cache else {}
+        if stream_cache:
+            Path(stream_cache).mkdir(parents=True, exist_ok=True)
+        for a, _ in items:
+            if a.file in cpath and cpath[a.file].exists():
+                got[a.file] = pickle.loads(cpath[a.file].read_bytes())
+        if got and progress:
+            progress(f"{len(got)} replayed records loaded from {stream_cache}")
 
         def done(res) -> None:
             rec, score = res
             got[rec.annotation.file] = (rec, score)
+            if rec.annotation.file in cpath:
+                tmp = cpath[rec.annotation.file].with_suffix(".tmp")
+                tmp.write_bytes(pickle.dumps(res))
+                os.replace(tmp, cpath[rec.annotation.file])
             if progress:
                 progress(f"streamed {rec.annotation.file}")
 
-        run_memory_bounded(stream_and_default, [(a, p, cfg) for a, p in items],
-                           [int(p.stat().st_size * 8) for _, p in items], workers, done)
+        todo = [(a, p) for a, p in items if a.file not in got]
+        run_memory_bounded(stream_and_default, [(a, p, cfg) for a, p in todo],
+                           [int(p.stat().st_size * 8) for _, p in todo], workers, done)
         order = [a.file for a, _ in items]
+        for a, _ in items:  # cached records carry the annotation they were built with
+            got[a.file][0].annotation = a
         srecs = [got[f][0] for f in order]
         rt_base_scores = [got[f][1] for f in order]
         rt_base = EvalResult("realtime-threshold-default", rt_base_scores, aggregate(rt_base_scores), 0.0)
