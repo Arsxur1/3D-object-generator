@@ -1,0 +1,965 @@
+{
+ "per_seizure": [
+  {
+   "file": "chb06/chb06_01.edf",
+   "onset_s": 1724.0,
+   "duration_s": 14.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_01.edf",
+   "onset_s": 7461.0,
+   "duration_s": 15.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "chb06/chb06_01.edf",
+   "onset_s": 13525.0,
+   "duration_s": 15.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_04.edf",
+   "onset_s": 327.0,
+   "duration_s": 20.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_04.edf",
+   "onset_s": 6211.0,
+   "duration_s": 20.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_09.edf",
+   "onset_s": 12500.0,
+   "duration_s": 16.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_10.edf",
+   "onset_s": 10833.0,
+   "duration_s": 12.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": false,
+   "offline-ml-A": false,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "chb06/chb06_13.edf",
+   "onset_s": 506.0,
+   "duration_s": 13.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "chb06/chb06_18.edf",
+   "onset_s": 7799.0,
+   "duration_s": 12.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "chb06/chb06_24.edf",
+   "onset_s": 9387.0,
+   "duration_s": 16.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN01/PN01-1.edf",
+   "onset_s": 10218.0,
+   "duration_s": 54.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN01/PN01-1.edf",
+   "onset_s": 46353.0,
+   "duration_s": 74.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN03/PN03-1.edf",
+   "onset_s": 38673.0,
+   "duration_s": 111.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN03/PN03-2.edf",
+   "onset_s": 34921.0,
+   "duration_s": 133.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN06/PN06-1.edf",
+   "onset_s": 5583.0,
+   "duration_s": 64.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN06/PN06-2.edf",
+   "onset_s": 8860.0,
+   "duration_s": 69.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN06/PN06-3.edf",
+   "onset_s": 6275.0,
+   "duration_s": 42.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": false,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN06/PN06-4.edf",
+   "onset_s": 5939.0,
+   "duration_s": 63.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN06/PN06-5.edf",
+   "onset_s": 4783.0,
+   "duration_s": 44.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN10/PN10-1.edf",
+   "onset_s": 7545.0,
+   "duration_s": 69.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN10/PN10-2.edf",
+   "onset_s": 7798.0,
+   "duration_s": 51.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN10/PN10-3.edf",
+   "onset_s": 7835.0,
+   "duration_s": 69.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN10/PN10-4.5.6.edf",
+   "onset_s": 2309.0,
+   "duration_s": 5.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN10/PN10-4.5.6.edf",
+   "onset_s": 6544.0,
+   "duration_s": 19.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": false,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN10/PN10-4.5.6.edf",
+   "onset_s": 11225.0,
+   "duration_s": 57.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN10/PN10-7.8.9.edf",
+   "onset_s": 59713.0,
+   "duration_s": 48.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": false,
+   "offline-ml-A": false,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN10/PN10-7.8.9.edf",
+   "onset_s": 5459.0,
+   "duration_s": 18.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN10/PN10-7.8.9.edf",
+   "onset_s": 12923.0,
+   "duration_s": 15.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN10/PN10-10.edf",
+   "onset_s": 7977.0,
+   "duration_s": 14.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN14/PN14-1.edf",
+   "onset_s": 7262.0,
+   "duration_s": 27.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": false,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN14/PN14-2.edf",
+   "onset_s": 7479.0,
+   "duration_s": 12.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": true
+  },
+  {
+   "file": "PN14/PN14-3.edf",
+   "onset_s": 17540.0,
+   "duration_s": 41.0,
+   "offline-threshold-default": false,
+   "offline-cmp-A": false,
+   "offline-ml-A": true,
+   "realtime-threshold-default": false,
+   "realtime-cmp-A": false,
+   "realtime-ml-A": false
+  },
+  {
+   "file": "PN14/PN14-4.edf",
+   "onset_s": 5463.0,
+   "duration_s": 83.0,
+   "offline-threshold-default": true,
+   "offline-cmp-A": true,
+   "offline-ml-A": true,
+   "realtime-threshold-default": true,
+   "realtime-cmp-A": true,
+   "realtime-ml-A": true
+  }
+ ],
+ "by_duration": {
+  "offline-threshold-default": {
+   "lt30": [
+    6,
+    17
+   ],
+   "ge30": [
+    13,
+    16
+   ]
+  },
+  "offline-cmp-A": {
+   "lt30": [
+    16,
+    17
+   ],
+   "ge30": [
+    13,
+    16
+   ]
+  },
+  "offline-ml-A": {
+   "lt30": [
+    14,
+    17
+   ],
+   "ge30": [
+    15,
+    16
+   ]
+  },
+  "realtime-threshold-default": {
+   "lt30": [
+    6,
+    17
+   ],
+   "ge30": [
+    11,
+    16
+   ]
+  },
+  "realtime-cmp-A": {
+   "lt30": [
+    10,
+    17
+   ],
+   "ge30": [
+    13,
+    16
+   ]
+  },
+  "realtime-ml-A": {
+   "lt30": [
+    10,
+    17
+   ],
+   "ge30": [
+    13,
+    16
+   ]
+  }
+ },
+ "pooled_inc10_inc11": {
+  "offline-threshold": {
+   "hours": 297.02,
+   "seizures": 141,
+   "tp": 116,
+   "fp": 2953,
+   "sensitivity": 0.8227,
+   "sens_ci95": [
+    0.749,
+    0.882
+   ],
+   "fa_per_hour": 9.942,
+   "latency_median_s": 5.0
+  },
+  "offline-v1": {
+   "hours": 297.02,
+   "seizures": 141,
+   "tp": 130,
+   "fp": 2541,
+   "sensitivity": 0.922,
+   "sens_ci95": [
+    0.865,
+    0.96
+   ],
+   "fa_per_hour": 8.555,
+   "latency_median_s": 7.0
+  },
+  "realtime-threshold": {
+   "hours": 297.0,
+   "seizures": 141,
+   "tp": 108,
+   "fp": 1101,
+   "sensitivity": 0.766,
+   "sens_ci95": [
+    0.687,
+    0.833
+   ],
+   "fa_per_hour": 3.707,
+   "latency_median_s": 22.0
+  },
+  "realtime-v1": {
+   "hours": 297.0,
+   "seizures": 141,
+   "tp": 120,
+   "fp": 1053,
+   "sensitivity": 0.8511,
+   "sens_ci95": [
+    0.781,
+    0.905
+   ],
+   "fa_per_hour": 3.545,
+   "latency_median_s": 21.0
+  }
+ },
+ "per_subject": {
+  "offline-threshold-default": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 1,
+    "fp": 139,
+    "sensitivity": 0.1,
+    "sens_ci95": [
+     0.003,
+     0.445
+    ],
+    "fa_per_hour": 3.668,
+    "latency_median_s": 32.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 142,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 10.528,
+    "latency_median_s": 2.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 424,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 17.501,
+    "latency_median_s": 25.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 99,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 8.2,
+    "latency_median_s": 21.0
+   },
+   "PN10": {
+    "hours": 18.73,
+    "seizures": 10,
+    "tp": 8,
+    "fp": 280,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.444,
+     0.975
+    ],
+    "fa_per_hour": 14.952,
+    "latency_median_s": 11.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 2,
+    "fp": 205,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.068,
+     0.932
+    ],
+    "fa_per_hour": 10.018,
+    "latency_median_s": 50.0
+   }
+  },
+  "offline-cmp-A": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 9,
+    "fp": 435,
+    "sensitivity": 0.9,
+    "sens_ci95": [
+     0.555,
+     0.997
+    ],
+    "fa_per_hour": 11.479,
+    "latency_median_s": 7.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 47,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 3.485,
+    "latency_median_s": 7.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 152,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 6.274,
+    "latency_median_s": 14.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 69,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 5.715,
+    "latency_median_s": 26.0
+   },
+   "PN10": {
+    "hours": 18.73,
+    "seizures": 10,
+    "tp": 9,
+    "fp": 201,
+    "sensitivity": 0.9,
+    "sens_ci95": [
+     0.555,
+     0.997
+    ],
+    "fa_per_hour": 10.734,
+    "latency_median_s": 8.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 3,
+    "fp": 119,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.194,
+     0.994
+    ],
+    "fa_per_hour": 5.815,
+    "latency_median_s": 17.0
+   }
+  },
+  "offline-ml-A": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 9,
+    "fp": 288,
+    "sensitivity": 0.9,
+    "sens_ci95": [
+     0.555,
+     0.997
+    ],
+    "fa_per_hour": 7.6,
+    "latency_median_s": 5.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 21,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 1.557,
+    "latency_median_s": 6.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 107,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 4.417,
+    "latency_median_s": 12.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 5,
+    "fp": 48,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.478,
+     1.0
+    ],
+    "fa_per_hour": 3.976,
+    "latency_median_s": 5.0
+   },
+   "PN10": {
+    "hours": 18.73,
+    "seizures": 10,
+    "tp": 8,
+    "fp": 110,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.444,
+     0.975
+    ],
+    "fa_per_hour": 5.874,
+    "latency_median_s": 9.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 3,
+    "fp": 432,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.194,
+     0.994
+    ],
+    "fa_per_hour": 21.11,
+    "latency_median_s": 3.0
+   }
+  },
+  "realtime-threshold-default": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 1,
+    "fp": 70,
+    "sensitivity": 0.1,
+    "sens_ci95": [
+     0.003,
+     0.445
+    ],
+    "fa_per_hour": 1.847,
+    "latency_median_s": 28.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 30,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 2.224,
+    "latency_median_s": 17.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 187,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 7.719,
+    "latency_median_s": 39.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 2,
+    "fp": 42,
+    "sensitivity": 0.4,
+    "sens_ci95": [
+     0.053,
+     0.853
+    ],
+    "fa_per_hour": 3.479,
+    "latency_median_s": 37.0
+   },
+   "PN10": {
+    "hours": 18.72,
+    "seizures": 10,
+    "tp": 8,
+    "fp": 131,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.444,
+     0.975
+    ],
+    "fa_per_hour": 6.997,
+    "latency_median_s": 23.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 2,
+    "fp": 57,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.068,
+     0.932
+    ],
+    "fa_per_hour": 2.786,
+    "latency_median_s": 67.0
+   }
+  },
+  "realtime-cmp-A": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 7,
+    "fp": 165,
+    "sensitivity": 0.7,
+    "sens_ci95": [
+     0.348,
+     0.933
+    ],
+    "fa_per_hour": 4.355,
+    "latency_median_s": 8.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 5,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 0.371,
+    "latency_median_s": 20.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 58,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 2.394,
+    "latency_median_s": 27.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 28,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 2.319,
+    "latency_median_s": 31.0
+   },
+   "PN10": {
+    "hours": 18.72,
+    "seizures": 10,
+    "tp": 6,
+    "fp": 54,
+    "sensitivity": 0.6,
+    "sens_ci95": [
+     0.262,
+     0.878
+    ],
+    "fa_per_hour": 2.884,
+    "latency_median_s": 38.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 2,
+    "fp": 49,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.068,
+     0.932
+    ],
+    "fa_per_hour": 2.395,
+    "latency_median_s": 29.0
+   }
+  },
+  "realtime-ml-A": {
+   "chb06": {
+    "hours": 37.89,
+    "seizures": 10,
+    "tp": 7,
+    "fp": 231,
+    "sensitivity": 0.7,
+    "sens_ci95": [
+     0.348,
+     0.933
+    ],
+    "fa_per_hour": 6.096,
+    "latency_median_s": 0.0
+   },
+   "PN01": {
+    "hours": 13.49,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 3,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 0.222,
+    "latency_median_s": 12.0
+   },
+   "PN03": {
+    "hours": 24.23,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 57,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 2.353,
+    "latency_median_s": 24.0
+   },
+   "PN06": {
+    "hours": 12.07,
+    "seizures": 5,
+    "tp": 5,
+    "fp": 9,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.478,
+     1.0
+    ],
+    "fa_per_hour": 0.746,
+    "latency_median_s": 32.0
+   },
+   "PN10": {
+    "hours": 18.72,
+    "seizures": 10,
+    "tp": 5,
+    "fp": 48,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.187,
+     0.813
+    ],
+    "fa_per_hour": 2.564,
+    "latency_median_s": 21.0
+   },
+   "PN14": {
+    "hours": 20.46,
+    "seizures": 4,
+    "tp": 2,
+    "fp": 71,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.068,
+     0.932
+    ],
+    "fa_per_hour": 3.47,
+    "latency_median_s": 19.0
+   }
+  }
+ }
+}

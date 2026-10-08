@@ -206,8 +206,11 @@ def test_pipeline_and_monitor_with_learned_detector(demo_edf, configs):
     assert mon._ml is not None and not any(type(d).__name__ == "IctalRhythmDetector" for d in mon.detectors)
     summary = mon.run(EdfReplaySource(demo_edf, chunk_s=cfg.realtime.step_s))
     assert summary.n_windows > 0
-    # default config keeps the threshold detector (pre-registered decision pending)
-    assert RealtimeMonitor(cfg)._ml is None
+    # default follows configs/ml.yaml (increment 11 decision: learned v2 in the monitor);
+    # the threshold detector stays available explicitly
+    assert RealtimeMonitor(cfg)._ml is not None
+    assert cfg.ml.realtime.model.endswith("ictal_gbm_realtime_v2.json")
+    assert RealtimeMonitor(cfg, learned=False)._ml is None
 
 
 def _with_morph(f, seed=0):
@@ -292,6 +295,7 @@ def test_monitor_learned_alarm_not_regated_on_confidence(demo_edf, configs, monk
 
     monkeypatch.setattr(mli, "load_model", lambda path: Const())
     cfg = copy.deepcopy(configs)
+    cfg.ml.realtime.threshold = 0.3  # pin: the scenario needs raw p just above threshold, below 0.6
     mon = RealtimeMonitor(cfg, learned=True)
     assert mon._rt.rule_for("seizure").min_confidence == 0.0
     summary = mon.run(EdfReplaySource(demo_edf, chunk_s=cfg.realtime.step_s))

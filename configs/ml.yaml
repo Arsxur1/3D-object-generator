@@ -1,23 +1,26 @@
-# Learned ictal detector (increment 10): gradient-boosted trees over causal epoch
-# features, JSON models in configs/models/. Operating points = point A
-# ("replacement") frozen in docs/preregistration_increment10_frozen.json.
-# `enabled` follows the pre-registered decision rule (docs/preregistration_increment10.md),
-# applied mechanically by evaluation/prereg10.apply_decision to the held-out result
-# (11 new patients, 170 h, 108 seizures — docs/increment10_report.md):
-#   offline : H2 confirmed (0.94 at 8.92 FA/h vs threshold 0.90 at 9.78) -> enabled
-#   realtime: H1 rejected  (0.90 at 4.08 FA/h vs threshold 0.84 at 3.43) -> disabled (option)
+# Learned ictal detector: gradient-boosted trees over causal epoch features, JSON
+# models in configs/models/. Settings below follow the pre-registered decision rules,
+# applied mechanically by evaluation/prereg11.apply_decision (model, threshold,
+# min_epochs, calibration, enabled are written by it; comments by hand).
+# Increment 10 (docs/preregistration_increment10.md, 11 new patients, 108 seizures):
+#   offline v1 became default; monitor stayed on the threshold detector (more FA).
+# Increment 11 (docs/preregistration_increment11.md, 6 last unused patients, 33 seizures;
+#   v2 = same features/model retrained on 31 patients; docs/increment11_report.md):
+#   offline : v2 0.88 at 7.93 FA/h vs threshold 0.58 at 10.16, v1 0.88 at 8.06 -> v2
+#   realtime: v2 0.70 at 3.30 FA/h vs threshold monitor 0.52 at 4.08 -> v2 (default)
 offline:
   enabled: true
-  model: configs/models/ictal_gbm_offline_v1.json
-  threshold: 0.4
-  min_epochs: 5
-  calibration: configs/calibration.ml_offline.json   # Platt, LOSO events (precision ~9% at point A)
-realtime:
-  enabled: false
-  model: configs/models/ictal_gbm_realtime_v1.json
+  model: configs/models/ictal_gbm_offline_v2.json
   threshold: 0.3
   min_epochs: 15
+  calibration: configs/calibration.ml_offline_v2.json   # Platt, LOSO events of v2 (precision ~8.5% at point A)
+realtime:
+  enabled: true
+  model: configs/models/ictal_gbm_realtime_v2.json
+  threshold: 0.7
+  min_epochs: 5
   alarm_persistence_windows: 1
-  calibration: configs/calibration.ml_realtime.json  # Platt, LOSO events (precision ~14% at point A)
+  calibration: configs/calibration.ml_realtime_v2.json  # Platt, LOSO events of v2 (precision ~16% at point A)
 provenance:
-  preregistration: docs/preregistration_increment10.md
+  preregistration: docs/preregistration_increment11.md
+  previous: docs/preregistration_increment10.md
