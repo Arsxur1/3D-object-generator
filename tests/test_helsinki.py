@@ -148,3 +148,43 @@ def test_prereg12_decision_rules_and_apply(tmp_path):
     from neurolens.contracts.config import LearnedDetectorConfig
 
     LearnedDetectorConfig(**doc)  # valid against the contract
+
+
+def test_plain_edf_fallback_matches_pyedflib_and_reads_noncompliant_header(demo_edf, tmp_path):
+    """Helsinki eeg50.edf declares EDF+C without an annotation signal; pyedflib
+    rejects it, the fallback reads the samples identically."""
+    import numpy as np
+    import pyedflib
+
+    from neurolens.layer1_ingest.edf import PlainEdfReader
+    from neurolens.layer1_ingest.registry import ingest
+
+    ref = pyedflib.EdfReader(str(demo_edf))
+    alt = PlainEdfReader(demo_edf)
+    labels = [lb for lb in ref.getSignalLabels() if lb != "EDF Annotations"]
+    assert alt.getSignalLabels() == labels
+    for i in range(alt.signals_in_file):
+        j = ref.getSignalLabels().index(labels[i])
+        assert np.allclose(alt.readSignal(i), ref.readSignal(j), atol=1e-6)
+        assert alt.getSampleFrequency(i) == ref.getSampleFrequency(j)
+    ref.close()
+
+    plain = tmp_path / "plain.edf"
+    names = ["EEG Fp1-REF", "EEG Fp2-REF", "EEG C3-REF", "EEG C4-REF", "ECG EKG-REF"]
+    w = pyedflib.EdfWriter(str(plain), len(names), file_type=pyedflib.FILETYPE_EDF)
+    w.setSignalHeaders([{"label": n, "dimension": "uV", "sample_frequency": 256, "physical_min": -500,
+                         "physical_max": 500, "digital_min": -32768, "digital_max": 32767} for n in names])
+    rng = np.random.default_rng(0)
+    w.writeSamples([rng.normal(0, 30, 256 * 20) for _ in names])
+    w.close()
+    raw = bytearray(plain.read_bytes())
+    raw[192:197] = b"EDF+C"  # declare EDF+ without the mandatory annotation signal
+    bad = tmp_path / "bad.edf"
+    bad.write_bytes(bytes(raw))
+    with pytest.raises(OSError):
+        pyedflib.EdfReader(str(bad))
+    sig = ingest(bad)
+    good = pyedflib.EdfReader(str(plain))
+    assert sig.channel_names[:4] == ["Fp1", "Fp2", "C3", "C4"]
+    assert np.allclose(sig.signal[0], good.readSignal(0), atol=0.02)
+    good.close()

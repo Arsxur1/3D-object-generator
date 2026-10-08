@@ -52,7 +52,12 @@ class EdfIngestor(Ingestor):
         context: ClinicalContext | None = None,
     ) -> UnifiedSignal:
         path = Path(path)
-        reader = pyedflib.EdfReader(str(path))
+        try:
+            reader = pyedflib.EdfReader(str(path))
+        except OSError:
+            # e.g. a header declaring EDF+ without the mandatory annotation signal
+            # (Helsinki neonatal eeg50.edf): read the data as plain EDF instead
+            reader = PlainEdfReader(path)
         try:
             n = reader.signals_in_file
             labels = reader.getSignalLabels()
@@ -99,6 +104,62 @@ class EdfIngestor(Ingestor):
         )
         out.quality.flags.extend(flags)
         return out
+
+
+class PlainEdfReader:
+    """Minimal EDF reader (header + 16-bit data records), used only when pyedflib
+    rejects a file whose samples are standard EDF but whose header is not strictly
+    compliant. Same subset of the pyedflib API as used above; 'EDF Annotations'
+    signals are skipped."""
+
+    def __init__(self, path: str | Path):
+        raw = Path(path).read_bytes()
+        hdr_bytes = int(raw[184:192].decode("ascii").strip())
+        n_records = int(raw[236:244].decode("ascii").strip())
+        ns = int(raw[252:256].decode("ascii").strip())
+
+        def field(offset: int, width: int) -> list[str]:
+            base = 256 + offset * ns
+            return [raw[base + i * width: base + (i + 1) * width].decode("latin-1").strip() for i in range(ns)]
+
+        # per-signal fields, each stored for all signals in turn (byte widths:
+        # label 16, transducer 80, dimension 8, pmin/pmax/dmin/dmax 8, prefilter 80, samples 8)
+        labels, dims = field(0, 16), field(96, 8)
+        pmin, pmax = [float(x) for x in field(104, 8)], [float(x) for x in field(112, 8)]
+        dmin, dmax = [float(x) for x in field(120, 8)], [float(x) for x in field(128, 8)]
+        nsamp = [int(x) for x in field(216, 8)]
+        duration = float(raw[244:252].decode("ascii").strip() or 1.0)
+        rec_len = sum(nsamp)
+        avail = (len(raw) - hdr_bytes) // (2 * rec_len)
+        n_records = avail if n_records < 0 else min(n_records, avail)
+        data = np.frombuffer(raw, dtype="<i2", count=n_records * rec_len, offset=hdr_bytes)
+        data = data.reshape(n_records, rec_len)
+        keep = [i for i in range(ns) if labels[i] != "EDF Annotations"]
+        starts = np.concatenate([[0], np.cumsum(nsamp)])
+        self._labels = [labels[i] for i in keep]
+        self._dims = [dims[i] for i in keep]
+        self._fs = [nsamp[i] / duration for i in keep]
+        self._signals = []
+        for i in keep:
+            dig = data[:, starts[i]:starts[i + 1]].reshape(-1).astype(np.float64)
+            gain = (pmax[i] - pmin[i]) / (dmax[i] - dmin[i])
+            self._signals.append((dig - dmin[i]) * gain + pmin[i])
+        self.signals_in_file = len(keep)
+
+    def getSignalLabels(self) -> list[str]:
+        return list(self._labels)
+
+    def getSampleFrequency(self, i: int) -> float:
+        return self._fs[i]
+
+    def getPhysicalDimension(self, i: int) -> str:
+        return self._dims[i]
+
+    def readSignal(self, i: int) -> np.ndarray:
+        return self._signals[i]
+
+    def close(self) -> None:
+        self._signals = []
 
 
 def _from_bipolar(
