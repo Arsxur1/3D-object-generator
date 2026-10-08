@@ -1,0 +1,215 @@
+{
+ "dataset": "helsinki dev half (40 neonates)",
+ "feature_set": 1,
+ "grid": {
+  "threshold": [
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   0.97,
+   0.99
+  ],
+  "min_epochs": [
+   5,
+   10,
+   15,
+   20,
+   30,
+   45
+  ]
+ },
+ "offline": {
+  "threshold_detector_same_data": {
+   "sensitivity": 0.5815217391304348,
+   "fa_per_hour": 4.598466199120045,
+   "tp": 107,
+   "n_seizures": 184
+  },
+  "candidates": {
+   "N": {
+    "params": {
+     "threshold": 0.6,
+     "min_epochs": 10
+    },
+    "loso": {
+     "n_records": 40,
+     "hours": 56.7581,
+     "n_seizures": 184,
+     "tp": 135,
+     "fn": 49,
+     "fp": 258,
+     "sensitivity": 0.7337,
+     "fa_per_hour": 4.5456,
+     "latency_median_s": 14.0,
+     "latency_p90_s": 60.8,
+     "f1_event": 0.4679
+    },
+    "fa_budget": 4.5985,
+    "feasible": true
+   },
+   "C": {
+    "params": {
+     "threshold": 0.5,
+     "min_epochs": 45
+    },
+    "loso": {
+     "n_records": 40,
+     "hours": 56.7581,
+     "n_seizures": 184,
+     "tp": 103,
+     "fn": 81,
+     "fp": 182,
+     "sensitivity": 0.5598,
+     "fa_per_hour": 3.2066,
+     "latency_median_s": 7.0,
+     "latency_p90_s": 83.0,
+     "f1_event": 0.4392
+    },
+    "fa_budget": 4.5985,
+    "feasible": true
+   }
+  },
+  "chosen": "N",
+  "A_replacement": {
+   "params": {
+    "threshold": 0.6,
+    "min_epochs": 10
+   },
+   "loso": {
+    "n_records": 40,
+    "hours": 56.7581,
+    "n_seizures": 184,
+    "tp": 135,
+    "fn": 49,
+    "fp": 258,
+    "sensitivity": 0.7337,
+    "fa_per_hour": 4.5456,
+    "latency_median_s": 14.0,
+    "latency_p90_s": 60.8,
+    "f1_event": 0.4679
+   },
+   "fa_budget": 4.5985,
+   "feasible": true
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_offline_neo1.json",
+   "sha256": "f07cf871e0d617032f2cae80c9dbd6615c1d271e7790c25219301f2942ba84cb",
+   "n_trees": 200
+  },
+  "calibration": {
+   "path": "configs/calibration.ml_offline_neo1.json",
+   "sha256": "3810c4ee1ba103bd41d640d03287916019df2775f0f9faa2a87a55c19c308906",
+   "n_events": 615,
+   "true_events": 288,
+   "precision": 0.4683,
+   "platt": [
+    2.2239,
+    -2.781
+   ],
+   "ece_before": 0.2922,
+   "ece_after": 0.0452,
+   "brier_after": 0.2034,
+   "source": "leave-one-neonate-out events, dev half, candidate N, point A"
+  }
+ },
+ "realtime": {
+  "threshold_detector_same_data": {
+   "sensitivity": 0.44565217391304346,
+   "fa_per_hour": 3.1021567235428043,
+   "tp": 82,
+   "n_seizures": 184
+  },
+  "candidates": {
+   "N": {
+    "params": {
+     "threshold": 0.5,
+     "min_epochs": 20
+    },
+    "loso": {
+     "n_records": 40,
+     "hours": 56.7347,
+     "n_seizures": 184,
+     "tp": 129,
+     "fn": 55,
+     "fp": 163,
+     "sensitivity": 0.7011,
+     "fa_per_hour": 2.873,
+     "latency_median_s": 31.0,
+     "latency_p90_s": 88.2,
+     "f1_event": 0.542
+    },
+    "fa_budget": 3.1022,
+    "feasible": true
+   },
+   "C": {
+    "params": {
+     "threshold": 0.85,
+     "min_epochs": 10
+    },
+    "loso": {
+     "n_records": 40,
+     "hours": 56.7347,
+     "n_seizures": 184,
+     "tp": 80,
+     "fn": 104,
+     "fp": 136,
+     "sensitivity": 0.4348,
+     "fa_per_hour": 2.3971,
+     "latency_median_s": 37.0,
+     "latency_p90_s": 149.4,
+     "f1_event": 0.4
+    },
+    "fa_budget": 3.1022,
+    "feasible": true
+   }
+  },
+  "chosen": "N",
+  "A_replacement": {
+   "params": {
+    "threshold": 0.5,
+    "min_epochs": 20
+   },
+   "loso": {
+    "n_records": 40,
+    "hours": 56.7347,
+    "n_seizures": 184,
+    "tp": 129,
+    "fn": 55,
+    "fp": 163,
+    "sensitivity": 0.7011,
+    "fa_per_hour": 2.873,
+    "latency_median_s": 31.0,
+    "latency_p90_s": 88.2,
+    "f1_event": 0.542
+   },
+   "fa_budget": 3.1022,
+   "feasible": true
+  },
+  "model": {
+   "path": "configs/models/ictal_gbm_realtime_neo1.json",
+   "sha256": "97d606a69899d8913611bf9287e26d86d2beec12fcfd91adbd12589e5e31ef15",
+   "n_trees": 200
+  },
+  "calibration": {
+   "path": "configs/calibration.ml_realtime_neo1.json",
+   "sha256": "98903ff78dc1ef6ebab1c77895122debdfe7f60f9a7299fd98be98b4b356faa1",
+   "n_events": 415,
+   "true_events": 209,
+   "precision": 0.5036,
+   "platt": [
+    2.2923,
+    -2.3212
+   ],
+   "ece_before": 0.2262,
+   "ece_after": 0.0456,
+   "brier_after": 0.1964,
+   "source": "leave-one-neonate-out events, dev half, candidate N, point A"
+  }
+ }
+}
