@@ -109,6 +109,36 @@ class Pipeline:
                     self.calibrator.platt.setdefault(code, ab)
                 for code, t in ml_cal.temperatures.items():
                     self.calibrator.temperatures.setdefault(code, t)
+        self._learned_arg = learned
+        self._calibration_file = calibration_file
+        self._neonatal_cache: dict = {}
+
+    def _neonatal_setup(self):
+        """(ml_detector or None, calibrator) for neonates per configs/ml.yaml
+        ``neonatal.offline`` — only consulted when ``learned`` was not forced."""
+        if "offline" not in self._neonatal_cache:
+            mode = self.cfg.ml.select("offline", neonate=True)
+            det, cal = None, None
+            if self._calibration_file and Path(self._calibration_file).exists():
+                from ..calibration.calibrator import ConfidenceCalibrator
+
+                cal = ConfidenceCalibrator.load(self._calibration_file)
+            if mode is not None:
+                from ..layer4_detect.ml_ictal import MLDetectorConfig, MLIctalDetector, load_model
+
+                det = MLIctalDetector(load_model(self.cfg.ml_model_path(mode.model)),
+                                      MLDetectorConfig(threshold=mode.threshold, min_epochs=mode.min_epochs))
+                if mode.calibration:
+                    from ..calibration.calibrator import ConfidenceCalibrator
+
+                    ml_cal = ConfidenceCalibrator.load(self.cfg.ml_model_path(mode.calibration))
+                    if cal is None:
+                        cal = ml_cal
+                    else:
+                        for code, ab in ml_cal.platt.items():
+                            cal.platt.setdefault(code, ab)
+            self._neonatal_cache["offline"] = (det, cal)
+        return self._neonatal_cache["offline"]
 
     # -- entry points ----------------------------------------------------
     def analyze_file(
@@ -154,11 +184,15 @@ class Pipeline:
 
         # --- Layer 4: detection ---
         detectors = default_detectors()
-        if self._ml_detector is not None:
+        ml_detector, calibrator = self._ml_detector, self.calibrator
+        if (analysis.patient.postmenstrual_age_weeks is not None and self._learned_arg is None
+                and self.cfg.ml.neonatal is not None):
+            ml_detector, calibrator = self._neonatal_setup()  # neonatal routing (configs/ml.yaml)
+        if ml_detector is not None:
             from ..layer4_detect.ictal import IctalRhythmDetector
 
             detectors = [d for d in detectors if not isinstance(d, IctalRhythmDetector)]
-            detectors.append(self._ml_detector)
+            detectors.append(ml_detector)
         if analysis.patient.postmenstrual_age_weeks is not None:
             from ..layer4_detect.neonatal import NeonatalBackgroundDetector
 
@@ -167,8 +201,8 @@ class Pipeline:
 
         # --- confidence calibration (TZ §13): calibrated confidences feed the
         #     causal graph, mode-B gate, and alarms so thresholds are reliable ---
-        if self.calibrator is not None:
-            self.calibrator.apply_to_detection(detection)
+        if calibrator is not None:
+            calibrator.apply_to_detection(detection)
 
         # --- Layer 5: causal reasoning ---
         graph = build_causal_graph(
@@ -201,10 +235,10 @@ class Pipeline:
             analysis, features, detection, graph, report, gate, montage_name
         )
         result_json["calibration"] = {
-            "applied": self.calibrator is not None,
-            "default_temperature": self.calibrator.default if self.calibrator else 1.0,
-            "per_code_temperatures": self.calibrator.temperatures if self.calibrator else {},
-            "metrics": self.calibrator.metrics if self.calibrator else {},
+            "applied": calibrator is not None,
+            "default_temperature": calibrator.default if calibrator else 1.0,
+            "per_code_temperatures": calibrator.temperatures if calibrator else {},
+            "metrics": calibrator.metrics if calibrator else {},
         }
 
         return PipelineOutput(

@@ -335,9 +335,11 @@ def load_items(
     only_cached: bool = True,
 ) -> list[tuple[RecordAnnotation, Path]]:
     """Annotations + local paths for subjects (cached files only by default)."""
-    from ..datasets.physionet import PhysioNetClient
+    from ..datasets.physionet import client_for
 
-    client = PhysioNetClient(database, cache_dir)
+    client = client_for(database, cache_dir)
+    if database == "helsinki" and len(subjects) == 1 and subjects[0] in ("dev", "test"):
+        subjects = client.split()[subjects[0]]  # rule-based neonatal split (pre-registered)
     items = []
     for sub in subjects:
         for ann in client.annotations(sub):

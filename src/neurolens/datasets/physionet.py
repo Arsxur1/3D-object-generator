@@ -331,6 +331,15 @@ class PhysioNetClient:
         return results
 
 
+def client_for(database: str, cache_dir: str | Path | None = None):
+    """Dataset client by name: PhysioNet databases or the Helsinki neonatal set (Zenodo)."""
+    if database == "helsinki":
+        from .helsinki import HelsinkiClient
+
+        return HelsinkiClient(cache_dir)
+    return PhysioNetClient(database, cache_dir)
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as fh:

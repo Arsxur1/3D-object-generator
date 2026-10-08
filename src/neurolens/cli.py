@@ -146,9 +146,11 @@ def _items(default_db: str, text: str, cache):
 
 
 def _physionet(args) -> int:
-    from .datasets.physionet import DATABASES, PhysioNetClient
+    from .datasets.physionet import client_for
 
-    client = PhysioNetClient(args.db, args.cache)
+    client = client_for(args.db, args.cache)
+    if args.subjects in ("dev", "test") and args.db == "helsinki":
+        args.subjects = ",".join(client.split()[args.subjects])  # rule-based split (pre-registered)
     if args.action == "list":
         subs = _subjects(args.subjects) if args.subjects else client.subjects()
         for sub in subs:
@@ -160,14 +162,21 @@ def _physionet(args) -> int:
                 mark = "cached" if client.is_cached(a.file) else ""
                 sz = ", ".join(f"{s.onset_s:.0f}-{s.offset_s:.0f}s" for s in a.seizures)
                 print(f"{a.file:28s} seizures={len(a.seizures)} {sz:30s} {mark}")
-        print(f"\n{DATABASES[args.db].citation}\nLicense: {DATABASES[args.db].license}")
+        if args.db == "helsinki":
+            from .datasets.helsinki import CITATION, LICENSE
+        else:
+            from .datasets.physionet import DATABASES
+
+            CITATION, LICENSE = DATABASES[args.db].citation, DATABASES[args.db].license
+        print(f"\n{CITATION}\nLicense: {LICENSE}")
         return 0
 
     files: list[str] = []
     for sub in _subjects(args.subjects):
         anns = client.annotations(sub)
         files += [a.file for a in anns if a.has_seizure]
-        files += [a.file for a in anns if not a.has_seizure][: args.n_free]
+        # one recording per neonate in the Helsinki set: seizure-free neonates are part of the cohort
+        files += [a.file for a in anns if not a.has_seizure][: None if args.db == "helsinki" else args.n_free]
     todo = [f for f in files if not client.is_cached(f)]
     est_gb = sum((client.remote_size(f) or 42_000_000) for f in todo) / 1e9
     print(f"{len(files)} files ({est_gb:.1f} GB to download) -> {client.cache}")
@@ -315,13 +324,18 @@ def _ml_eval(args) -> int:
     for r in out["results"]:
         print(_fmt_score(r.mode, r))
     if args.assess:
-        if args.analysis == "prereg11":
-            from .evaluation.prereg11 import assess, markdown_report
-        else:
-            from .evaluation.prereg10 import assess, markdown_report
-
         metrics = json.loads(out["paths"]["json"].read_text(encoding="utf-8"))
-        a = assess(metrics)
+        if args.analysis == "prereg12":
+            from .evaluation.prereg12 import assess, markdown_report
+
+            amb = {a.file: [(s.onset_s, s.offset_s) for s in a.ambiguous] for a, _ in items}
+            a = assess(metrics, ambiguous=amb)
+        else:
+            if args.analysis == "prereg11":
+                from .evaluation.prereg11 import assess, markdown_report
+            else:
+                from .evaluation.prereg10 import assess, markdown_report
+            a = assess(metrics)
         path = out["paths"]["json"].with_name("prereg_assessment.json")
         path.write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
         out["paths"]["json"].with_name("prereg_report.md").write_text(markdown_report(a), encoding="utf-8")
@@ -389,7 +403,7 @@ def build_parser() -> argparse.ArgumentParser:
     cal.set_defaults(func=_calibrate)
 
     def _data_args(x):
-        x.add_argument("--db", default="chbmit", choices=["chbmit", "siena"])
+        x.add_argument("--db", default="chbmit", choices=["chbmit", "siena", "helsinki"])
         x.add_argument("--cache", default=None, help="Data cache dir (default data/physionet or $NEUROLENS_DATA).")
 
     ph = sub.add_parser("physionet", help="List/fetch open annotated EEG from PhysioNet.")
@@ -439,7 +453,7 @@ def build_parser() -> argparse.ArgumentParser:
     me.add_argument("--workers", type=int, default=3)
     me.add_argument("--offline-only", action="store_true", dest="offline_only")
     me.add_argument("--assess", action="store_true", help="Apply the pre-registered analysis (--analysis).")
-    me.add_argument("--analysis", default="prereg10", choices=["prereg10", "prereg11"])
+    me.add_argument("--analysis", default="prereg10", choices=["prereg10", "prereg11", "prereg12"])
     me.add_argument("--compare", default=None, help="Second frozen set scored as *-cmp-A (e.g. previous models).")
     me.add_argument("--stream-cache", default="data/physionet/.features/streams", dest="stream_cache",
                     help="Save each record's monitor replay as it finishes; an interrupted run resumes "

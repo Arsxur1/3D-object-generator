@@ -8,7 +8,7 @@ norms, the physiological rule base, ACNS terminology).
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -215,6 +215,19 @@ class LearnedDetectorMode(BaseModel):
                     "gated only by threshold/min_epochs.")
 
 
+class NeonatalPolicy(BaseModel):
+    """Which seizure detector serves neonates (patient with postmenstrual age set):
+    ``general`` — the offline/realtime settings above; ``threshold`` — the
+    rule-based IctalRhythmDetector; ``neonatal`` — the dedicated model below."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    offline: Literal["general", "threshold", "neonatal"] = "general"
+    realtime: Literal["general", "threshold", "neonatal"] = "general"
+    offline_model: Optional[LearnedDetectorMode] = None
+    realtime_model: Optional[LearnedDetectorMode] = None
+
+
 class LearnedDetectorConfig(BaseModel):
     """configs/ml.yaml — learned ictal detector per path (offline / real-time)."""
 
@@ -222,5 +235,21 @@ class LearnedDetectorConfig(BaseModel):
 
     offline: Optional[LearnedDetectorMode] = None
     realtime: Optional[LearnedDetectorMode] = None
+    neonatal: Optional[NeonatalPolicy] = None
     provenance: dict = Field(default_factory=dict)
+
+    def select(self, path: str, neonate: bool = False) -> Optional[LearnedDetectorMode]:
+        """Learned-detector settings for ``path`` ('offline'/'realtime') and patient
+        group; None means the threshold detector."""
+        general = getattr(self, path)
+        if neonate and self.neonatal is not None:
+            choice = getattr(self.neonatal, path)
+            if choice == "threshold":
+                return None
+            if choice == "neonatal":
+                mode = getattr(self.neonatal, f"{path}_model")
+                if mode is None:
+                    raise ValueError(f"ml.yaml neonatal.{path} = neonatal but no {path}_model")
+                return mode
+        return general if (general is not None and general.enabled) else None
 

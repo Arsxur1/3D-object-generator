@@ -27,6 +27,9 @@ class RecordAnnotation:
     sampling_rate_hz: float | None = None
     duration_s: float | None = None
     warnings: list[str] = field(default_factory=list)
+    # regions marked by some but not all annotators (multi-expert datasets): neither
+    # counted as seizures nor required to be detected; used by secondary analyses
+    ambiguous: list[SeizureInterval] = field(default_factory=list)
 
     @property
     def has_seizure(self) -> bool:

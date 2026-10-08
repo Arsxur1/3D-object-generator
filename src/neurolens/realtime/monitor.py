@@ -17,7 +17,7 @@ import numpy as np
 from ..contracts.alarms import AlarmSeverity, AlarmType, MonitorSummary
 from ..contracts.events import DetectionResult, SeizureBurden
 from ..contracts.report import Bilingual
-from ..contracts.signal import UnifiedSignal
+from ..contracts.signal import PatientInfo, UnifiedSignal
 from ..layer2_preprocess.filters import apply_filters
 from ..layer2_preprocess.montage_engine import MontageEngine
 from ..layer2_preprocess.reref import rereference
@@ -63,6 +63,7 @@ class RealtimeMonitor:
         detectors: list[Detector] | None = None,
         out_dir: str | Path | None = None,
         learned: Optional[bool] = None,
+        patient: Optional[PatientInfo] = None,
     ):
         self.cfg = config or load_configs()
         self.montage_name = montage_name
@@ -72,6 +73,11 @@ class RealtimeMonitor:
         # learned seizure detector (configs/ml.yaml); learned=None follows the config
         ml_mode = self.cfg.ml.realtime
         use_ml = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
+        neonate = patient is not None and patient.postmenstrual_age_weeks is not None
+        if learned is None and neonate and self.cfg.ml.neonatal is not None:
+            # neonatal routing (configs/ml.yaml neonatal.realtime): general / threshold / neonatal
+            ml_mode = self.cfg.ml.select("realtime", neonate=True)
+            use_ml = ml_mode is not None
         self._ml = None
         self._ml_cal = None
         self._rt = self.cfg.realtime
