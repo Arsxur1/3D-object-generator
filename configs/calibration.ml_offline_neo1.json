@@ -1,0 +1,26 @@
+{
+  "version": "0.1.0",
+  "default": 1.0,
+  "temperatures": {},
+  "platt": {
+    "ictal_ml": [
+      2.2239,
+      -2.781
+    ]
+  },
+  "metrics": {
+    "ictal_ml": {
+      "n_events": 615,
+      "true_events": 288,
+      "precision": 0.4683,
+      "platt": [
+        2.2239,
+        -2.781
+      ],
+      "ece_before": 0.2922,
+      "ece_after": 0.0452,
+      "brier_after": 0.2034,
+      "source": "leave-one-neonate-out events, dev half, candidate N, point A"
+    }
+  }
+}
