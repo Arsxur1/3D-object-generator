@@ -188,3 +188,13 @@ def test_plain_edf_fallback_matches_pyedflib_and_reads_noncompliant_header(demo_
     assert sig.channel_names[:4] == ["Fp1", "Fp2", "C3", "C4"]
     assert np.allclose(sig.signal[0], good.readSignal(0), atol=0.02)
     good.close()
+
+
+def test_default_config_neonatal_decision(configs):
+    """Increment-12 decision in configs/ml.yaml: neonates -> threshold detector offline,
+    neonatal model in the monitor; the general v2 model is never used for neonates."""
+    ml = configs.ml
+    assert ml.select("offline", neonate=True) is None
+    rt = ml.select("realtime", neonate=True)
+    assert rt is not None and rt.model.endswith("ictal_gbm_realtime_neo1.json")
+    assert ml.select("offline").model.endswith("offline_v2.json")

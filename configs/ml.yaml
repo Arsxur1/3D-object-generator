@@ -8,6 +8,11 @@
 #   v2 = same features/model retrained on 31 patients; docs/increment11_report.md):
 #   offline : v2 0.88 at 7.93 FA/h vs threshold 0.58 at 10.16, v1 0.88 at 8.06 -> v2
 #   realtime: v2 0.70 at 3.30 FA/h vs threshold monitor 0.52 at 4.08 -> v2 (default)
+# Increment 12 (docs/preregistration_increment12.md; Helsinki neonates, 39 held-out,
+#   146 consensus seizures; docs/increment12_report.md) - neonates (postmenstrual age set):
+#   offline : neonatal model 0.50 at 5.02 FA/h vs threshold 0.55 at 4.66 -> threshold
+#   realtime: neonatal model 0.45 at 3.12 FA/h vs threshold 0.39 at 3.48 -> neonatal model
+#   general v2 on neonates: 0.35 offline / 0.21 monitor -> never used for neonates
 offline:
   enabled: true
   model: configs/models/ictal_gbm_offline_v2.json
@@ -21,6 +26,16 @@ realtime:
   min_epochs: 5
   alarm_persistence_windows: 1
   calibration: configs/calibration.ml_realtime_v2.json  # Platt, LOSO events of v2 (precision ~16% at point A)
+neonatal:  # seizure detector for neonates (increment 12, evaluation/prereg12.apply_decision)
+  offline: threshold
+  realtime: neonatal
+  realtime_model:
+    enabled: true
+    model: configs/models/ictal_gbm_realtime_neo1.json
+    threshold: 0.5
+    min_epochs: 20
+    calibration: configs/calibration.ml_realtime_neo1.json
 provenance:
   preregistration: docs/preregistration_increment11.md
+  neonatal: docs/preregistration_increment12.md
   previous: docs/preregistration_increment10.md

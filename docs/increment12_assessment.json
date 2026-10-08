@@ -1,0 +1,3170 @@
+{
+ "overall": {
+  "offline-threshold-default": {
+   "hours": 55.14,
+   "seizures": 146,
+   "tp": 81,
+   "fp": 257,
+   "sensitivity": 0.5548,
+   "sens_ci95": [
+    0.47,
+    0.637
+   ],
+   "fa_per_hour": 4.661,
+   "latency_median_s": 14.0
+  },
+  "offline-ml-A": {
+   "hours": 55.14,
+   "seizures": 146,
+   "tp": 73,
+   "fp": 277,
+   "sensitivity": 0.5,
+   "sens_ci95": [
+    0.416,
+    0.584
+   ],
+   "fa_per_hour": 5.024,
+   "latency_median_s": 13.0
+  },
+  "offline-cmp-A": {
+   "hours": 55.14,
+   "seizures": 146,
+   "tp": 51,
+   "fp": 185,
+   "sensitivity": 0.3493,
+   "sens_ci95": [
+    0.272,
+    0.433
+   ],
+   "fa_per_hour": 3.355,
+   "latency_median_s": 18.0
+  },
+  "realtime-threshold-default": {
+   "hours": 55.12,
+   "seizures": 146,
+   "tp": 57,
+   "fp": 192,
+   "sensitivity": 0.3904,
+   "sens_ci95": [
+    0.311,
+    0.475
+   ],
+   "fa_per_hour": 3.483,
+   "latency_median_s": 24.0
+  },
+  "realtime-ml-A": {
+   "hours": 55.12,
+   "seizures": 146,
+   "tp": 65,
+   "fp": 172,
+   "sensitivity": 0.4452,
+   "sens_ci95": [
+    0.363,
+    0.53
+   ],
+   "fa_per_hour": 3.12,
+   "latency_median_s": 32.0
+  },
+  "realtime-cmp-A": {
+   "hours": 55.12,
+   "seizures": 146,
+   "tp": 30,
+   "fp": 99,
+   "sensitivity": 0.2055,
+   "sens_ci95": [
+    0.143,
+    0.28
+   ],
+   "fa_per_hour": 1.796,
+   "latency_median_s": 45.0
+  }
+ },
+ "macro_sensitivity": {
+  "offline-threshold-default": 0.5292,
+  "offline-ml-A": 0.5033,
+  "offline-cmp-A": 0.3705,
+  "realtime-threshold-default": 0.2306,
+  "realtime-ml-A": 0.5159,
+  "realtime-cmp-A": 0.1564
+ },
+ "by_subject": {
+  "offline-threshold-default": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 1.052,
+    "latency_median_s": 155.0
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 1,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 0.985,
+    "latency_median_s": 73.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 28,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 18.568,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.481,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 32,
+    "fp": 0,
+    "sensitivity": 0.7273,
+    "sens_ci95": [
+     0.572,
+     0.85
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 8.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 10,
+    "fp": 48,
+    "sensitivity": 0.8333,
+    "sens_ci95": [
+     0.516,
+     0.979
+    ],
+    "fa_per_hour": 29.091,
+    "latency_median_s": 0.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 3,
+    "fp": 3,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.075,
+     0.701
+    ],
+    "fa_per_hour": 1.199,
+    "latency_median_s": 0.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 8,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 7.775,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 1,
+    "fp": 8,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.013,
+     0.987
+    ],
+    "fa_per_hour": 4.292,
+    "latency_median_s": 75.0
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.896,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.781,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 13,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 12.488,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 4,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 2.219,
+    "latency_median_s": 1.0
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 7,
+    "fp": 0,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.146,
+     0.57
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 17.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 1,
+    "fp": 14,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.013,
+     0.987
+    ],
+    "fa_per_hour": 8.637,
+    "latency_median_s": -44.0
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 5,
+    "fp": 5,
+    "sensitivity": 0.7143,
+    "sens_ci95": [
+     0.29,
+     0.963
+    ],
+    "fa_per_hour": 5.359,
+    "latency_median_s": 3.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.883,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 11,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 7.736,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 15,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 6.247,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 6,
+    "fp": 10,
+    "sensitivity": 0.6,
+    "sens_ci95": [
+     0.262,
+     0.878
+    ],
+    "fa_per_hour": 3.655,
+    "latency_median_s": 33.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 2,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 1.837,
+    "latency_median_s": 102.0
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 14,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 9.763,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 21,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 19.737,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 9,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 6.918,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.522
+    ],
+    "fa_per_hour": 3.693,
+    "latency_median_s": null
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 7,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.977,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 5,
+    "fp": 0,
+    "sensitivity": 0.3125,
+    "sens_ci95": [
+     0.11,
+     0.587
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 48.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 9,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 8.964,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.842,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 11,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 7.925,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 0,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 318.0
+   },
+   "eeg77.edf": {
+    "hours": 1.17,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 3.433,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 2,
+    "fp": 0,
+    "sensitivity": 0.4,
+    "sens_ci95": [
+     0.053,
+     0.853
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 7.0
+   }
+  },
+  "offline-ml-A": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 7,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 7.361,
+    "latency_median_s": -14.0
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 21,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 20.69,
+    "latency_median_s": -63.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 21,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 13.926,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.962,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.806,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 8,
+    "fp": 1,
+    "sensitivity": 0.1818,
+    "sens_ci95": [
+     0.082,
+     0.327
+    ],
+    "fa_per_hour": 0.966,
+    "latency_median_s": 46.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 8,
+    "fp": 37,
+    "sensitivity": 0.6667,
+    "sens_ci95": [
+     0.349,
+     0.901
+    ],
+    "fa_per_hour": 22.424,
+    "latency_median_s": 6.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.075,
+     0.701
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 66.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 3,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 2.915,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 2.682,
+    "latency_median_s": null
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 3,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.09,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 2,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 1.109,
+    "latency_median_s": 109.0
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.572,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 17,
+    "fp": 3,
+    "sensitivity": 0.8095,
+    "sens_ci95": [
+     0.581,
+     0.946
+    ],
+    "fa_per_hour": 1.772,
+    "latency_median_s": 13.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 1,
+    "fp": 0,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.013,
+     0.987
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 36.0
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 4,
+    "fp": 0,
+    "sensitivity": 0.5714,
+    "sens_ci95": [
+     0.184,
+     0.901
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 23.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.942,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.703,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 27,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 11.245,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 10,
+    "fp": 38,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.692,
+     1.0
+    ],
+    "fa_per_hour": 13.889,
+    "latency_median_s": 6.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 0,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 26.0
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.487,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 3,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 2.306,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 48,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 45.714,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 3,
+    "fp": 4,
+    "sensitivity": 0.6,
+    "sens_ci95": [
+     0.147,
+     0.947
+    ],
+    "fa_per_hour": 3.693,
+    "latency_median_s": 13.0
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.568,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 8,
+    "fp": 0,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.247,
+     0.753
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 35.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 4.98,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.842,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 33,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 23.775,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.91,
+    "latency_median_s": null
+   },
+   "eeg77.edf": {
+    "hours": 1.17,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 3,
+    "fp": 1,
+    "sensitivity": 0.6,
+    "sens_ci95": [
+     0.147,
+     0.947
+    ],
+    "fa_per_hour": 1.092,
+    "latency_median_s": 15.0
+   }
+  },
+  "offline-cmp-A": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 3,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 3.155,
+    "latency_median_s": 275.0
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 12,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 11.823,
+    "latency_median_s": 5.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.663,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.481,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.0682,
+    "sens_ci95": [
+     0.014,
+     0.187
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": -4.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 12,
+    "fp": 33,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.735,
+     1.0
+    ],
+    "fa_per_hour": 20.0,
+    "latency_median_s": 13.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 4,
+    "fp": 1,
+    "sensitivity": 0.4444,
+    "sens_ci95": [
+     0.137,
+     0.788
+    ],
+    "fa_per_hour": 0.4,
+    "latency_median_s": 91.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 5.831,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 8,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 4.292,
+    "latency_median_s": null
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.781,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 0.555,
+    "latency_median_s": 361.0
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 6,
+    "fp": 0,
+    "sensitivity": 0.2857,
+    "sens_ci95": [
+     0.113,
+     0.522
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 29.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 1,
+    "fp": 4,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.013,
+     0.987
+    ],
+    "fa_per_hour": 2.468,
+    "latency_median_s": -18.0
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.4286,
+    "sens_ci95": [
+     0.099,
+     0.816
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 46.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 11,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 7.736,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 29,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 12.078,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 10,
+    "fp": 21,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.692,
+     1.0
+    ],
+    "fa_per_hour": 7.675,
+    "latency_median_s": 18.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.487,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.88,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.769,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.952,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.522
+    ],
+    "fa_per_hour": 3.693,
+    "latency_median_s": null
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 13,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 7.386,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 5,
+    "fp": 0,
+    "sensitivity": 0.3125,
+    "sens_ci95": [
+     0.11,
+     0.587
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 63.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 3,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 2.988,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.842,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 22,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 15.85,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.91,
+    "latency_median_s": null
+   },
+   "eeg77.edf": {
+    "hours": 1.17,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 1,
+    "fp": 0,
+    "sensitivity": 0.2,
+    "sens_ci95": [
+     0.005,
+     0.716
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 37.0
+   }
+  },
+  "realtime-threshold-default": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 2.103,
+    "latency_median_s": null
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 0.2,
+    "sens_ci95": [
+     0.005,
+     0.716
+    ],
+    "fa_per_hour": 0.986,
+    "latency_median_s": 60.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 21,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 13.935,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.481,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.806,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 25,
+    "fp": 0,
+    "sensitivity": 0.5682,
+    "sens_ci95": [
+     0.41,
+     0.717
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 20.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 9,
+    "fp": 35,
+    "sensitivity": 0.75,
+    "sens_ci95": [
+     0.428,
+     0.945
+    ],
+    "fa_per_hour": 21.212,
+    "latency_median_s": 8.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 3,
+    "fp": 5,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.075,
+     0.701
+    ],
+    "fa_per_hour": 1.999,
+    "latency_median_s": 76.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.887,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 2.147,
+    "latency_median_s": null
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.792,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 4.808,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 1.109,
+    "latency_median_s": null
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 7,
+    "fp": 0,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.146,
+     0.57
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 32.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 11,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 6.786,
+    "latency_median_s": null
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 4,
+    "fp": 2,
+    "sensitivity": 0.5714,
+    "sens_ci95": [
+     0.184,
+     0.901
+    ],
+    "fa_per_hour": 2.144,
+    "latency_median_s": 14.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 7,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 4.923,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 15,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 6.25,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 3,
+    "fp": 13,
+    "sensitivity": 0.3,
+    "sens_ci95": [
+     0.067,
+     0.652
+    ],
+    "fa_per_hour": 4.751,
+    "latency_median_s": 38.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 3,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 2.755,
+    "latency_median_s": 130.0
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 3,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 2.094,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 19,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 17.857,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 5,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.843,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.907,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.522
+    ],
+    "fa_per_hour": 1.847,
+    "latency_median_s": null
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 7,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.977,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 2,
+    "fp": 0,
+    "sensitivity": 0.125,
+    "sens_ci95": [
+     0.016,
+     0.383
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 137.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 7,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 6.972,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.842,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 4.326,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg77.edf": {
+    "hours": 1.16,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 4,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 3.436,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 1,
+    "fp": 0,
+    "sensitivity": 0.2,
+    "sens_ci95": [
+     0.005,
+     0.716
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 30.0
+   }
+  },
+  "realtime-ml-A": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 6,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 6.309,
+    "latency_median_s": -8.0
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 13,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 12.821,
+    "latency_median_s": -112.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.327,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.962,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 5,
+    "fp": 1,
+    "sensitivity": 0.1136,
+    "sens_ci95": [
+     0.038,
+     0.246
+    ],
+    "fa_per_hour": 0.966,
+    "latency_median_s": 76.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 6,
+    "fp": 14,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.211,
+     0.789
+    ],
+    "fa_per_hour": 8.485,
+    "latency_median_s": 24.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.3333,
+    "sens_ci95": [
+     0.075,
+     0.701
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 36.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.631,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.944,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 3.221,
+    "latency_median_s": null
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 6.179,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 0.555,
+    "latency_median_s": 128.0
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.787,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 17,
+    "fp": 2,
+    "sensitivity": 0.8095,
+    "sens_ci95": [
+     0.581,
+     0.946
+    ],
+    "fa_per_hour": 1.181,
+    "latency_median_s": 29.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 0.5,
+    "sens_ci95": [
+     0.013,
+     0.987
+    ],
+    "fa_per_hour": 0.617,
+    "latency_median_s": 52.0
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 4,
+    "fp": 1,
+    "sensitivity": 0.5714,
+    "sens_ci95": [
+     0.184,
+     0.901
+    ],
+    "fa_per_hour": 1.072,
+    "latency_median_s": 43.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.885,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.703,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 20,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 8.333,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 10,
+    "fp": 20,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.692,
+     1.0
+    ],
+    "fa_per_hour": 7.31,
+    "latency_median_s": 21.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 2,
+    "fp": 0,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.158,
+     1.0
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 39.0
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 4.187,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.537,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 33,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 31.459,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 0.2,
+    "sens_ci95": [
+     0.005,
+     0.716
+    ],
+    "fa_per_hour": 0.923,
+    "latency_median_s": 41.0
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 6,
+    "fp": 0,
+    "sensitivity": 0.375,
+    "sens_ci95": [
+     0.152,
+     0.646
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 51.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 5.976,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 20,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 14.42,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 1,
+    "fp": 1,
+    "sensitivity": 1.0,
+    "sens_ci95": [
+     0.025,
+     1.0
+    ],
+    "fa_per_hour": 0.91,
+    "latency_median_s": 187.0
+   },
+   "eeg77.edf": {
+    "hours": 1.16,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 3,
+    "fp": 1,
+    "sensitivity": 0.6,
+    "sens_ci95": [
+     0.147,
+     0.947
+    ],
+    "fa_per_hour": 1.093,
+    "latency_median_s": 32.0
+   }
+  },
+  "realtime-cmp-A": {
+   "eeg4.edf": {
+    "hours": 0.95,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg6.edf": {
+    "hours": 1.31,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg7.edf": {
+    "hours": 1.01,
+    "seizures": 5,
+    "tp": 4,
+    "fp": 1,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.284,
+     0.995
+    ],
+    "fa_per_hour": 0.986,
+    "latency_median_s": 45.0
+   },
+   "eeg10.edf": {
+    "hours": 1.51,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.327,
+    "latency_median_s": null
+   },
+   "eeg11.edf": {
+    "hours": 2.08,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg12.edf": {
+    "hours": 1.24,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg14.edf": {
+    "hours": 1.03,
+    "seizures": 44,
+    "tp": 2,
+    "fp": 0,
+    "sensitivity": 0.0455,
+    "sens_ci95": [
+     0.006,
+     0.155
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 18.0
+   },
+   "eeg16.edf": {
+    "hours": 1.65,
+    "seizures": 12,
+    "tp": 3,
+    "fp": 19,
+    "sensitivity": 0.25,
+    "sens_ci95": [
+     0.055,
+     0.572
+    ],
+    "fa_per_hour": 11.515,
+    "latency_median_s": 8.0
+   },
+   "eeg19.edf": {
+    "hours": 2.5,
+    "seizures": 9,
+    "tp": 2,
+    "fp": 1,
+    "sensitivity": 0.2222,
+    "sens_ci95": [
+     0.028,
+     0.6
+    ],
+    "fa_per_hour": 0.4,
+    "latency_median_s": 289.0
+   },
+   "eeg21.edf": {
+    "hours": 1.58,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg24.edf": {
+    "hours": 1.03,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 2,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 1.944,
+    "latency_median_s": null
+   },
+   "eeg25.edf": {
+    "hours": 1.86,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 10,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 5.368,
+    "latency_median_s": null
+   },
+   "eeg27.edf": {
+    "hours": 0.97,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg29.edf": {
+    "hours": 2.23,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg32.edf": {
+    "hours": 1.28,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg33.edf": {
+    "hours": 1.04,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg34.edf": {
+    "hours": 1.8,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg37.edf": {
+    "hours": 1.27,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg38.edf": {
+    "hours": 1.69,
+    "seizures": 21,
+    "tp": 5,
+    "fp": 0,
+    "sensitivity": 0.2381,
+    "sens_ci95": [
+     0.082,
+     0.472
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 50.0
+   },
+   "eeg40.edf": {
+    "hours": 1.62,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 0.617,
+    "latency_median_s": null
+   },
+   "eeg44.edf": {
+    "hours": 0.93,
+    "seizures": 7,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.4286,
+    "sens_ci95": [
+     0.099,
+     0.816
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 77.0
+   },
+   "eeg45.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg46.edf": {
+    "hours": 1.42,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 8,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 5.626,
+    "latency_median_s": null
+   },
+   "eeg49.edf": {
+    "hours": 2.4,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 12,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 5.0,
+    "latency_median_s": null
+   },
+   "eeg50.edf": {
+    "hours": 2.74,
+    "seizures": 10,
+    "tp": 8,
+    "fp": 15,
+    "sensitivity": 0.8,
+    "sens_ci95": [
+     0.444,
+     0.975
+    ],
+    "fa_per_hour": 5.482,
+    "latency_median_s": 34.0
+   },
+   "eeg52.edf": {
+    "hours": 1.09,
+    "seizures": 2,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.842
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg55.edf": {
+    "hours": 1.43,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg56.edf": {
+    "hours": 1.06,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 6,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 5.639,
+    "latency_median_s": null
+   },
+   "eeg58.edf": {
+    "hours": 1.3,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg60.edf": {
+    "hours": 1.05,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg63.edf": {
+    "hours": 1.08,
+    "seizures": 5,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.522
+    ],
+    "fa_per_hour": 0.923,
+    "latency_median_s": null
+   },
+   "eeg64.edf": {
+    "hours": 1.76,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 7,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 3.977,
+    "latency_median_s": null
+   },
+   "eeg67.edf": {
+    "hours": 1.36,
+    "seizures": 16,
+    "tp": 3,
+    "fp": 0,
+    "sensitivity": 0.1875,
+    "sens_ci95": [
+     0.04,
+     0.456
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": 90.0
+   },
+   "eeg68.edf": {
+    "hours": 1.0,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.996,
+    "latency_median_s": null
+   },
+   "eeg71.edf": {
+    "hours": 1.19,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 1,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 0.842,
+    "latency_median_s": null
+   },
+   "eeg72.edf": {
+    "hours": 1.39,
+    "seizures": 0,
+    "tp": 0,
+    "fp": 12,
+    "sensitivity": null,
+    "sens_ci95": [
+     NaN,
+     NaN
+    ],
+    "fa_per_hour": 8.652,
+    "latency_median_s": null
+   },
+   "eeg75.edf": {
+    "hours": 1.1,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg77.edf": {
+    "hours": 1.16,
+    "seizures": 1,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.975
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   },
+   "eeg79.edf": {
+    "hours": 0.92,
+    "seizures": 5,
+    "tp": 0,
+    "fp": 0,
+    "sensitivity": 0.0,
+    "sens_ci95": [
+     0.0,
+     0.522
+    ],
+    "fa_per_hour": 0.0,
+    "latency_median_s": null
+   }
+  }
+ },
+ "hypotheses": {
+  "H1_offline_neonatal_noninferior_to_threshold": false,
+  "H2_realtime_neonatal_noninferior_to_threshold": true,
+  "H3_offline_general_noninferior_to_threshold": false,
+  "H4_realtime_general_noninferior_to_threshold": false
+ },
+ "secondary": {
+  "neonatal_vs_general_noninferior": {
+   "offline": false,
+   "realtime": false
+  },
+  "fa_per_hour_excluding_ambiguous": {
+   "offline-threshold-default": 3.446,
+   "offline-ml-A": 4.226,
+   "offline-cmp-A": 2.43,
+   "realtime-threshold-default": 2.449,
+   "realtime-ml-A": 2.739,
+   "realtime-cmp-A": 1.252
+  }
+ },
+ "decision": {
+  "offline_neonatal": "threshold",
+  "realtime_neonatal": "neonatal"
+ }
+}
