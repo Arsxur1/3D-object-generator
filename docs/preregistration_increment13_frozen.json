@@ -1,0 +1,75 @@
+{
+ "dataset": "Sleep-EDF SC, development half (even subject numbers)",
+ "n_nights": 78,
+ "n_subjects": 40,
+ "n_epochs": 100616,
+ "dev_cv": {
+  "kappa": 0.7081,
+  "accuracy": 0.7858,
+  "macro_f1": 0.7285,
+  "f1": {
+   "W": 0.9071,
+   "N1": 0.4757,
+   "N2": 0.8042,
+   "N3": 0.6623,
+   "REM": 0.7933
+  },
+  "per_night_kappa_median": 0.712,
+  "confusion": [
+   [
+    30301,
+    2988,
+    624,
+    75,
+    491
+   ],
+   [
+    1375,
+    6125,
+    2730,
+    105,
+    1037
+   ],
+   [
+    361,
+    3654,
+    27867,
+    2331,
+    1180
+   ],
+   [
+    65,
+    54,
+    1723,
+    4276,
+    0
+   ],
+   [
+    227,
+    1556,
+    970,
+    7,
+    10494
+   ]
+  ]
+ },
+ "dev_rule_based": {
+  "kappa": 0.1981,
+  "accuracy": 0.3655,
+  "macro_f1": 0.3187,
+  "f1": {
+   "W": 0.5092,
+   "N1": 0.1867,
+   "N2": 0.4186,
+   "N3": 0.373,
+   "REM": 0.1059
+  }
+ },
+ "model": {
+  "path": "configs/models/sleep_stager_v1.json",
+  "sha256": "7378512671fdefbb4ae052ae8bc81814b1a1d247cf80ebe7126488bd1a4bbcf0",
+  "n_iterations": 140,
+  "n_features": 215,
+  "size_bytes": 2225410
+ }
+}
