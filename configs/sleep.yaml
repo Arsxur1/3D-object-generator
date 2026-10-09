@@ -1,0 +1,6 @@
+# Learned AASM sleep staging (W/N1/N2/N3/REM) in the offline report.
+# Disabled until the pre-registered held-out check (docs/preregistration_increment13.md)
+# decides; evaluation/prereg13.apply_decision rewrites `enabled` and `model`.
+enabled: false
+model: null
+min_duration_h: 2.0

@@ -307,6 +307,42 @@ def _tune(args) -> int:
     return 0
 
 
+def _sleep(args) -> int:
+    """Sleep-EDF: fetch a split, or evaluate a frozen stager on it (+ pre-registered analysis)."""
+    import json
+
+    from .datasets.sleepedf import SleepEDFClient
+
+    client = SleepEDFClient(args.cache)
+    recs = client.split()[args.split]
+    if args.action == "fetch":
+        res = client.fetch_records(recs, workers=args.workers,
+                                   on_done=lambda r, e: print(("ok  " if e is None else f"ERR {e} ") + r, flush=True))
+        return 0 if all(not isinstance(v, Exception) for v in res.values()) else 1
+    from .evaluation.sleep_eval import evaluate, prepare_nights, save
+    from .layer4_detect.sleep_staging import MulticlassTreeModel
+
+    frozen = json.loads(open(args.frozen, encoding="utf-8").read())
+    import hashlib
+
+    if hashlib.sha256(open(frozen["model"]["path"], "rb").read()).hexdigest() != frozen["model"]["sha256"]:
+        raise RuntimeError("sleep model does not match the frozen sha256")
+    nights = prepare_nights(client, recs, args.feature_cache, workers=args.workers, progress=print)
+    result = evaluate(nights, MulticlassTreeModel.load(frozen["model"]["path"]))
+    path = save(result, args.out)
+    for k, v in result.items():
+        print(f"{k}: kappa {v['kappa']:.3f} accuracy {v['accuracy']:.3f} macro-F1 {v['macro_f1']:.3f} F1 {v['f1']}")
+    if args.assess:
+        from .evaluation.prereg13 import assess, markdown_report
+
+        a = assess(result, frozen)
+        path.with_name("prereg_assessment.json").write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
+        path.with_name("prereg_report.md").write_text(markdown_report(a), encoding="utf-8")
+        print(json.dumps({"hypotheses": a["hypotheses"], "decision": a["decision"]}, indent=1))
+    print(f"Saved: {path}")
+    return 0
+
+
 def _ml_eval(args) -> int:
     import json
 
@@ -460,6 +496,17 @@ def build_parser() -> argparse.ArgumentParser:
                          "('' disables).")
     me.add_argument("--out", default="out_eval/ml_eval")
     me.set_defaults(func=_ml_eval)
+
+    sl = sub.add_parser("sleep", help="Sleep-EDF: fetch a split or evaluate a frozen sleep stager.")
+    sl.add_argument("action", choices=["fetch", "eval"])
+    sl.add_argument("--split", choices=["dev", "test"], required=True)
+    sl.add_argument("--cache", default=None)
+    sl.add_argument("--frozen", default="docs/preregistration_increment13_frozen.json")
+    sl.add_argument("--feature-cache", default="data/physionet/.features/sleep", dest="feature_cache")
+    sl.add_argument("--workers", type=int, default=3)
+    sl.add_argument("--assess", action="store_true")
+    sl.add_argument("--out", default="out_eval/sleep")
+    sl.set_defaults(func=_sleep)
 
     sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
     sv.add_argument("--host", default="127.0.0.1")

@@ -52,6 +52,13 @@ DATABASES: dict[str, DatabaseInfo] = {
         "A Study on Data of Noninvasive Recordings. Processes 8(7):846, 2020.",
         "Creative Commons Attribution 4.0 International",
     ),
+    "sleepedf": DatabaseInfo(
+        "sleep-edfx", "1.0.0",
+        "Kemp B et al. Analysis of a sleep-dependent neuronal feedback loop: the slow-wave "
+        "microcontinuity of the EEG. IEEE-BME 47(9):1185-1194, 2000; Goldberger AL et al. "
+        "PhysioNet. Circulation 101(23):e215-e220, 2000.",
+        "Open Data Commons Attribution License v1.0",
+    ),
 }
 
 Fetcher = Callable[[str], bytes]

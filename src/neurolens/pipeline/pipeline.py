@@ -113,6 +113,22 @@ class Pipeline:
         self._calibration_file = calibration_file
         self._neonatal_cache: dict = {}
 
+    def _sleep_staging(self, signal: UnifiedSignal) -> dict | None:
+        """Learned AASM staging (configs/sleep.yaml) for long recordings; None when
+        disabled, too short, or the needed 10-20 electrodes are missing."""
+        sc = self.cfg.sleep
+        if not sc.enabled or not sc.model or signal.duration_s < sc.min_duration_h * 3600:
+            return None
+        from ..layer4_detect.sleep_staging import MulticlassTreeModel, stage_signal
+
+        if getattr(self, "_sleep_model", None) is None:
+            self._sleep_model = MulticlassTreeModel.load(self.cfg.ml_model_path(sc.model))
+        out = stage_signal(signal.channel_names, signal.signal, signal.sampling_rate_hz, self._sleep_model)
+        if out is not None:
+            out["model"] = sc.model
+            out["provenance"] = sc.provenance
+        return out
+
     def _neonatal_setup(self):
         """(ml_detector or None, calibrator) for neonates per configs/ml.yaml
         ``neonatal.offline`` — only consulted when ``learned`` was not forced."""
@@ -240,6 +256,9 @@ class Pipeline:
             "per_code_temperatures": calibrator.temperatures if calibrator else {},
             "metrics": calibrator.metrics if calibrator else {},
         }
+        sleep = self._sleep_staging(signal)
+        if sleep is not None:
+            result_json["sleep_staging"] = sleep
 
         return PipelineOutput(
             signal=analysis,

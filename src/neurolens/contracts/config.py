@@ -215,6 +215,17 @@ class LearnedDetectorMode(BaseModel):
                     "gated only by threshold/min_epochs.")
 
 
+class SleepStagingConfig(BaseModel):
+    """configs/sleep.yaml — learned AASM sleep staging in the offline report."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    model: Optional[str] = None
+    min_duration_h: float = Field(default=2.0, description="Stage only recordings at least this long.")
+    provenance: dict = Field(default_factory=dict)
+
+
 class NeonatalPolicy(BaseModel):
     """Which seizure detector serves neonates (patient with postmenstrual age set):
     ``general`` — the offline/realtime settings above; ``threshold`` — the
