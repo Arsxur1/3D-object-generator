@@ -98,10 +98,11 @@ def read_cap(edf_path: str | Path, txt: str, target_fs: float = 100.0) -> tuple[
     """Approximate Sleep-EDF derivations at ``target_fs`` + expert stages."""
     from fractions import Fraction
 
-    import pyedflib
     from scipy.signal import resample_poly
 
-    r = pyedflib.EdfReader(str(edf_path))
+    from ..layer1_ingest.edf import open_edf
+
+    r = open_edf(edf_path)
     try:
         labels = [lb.strip().upper() for lb in r.getSignalLabels()]
         chain = RIGHT if set(RIGHT) <= set(labels) else LEFT

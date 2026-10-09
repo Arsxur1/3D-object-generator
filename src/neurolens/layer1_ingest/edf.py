@@ -52,12 +52,9 @@ class EdfIngestor(Ingestor):
         context: ClinicalContext | None = None,
     ) -> UnifiedSignal:
         path = Path(path)
-        try:
-            reader = pyedflib.EdfReader(str(path))
-        except OSError:
-            # e.g. a header declaring EDF+ without the mandatory annotation signal
-            # (Helsinki neonatal eeg50.edf): read the data as plain EDF instead
-            reader = PlainEdfReader(path)
+        # pyedflib rejects e.g. EDF+ headers without the annotation signal (Helsinki
+        # eeg50.edf) or a record count beyond the data (CAP brux1.edf): plain EDF then
+        reader = open_edf(path)
         try:
             n = reader.signals_in_file
             labels = reader.getSignalLabels()
@@ -106,6 +103,15 @@ class EdfIngestor(Ingestor):
         return out
 
 
+def open_edf(path: str | Path):
+    """pyedflib reader, or :class:`PlainEdfReader` when pyedflib rejects the file
+    (non-compliant EDF+ header, or a header record count larger than the data)."""
+    try:
+        return pyedflib.EdfReader(str(path))
+    except OSError:
+        return PlainEdfReader(path)
+
+
 class PlainEdfReader:
     """Minimal EDF reader (header + 16-bit data records), used only when pyedflib
     rejects a file whose samples are standard EDF but whose header is not strictly
@@ -145,6 +151,19 @@ class PlainEdfReader:
             gain = (pmax[i] - pmin[i]) / (dmax[i] - dmin[i])
             self._signals.append((dig - dmin[i]) * gain + pmin[i])
         self.signals_in_file = len(keep)
+        self.truncated_records = max(0, int(raw[236:244].decode("ascii").strip()) - n_records)
+        self._start = (raw[168:176].decode("ascii"), raw[176:184].decode("ascii"))
+
+    def getStartdatetime(self):
+        from datetime import datetime
+
+        d, t = self._start
+        day, month, year = (int(x) for x in d.split("."))
+        hh, mm, ss = (int(x) for x in t.split("."))
+        return datetime(2000 + year if year < 85 else 1900 + year, month, day, hh, mm, ss)
+
+    def getSampleFrequencies(self):
+        return list(self._fs)
 
     def getSignalLabels(self) -> list[str]:
         return list(self._labels)

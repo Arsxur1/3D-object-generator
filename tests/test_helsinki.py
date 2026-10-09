@@ -198,3 +198,25 @@ def test_default_config_neonatal_decision(configs):
     rt = ml.select("realtime", neonate=True)
     assert rt is not None and rt.model.endswith("ictal_gbm_realtime_neo1.json")
     assert ml.select("offline").model.endswith("offline_v2.json")
+
+
+def test_open_edf_reads_file_shorter_than_header(tmp_path):
+    """CAP brux1.edf: header record count exceeds the data on disk; the fallback
+    reads the records that exist and reports how many are missing."""
+    import numpy as np
+    import pyedflib
+
+    from neurolens.layer1_ingest.edf import PlainEdfReader, open_edf
+
+    plain = tmp_path / "plain.edf"
+    w = pyedflib.EdfWriter(str(plain), 2, file_type=pyedflib.FILETYPE_EDF)
+    w.setSignalHeaders([{"label": f"C{i}", "dimension": "uV", "sample_frequency": 100, "physical_min": -500,
+                         "physical_max": 500, "digital_min": -32768, "digital_max": 32767} for i in range(2)])
+    w.writeSamples([np.random.default_rng(i).normal(0, 20, 1000) for i in range(2)])
+    w.close()
+    raw = plain.read_bytes()
+    cut = tmp_path / "cut.edf"
+    cut.write_bytes(raw[: len(raw) - 2 * 2 * 100 * 3])  # drop the last 3 one-second records
+    r = open_edf(cut)
+    assert isinstance(r, PlainEdfReader) and r.truncated_records == 3
+    assert len(r.readSignal(0)) == 700 and r.getStartdatetime().year >= 2000
