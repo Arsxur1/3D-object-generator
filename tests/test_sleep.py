@@ -177,3 +177,14 @@ def test_prepare_nights_runs_in_worker_processes(tmp_path, monkeypatch):
     pickle.dumps((tmp_path, rec, None))  # what is sent to a worker must pickle
     out = sleep_eval.prepare_nights(SleepEDFClient(tmp_path), [rec], None, workers=1)
     assert out == ["SC4011"] and calls == ["SC4011"]
+
+
+def test_default_config_enables_validated_stager(configs):
+    """Increment-13 decision: staging on by default with the frozen model (SHA-256 checked)."""
+    import hashlib
+    import json
+
+    sc = configs.sleep
+    assert sc.enabled and sc.model == "configs/models/sleep_stager_v1.json" and sc.min_duration_h == 2.0
+    frozen = json.loads(open("docs/preregistration_increment13_frozen.json", encoding="utf-8").read())
+    assert hashlib.sha256(open(sc.model, "rb").read()).hexdigest() == frozen["model"]["sha256"]

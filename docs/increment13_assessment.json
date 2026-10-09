@@ -1,0 +1,41 @@
+{
+ "learned": {
+  "accuracy": 0.7835,
+  "kappa": 0.7082,
+  "macro_f1": 0.7369,
+  "f1": {
+   "W": 0.8918,
+   "N1": 0.4705,
+   "N2": 0.81,
+   "N3": 0.7092,
+   "REM": 0.8028
+  },
+  "per_night_kappa_median": 0.7068,
+  "n_epochs": 94853,
+  "n_nights": 75,
+  "n_subjects": 38
+ },
+ "rule_based": {
+  "accuracy": 0.3964,
+  "kappa": 0.2388,
+  "macro_f1": 0.3515,
+  "f1": {
+   "W": 0.5671,
+   "N1": 0.1901,
+   "N2": 0.4251,
+   "N3": 0.4422,
+   "REM": 0.1331
+  },
+  "per_night_kappa_median": 0.2286
+ },
+ "dev_cv_kappa": 0.7081,
+ "hypotheses": {
+  "H1_kappa_at_least_0.70": true,
+  "H2_beats_rule_based_by_0.10_kappa": true,
+  "H3_transfer_within_0.05_of_dev_cv": true,
+  "H4_macro_f1_at_least_0.65": true
+ },
+ "decision": {
+  "sleep_staging_enabled_by_default": true
+ }
+}
