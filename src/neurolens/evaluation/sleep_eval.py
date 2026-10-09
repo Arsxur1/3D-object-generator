@@ -145,3 +145,59 @@ def save(result: dict, out_dir: str | Path) -> Path:
     p = out / "sleep_metrics.json"
     p.write_text(json.dumps(result, indent=1), encoding="utf-8")
     return p
+
+
+# ---------------------------------------------------------------------------
+# CAP Sleep Database (clinical transfer test, increment 13b)
+# ---------------------------------------------------------------------------
+
+def cap_headers(client) -> dict[str, list[str]]:
+    """Channel labels of every CAP recording from its EDF header (HTTP range
+    request, no signal data), cached as JSON."""
+    import time
+    import urllib.request
+
+    path = client.cache / "headers.json"
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    out = {}
+    for rec in [r for r in client.records() if r.endswith(".edf")]:
+        for attempt in range(6):
+            try:
+                req = urllib.request.Request(f"{client.base}/{rec}",
+                                             headers={"Range": "bytes=0-16383", "User-Agent": "neurolens/0.1"})
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    h = resp.read()
+                break
+            except Exception:
+                if attempt == 5:
+                    raise
+                time.sleep(5 * (attempt + 1))
+        ns = int(h[252:256])
+        out[rec] = [h[256 + 16 * i: 256 + 16 * (i + 1)].decode("latin-1").strip() for i in range(ns)]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, indent=1), encoding="utf-8")
+    return out
+
+
+def prepare_cap_night(client, rec_name: str, cache_dir: str | Path, keep_edf: bool = False) -> Night:
+    """Download one CAP recording (+ scoring), compute features, delete the EDF."""
+    import zlib
+
+    from ..datasets.capsleep import read_cap
+
+    cp = Path(cache_dir) / f"cap_{rec_name.removesuffix('.edf')}_fv{FEATURE_VERSION}.pkl"
+    if cp.exists():
+        return pickle.loads(cp.read_bytes())
+    edf = client.fetch(rec_name)
+    txt = client.text(rec_name.removesuffix(".edf") + ".txt")
+    sig, rec = read_cap(edf, txt)
+    a, b = rec.start_epoch, rec.end_epoch
+    F, names = epoch_features(sig["frontal"], sig["parietal"], sig["eog"], 100.0, a, b)
+    y = np.array([-1 if s is None else s for s in rec.stages[a:b]], dtype=int)
+    night = Night(rec.name, zlib.crc32(rec.name.encode()), F, names, y)
+    cp.parent.mkdir(parents=True, exist_ok=True)
+    cp.write_bytes(pickle.dumps(night))
+    if not keep_edf:
+        edf.unlink(missing_ok=True)
+    return night

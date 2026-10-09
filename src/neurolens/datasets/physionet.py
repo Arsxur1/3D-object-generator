@@ -52,6 +52,13 @@ DATABASES: dict[str, DatabaseInfo] = {
         "A Study on Data of Noninvasive Recordings. Processes 8(7):846, 2020.",
         "Creative Commons Attribution 4.0 International",
     ),
+    "capsleep": DatabaseInfo(
+        "capslpdb", "1.0.0",
+        "Terzano MG et al. Atlas, rules, and recording techniques for the scoring of cyclic "
+        "alternating pattern (CAP) in human sleep. Sleep Med 2(6):537-553, 2001; Goldberger AL "
+        "et al. PhysioNet. Circulation 101(23):e215-e220, 2000.",
+        "Open Data Commons Attribution License v1.0",
+    ),
     "sleepedf": DatabaseInfo(
         "sleep-edfx", "1.0.0",
         "Kemp B et al. Analysis of a sleep-dependent neuronal feedback loop: the slow-wave "

@@ -242,10 +242,12 @@ def hypnogram_summary(stages: np.ndarray) -> dict:
 MODEL_FS = 100.0  # Sleep-EDF EEG sampling rate the model was trained on
 
 
-def derivations(names: list[str], data: np.ndarray) -> dict | None:
+def derivations(names: list[str], data: np.ndarray, parasagittal_fallback: bool = False) -> dict | None:
     """Sleep-EDF-like derivations from a 10-20 recording: Fpz-Cz (Fp1/Fp2 mean when
     Fpz is absent), Pz-Oz (O1/O2 mean when Oz is absent) and horizontal EOG (a
-    dedicated EOG channel, else F7-F8). None when the needed electrodes are missing."""
+    dedicated EOG channel, else F7-F8). Without midline electrodes and with
+    ``parasagittal_fallback``: Fp2-C4 / P4-O2 (left side if the right is missing),
+    as validated on clinical PSG in increment 13b. None when electrodes are missing."""
     idx = {n.upper(): i for i, n in enumerate(names)}
 
     def ch(*opts):
@@ -256,7 +258,14 @@ def derivations(names: list[str], data: np.ndarray) -> dict | None:
     oz = ch("Oz") if "OZ" in idx else ch("O1", "O2")
     cz, pz = ch("Cz"), ch("Pz")
     if fpz is None or oz is None or cz is None or pz is None:
-        return None
+        side = next((s for s in (("FP2", "C4", "P4", "O2"), ("FP1", "C3", "P3", "O1"))
+                     if all(e in idx for e in s)), None) if parasagittal_fallback else None
+        if side is None:
+            return None
+        fp, c, pp, o = (data[idx[e]] for e in side)
+        frontal, parietal = fp - c, pp - o
+    else:
+        frontal, parietal = fpz - cz, pz - oz
     eog_name = next((n for n in names if n.upper().startswith("EOG") or n.upper().startswith("LOC")), None)
     if eog_name is not None:
         eog = data[names.index(eog_name)]
@@ -264,14 +273,15 @@ def derivations(names: list[str], data: np.ndarray) -> dict | None:
         eog = data[idx["F7"]] - data[idx["F8"]]
     else:
         eog = None
-    return {"frontal": fpz - cz, "parietal": pz - oz, "eog": eog}
+    return {"frontal": frontal, "parietal": parietal, "eog": eog}
 
 
-def stage_signal(names: list[str], data: np.ndarray, fs: float, model: MulticlassTreeModel) -> dict | None:
+def stage_signal(names: list[str], data: np.ndarray, fs: float, model: MulticlassTreeModel,
+                 parasagittal_fallback: bool = False) -> dict | None:
     """Hypnogram + sleep summary for a recording, or None if derivations are missing."""
     from scipy.signal import resample_poly
 
-    der = derivations(names, data)
+    der = derivations(names, data, parasagittal_fallback)
     if der is None:
         return None
     if abs(fs - MODEL_FS) > 1e-6:
@@ -294,6 +304,7 @@ def stage_signal(names: list[str], data: np.ndarray, fs: float, model: Multiclas
         "hypnogram": [STAGES[i] for i in stages],
         "summary": hypnogram_summary(stages),
         "mean_confidence": round(float(proba.max(axis=1).mean()), 3),
+        "derivations": "midline" if derivations(names, data[:, :1]) is not None else "parasagittal",
         "eog_source": "eog_channel" if any(n.upper().startswith(("EOG", "LOC")) for n in names)
                       else ("F7-F8" if der["eog"] is not None else "none"),
     }

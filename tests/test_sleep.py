@@ -188,3 +188,59 @@ def test_default_config_enables_validated_stager(configs):
     assert sc.enabled and sc.model == "configs/models/sleep_stager_v1.json" and sc.min_duration_h == 2.0
     frozen = json.loads(open("docs/preregistration_increment13_frozen.json", encoding="utf-8").read())
     assert hashlib.sha256(open(sc.model, "rb").read()).hexdigest() == frozen["model"]["sha256"]
+
+
+CAP_TXT = """RemLogic Event Export
+Patient:\tN 1
+
+Sleep Stage\tPosition\tTime [hh:mm:ss]\tEvent\tDuration[s]\tLocation
+W\tUnknown Position\t22:00:30\tSLEEP-S0\t30\tROC-LOC
+S1\tUnknown Position\t22:01:00\tSLEEP-S1\t30\tROC-LOC
+S4\tUnknown Position\t22:01:30\tSLEEP-S4\t60\tROC-LOC
+R\tUnknown Position\t22:02:30\tSLEEP-REM\t30\tROC-LOC
+MT\tUnknown Position\t22:03:00\tSLEEP-MT\t30\tROC-LOC
+W\tUnknown Position\t22:03:30\tMCAP-A1\t4\tFp2-F4
+"""
+
+
+def test_cap_scoring_alignment_and_selection():
+    from neurolens.datasets.capsleep import parse_scoring, select_records, usable
+
+    st = parse_scoring(CAP_TXT, "22:00:00", 10)
+    W, N1, N3, R = (STAGES.index(s) for s in ("W", "N1", "N3", "REM"))
+    assert st[:7] == [None, W, N1, N3, N3, R, None] and st[7] is None  # MT unscored, MCAP ignored
+    chain = ["Fp2-F4", "F4-C4", "C4-P4", "P4-O2", "ROC-LOC"]
+    assert usable(chain) and not usable(chain[:-1]) and usable(["FP1-F3", "F3-C3", "P3-O1", "ROC-LOC"])
+    heads = {f"nfle{i}.edf": chain for i in range(1, 7)} | {"n1.edf": ["C3-A2"], "n2.edf": chain, "rbd3.edf": chain}
+    assert select_records(heads) == ["n2.edf", "nfle1.edf", "nfle2.edf", "nfle3.edf", "nfle4.edf", "rbd3.edf"]
+
+
+def test_parasagittal_fallback_is_gated():
+    names = ["Fp2", "C4", "P4", "O2", "F7", "F8"]
+    data = np.arange(6 * 10, dtype=float).reshape(6, 10)
+    assert derivations(names, data) is None  # no midline: off by default
+    d = derivations(names, data, parasagittal_fallback=True)
+    assert np.allclose(d["frontal"], data[0] - data[1]) and np.allclose(d["parietal"], data[2] - data[3])
+
+
+def test_prereg13b_decision_and_apply(tmp_path):
+    import shutil
+
+    import yaml
+
+    from neurolens.evaluation.prereg13b import apply_decision, assess, markdown_report
+
+    def sc(k):
+        return {"accuracy": 0.7, "kappa": k, "macro_f1": 0.6, "f1": {s: 0.6 for s in STAGES},
+                "per_night_kappa_median": k, "n_epochs": 100, "n_nights": 3}
+
+    a = assess({"learned": sc(0.63), "rule_based": sc(0.3)}, {"nfle": sc(0.6)})
+    b = assess({"learned": sc(0.55), "rule_based": sc(0.3)}, {"nfle": sc(0.5)})
+    assert a["decision"]["parasagittal_fallback"] and not b["decision"]["parasagittal_fallback"]
+    assert "nfle" in markdown_report(a)
+    cfg = tmp_path / "sleep.yaml"
+    shutil.copy("configs/sleep.yaml", cfg)
+    apply_decision(a, str(cfg))
+    assert yaml.safe_load(cfg.read_text())["parasagittal_fallback"] is True
+    apply_decision(b, str(cfg))
+    assert yaml.safe_load(cfg.read_text())["parasagittal_fallback"] is False

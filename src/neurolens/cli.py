@@ -307,12 +307,59 @@ def _tune(args) -> int:
     return 0
 
 
+def _sleep_cap(args) -> int:
+    """Increment 13b: frozen stager on the pre-registered CAP Sleep Database subset."""
+    import hashlib
+    import json
+    from pathlib import Path
+
+    import numpy as np
+
+    from .datasets.capsleep import select_records
+    from .datasets.physionet import PhysioNetClient
+    from .evaluation.sleep_eval import cap_headers, predict_night, prepare_cap_night, save, score
+    from .layer4_detect.sleep_staging import MulticlassTreeModel, rule_based_stages
+
+    frozen = json.loads(open(args.frozen, encoding="utf-8").read())
+    if hashlib.sha256(open(frozen["model"]["path"], "rb").read()).hexdigest() != frozen["model"]["sha256"]:
+        raise RuntimeError("sleep model does not match the frozen sha256")
+    client = PhysioNetClient("capsleep", args.cache)
+    names = select_records(cap_headers(client))
+    model = MulticlassTreeModel.load(frozen["model"]["path"])
+    nights = []
+    for i, n in enumerate(names, 1):
+        nights.append(prepare_cap_night(client, n, args.feature_cache))
+        print(f"[{i}/{len(names)}] prepared {n}", flush=True)
+    learned = [predict_night(model, n) for n in nights]
+    rule = [rule_based_stages(n.F, n.names) for n in nights]
+    result = {"learned": score(nights, learned), "rule_based": score(nights, rule), "records": names}
+    groups = sorted({n.key.rstrip("0123456789") for n in nights})
+    by_group = {g: score([n for n in nights if n.key.rstrip("0123456789") == g],
+                         [p for n, p in zip(nights, learned) if n.key.rstrip("0123456789") == g]) for g in groups}
+    result["by_group"] = {g: {k: v[k] for k in ("kappa", "accuracy", "macro_f1", "n_nights")} for g, v in by_group.items()}
+    path = save(result, args.out)
+    for k in ("learned", "rule_based"):
+        v = result[k]
+        print(f"{k}: kappa {v['kappa']:.3f} accuracy {v['accuracy']:.3f} macro-F1 {v['macro_f1']:.3f}")
+    if args.assess:
+        from .evaluation.prereg13b import assess, markdown_report
+
+        a = assess(result, by_group)
+        path.with_name("prereg_assessment.json").write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
+        path.with_name("prereg_report.md").write_text(markdown_report(a), encoding="utf-8")
+        print(json.dumps({"hypotheses": a["hypotheses"], "decision": a["decision"]}, indent=1))
+    print(f"Saved: {path}")
+    return 0
+
+
 def _sleep(args) -> int:
     """Sleep-EDF: fetch a split, or evaluate a frozen stager on it (+ pre-registered analysis)."""
     import json
 
     from .datasets.sleepedf import SleepEDFClient
 
+    if args.action == "cap":
+        return _sleep_cap(args)
     client = SleepEDFClient(args.cache)
     recs = client.split()[args.split]
     if args.action == "fetch":
@@ -498,8 +545,9 @@ def build_parser() -> argparse.ArgumentParser:
     me.set_defaults(func=_ml_eval)
 
     sl = sub.add_parser("sleep", help="Sleep-EDF: fetch a split or evaluate a frozen sleep stager.")
-    sl.add_argument("action", choices=["fetch", "eval"])
-    sl.add_argument("--split", choices=["dev", "test"], required=True)
+    sl.add_argument("action", choices=["fetch", "eval", "cap"],
+                    help="fetch/eval: Sleep-EDF split; cap: clinical transfer test (CAP Sleep Database)")
+    sl.add_argument("--split", choices=["dev", "test"], default="test")
     sl.add_argument("--cache", default=None)
     sl.add_argument("--frozen", default="docs/preregistration_increment13_frozen.json")
     sl.add_argument("--feature-cache", default="data/physionet/.features/sleep", dest="feature_cache")

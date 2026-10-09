@@ -123,7 +123,8 @@ class Pipeline:
 
         if getattr(self, "_sleep_model", None) is None:
             self._sleep_model = MulticlassTreeModel.load(self.cfg.ml_model_path(sc.model))
-        out = stage_signal(signal.channel_names, signal.signal, signal.sampling_rate_hz, self._sleep_model)
+        out = stage_signal(signal.channel_names, signal.signal, signal.sampling_rate_hz, self._sleep_model,
+                           parasagittal_fallback=sc.parasagittal_fallback)
         if out is not None:
             out["model"] = sc.model
             out["provenance"] = sc.provenance

@@ -7,6 +7,8 @@
 enabled: true
 model: configs/models/sleep_stager_v1.json
 min_duration_h: 2.0
+# Fp2-C4 / P4-O2 without midline electrodes: decided by the increment-13b transfer test
+parasagittal_fallback: false
 provenance:
   preregistration: docs/preregistration_increment13.md
   report: docs/increment13_report.md
