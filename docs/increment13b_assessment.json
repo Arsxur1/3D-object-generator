@@ -1,0 +1,47 @@
+{
+ "learned": {
+  "accuracy": 0.6516,
+  "kappa": 0.5451,
+  "macro_f1": 0.6262,
+  "f1": {
+   "W": 0.7792,
+   "N1": 0.2902,
+   "N2": 0.6476,
+   "N3": 0.6315,
+   "REM": 0.7826
+  },
+  "per_night_kappa_median": 0.5583,
+  "n_epochs": 28203,
+  "n_nights": 29
+ },
+ "rule_based": {
+  "accuracy": 0.3935,
+  "kappa": 0.2521,
+  "macro_f1": 0.3414,
+  "f1": {
+   "W": 0.4511,
+   "N1": 0.0656,
+   "N2": 0.5144,
+   "N3": 0.5777,
+   "REM": 0.098
+  },
+  "per_night_kappa_median": 0.2583
+ },
+ "by_group_kappa": {
+  "brux": 0.4884,
+  "ins": 0.6277,
+  "n": 0.6888,
+  "narco": 0.6321,
+  "nfle": 0.685,
+  "plm": 0.5175,
+  "rbd": 0.276,
+  "sdb": 0.3537
+ },
+ "hypotheses": {
+  "H1_kappa_at_least_0.60": false,
+  "H2_beats_rule_based_by_0.10_kappa": true
+ },
+ "decision": {
+  "parasagittal_fallback": false
+ }
+}

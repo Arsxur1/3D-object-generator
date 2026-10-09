@@ -244,3 +244,8 @@ def test_prereg13b_decision_and_apply(tmp_path):
     assert yaml.safe_load(cfg.read_text())["parasagittal_fallback"] is True
     apply_decision(b, str(cfg))
     assert yaml.safe_load(cfg.read_text())["parasagittal_fallback"] is False
+
+
+def test_default_config_keeps_parasagittal_fallback_off(configs):
+    """Increment-13b decision: kappa 0.545 < 0.60 on clinical PSG -> no fallback."""
+    assert configs.sleep.parasagittal_fallback is False
