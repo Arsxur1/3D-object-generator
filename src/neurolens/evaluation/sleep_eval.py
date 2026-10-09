@@ -60,11 +60,17 @@ def prepare_night(client: SleepEDFClient, rec: SleepRecord, cache_dir: str | Pat
     return night
 
 
+def _prepare_in_worker(data_dir, rec: SleepRecord, cache_dir) -> Night:
+    # clients hold download callables (not picklable): each worker builds its own
+    return prepare_night(SleepEDFClient(data_dir), rec, cache_dir)
+
+
 def prepare_nights(client, recs, cache_dir=None, workers: int = 3, progress: Optional[Callable] = None) -> list[Night]:
     from concurrent.futures import ProcessPoolExecutor
 
+    data_dir = client.cache.parent
     with ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
-        futs = [pool.submit(prepare_night, client, r, cache_dir) for r in recs]
+        futs = [pool.submit(_prepare_in_worker, data_dir, r, cache_dir) for r in recs]
         out = []
         for r, f in zip(recs, futs):
             out.append(f.result())

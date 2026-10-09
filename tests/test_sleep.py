@@ -159,3 +159,21 @@ def test_prereg13_decision_and_apply(tmp_path):
     assert d["enabled"] is True and d["model"] == "configs/models/sleep_stager_v1.json"
     apply_decision(b, frozen, str(cfg))
     assert yaml.safe_load(cfg.read_text())["enabled"] is False
+
+
+def test_prepare_nights_runs_in_worker_processes(tmp_path, monkeypatch):
+    """Regression: the client is not picklable; workers must build their own."""
+    from neurolens.datasets.sleepedf import SleepEDFClient, SleepRecord
+    from neurolens.evaluation import sleep_eval
+
+    calls = []
+    monkeypatch.setattr(sleep_eval, "prepare_night", lambda c, r, d: calls.append(r.key) or r.key)
+    from concurrent.futures import ThreadPoolExecutor
+
+    monkeypatch.setattr("concurrent.futures.ProcessPoolExecutor", ThreadPoolExecutor)
+    import pickle
+
+    rec = SleepRecord(1, 1, "sleep-cassette/SC4011E0-PSG.edf", "sleep-cassette/SC4011EH-Hypnogram.edf")
+    pickle.dumps((tmp_path, rec, None))  # what is sent to a worker must pickle
+    out = sleep_eval.prepare_nights(SleepEDFClient(tmp_path), [rec], None, workers=1)
+    assert out == ["SC4011"] and calls == ["SC4011"]
