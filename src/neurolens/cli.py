@@ -307,6 +307,54 @@ def _tune(args) -> int:
     return 0
 
 
+def _sleep_cap14(args) -> int:
+    """Increment 14: clinical stager vs v1 on the never-used CAP test records."""
+    import hashlib
+    import json
+
+    from .datasets.capsleep import select_test_records_14
+    from .datasets.physionet import PhysioNetClient
+    from .evaluation.sleep_eval import cap_headers, predict_night, prepare_cap_night, save, score
+    from .layer4_detect.sleep_staging import MulticlassTreeModel, rule_based_stages
+
+    def load_frozen(path):
+        fz = json.loads(open(path, encoding="utf-8").read())
+        if hashlib.sha256(open(fz["model"]["path"], "rb").read()).hexdigest() != fz["model"]["sha256"]:
+            raise RuntimeError(f"{fz['model']['path']} does not match the frozen sha256")
+        return fz
+
+    fz14 = load_frozen(args.frozen14)
+    fz13 = load_frozen(args.frozen)
+    client = PhysioNetClient("capsleep", args.cache)
+    names = select_test_records_14(cap_headers(client))
+    nights = []
+    for i, n in enumerate(names, 1):
+        nights.append(prepare_cap_night(client, n, args.feature_cache))
+        print(f"[{i}/{len(names)}] prepared {n}", flush=True)
+    clin = MulticlassTreeModel.load(fz14["model"]["path"])
+    v1 = MulticlassTreeModel.load(fz13["model"]["path"])
+    pc = [predict_night(clin, n) for n in nights]
+    result = {"clinical": score(nights, pc), "v1": score(nights, [predict_night(v1, n) for n in nights]),
+              "rule_based": score(nights, [rule_based_stages(n.F, n.names) for n in nights]), "records": names}
+    grp = lambda n: n.key.rstrip("0123456789")
+    by_group = {g: score([n for n in nights if grp(n) == g], [p for n, p in zip(nights, pc) if grp(n) == g])
+                for g in sorted({grp(n) for n in nights})}
+    result["by_group"] = {g: {k: v[k] for k in ("kappa", "accuracy", "macro_f1", "n_nights")} for g, v in by_group.items()}
+    path = save(result, args.out)
+    for k in ("clinical", "v1", "rule_based"):
+        v = result[k]
+        print(f"{k}: kappa {v['kappa']:.3f} accuracy {v['accuracy']:.3f} macro-F1 {v['macro_f1']:.3f}")
+    if args.assess:
+        from .evaluation.prereg14 import assess, markdown_report
+
+        a = assess(result, fz14, by_group)
+        path.with_name("prereg_assessment.json").write_text(json.dumps(a, indent=1, ensure_ascii=False), encoding="utf-8")
+        path.with_name("prereg_report.md").write_text(markdown_report(a), encoding="utf-8")
+        print(json.dumps({"hypotheses": a["hypotheses"], "decision": a["decision"]}, indent=1))
+    print(f"Saved: {path}")
+    return 0
+
+
 def _sleep_cap(args) -> int:
     """Increment 13b: frozen stager on the pre-registered CAP Sleep Database subset."""
     import hashlib
@@ -360,6 +408,8 @@ def _sleep(args) -> int:
 
     if args.action == "cap":
         return _sleep_cap(args)
+    if args.action == "cap14":
+        return _sleep_cap14(args)
     client = SleepEDFClient(args.cache)
     recs = client.split()[args.split]
     if args.action == "fetch":
@@ -545,13 +595,14 @@ def build_parser() -> argparse.ArgumentParser:
     me.set_defaults(func=_ml_eval)
 
     sl = sub.add_parser("sleep", help="Sleep-EDF: fetch a split or evaluate a frozen sleep stager.")
-    sl.add_argument("action", choices=["fetch", "eval", "cap"],
+    sl.add_argument("action", choices=["fetch", "eval", "cap", "cap14"],
                     help="fetch/eval: Sleep-EDF split; cap: clinical transfer test (CAP Sleep Database)")
     sl.add_argument("--split", choices=["dev", "test"], default="test")
     sl.add_argument("--cache", default=None)
     sl.add_argument("--frozen", default="docs/preregistration_increment13_frozen.json")
     sl.add_argument("--feature-cache", default="data/physionet/.features/sleep", dest="feature_cache")
     sl.add_argument("--workers", type=int, default=3)
+    sl.add_argument("--frozen14", default="docs/preregistration_increment14_frozen.json")
     sl.add_argument("--assess", action="store_true")
     sl.add_argument("--out", default="out_eval/sleep")
     sl.set_defaults(func=_sleep)

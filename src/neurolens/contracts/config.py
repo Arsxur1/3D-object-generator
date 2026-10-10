@@ -225,7 +225,10 @@ class SleepStagingConfig(BaseModel):
     min_duration_h: float = Field(default=2.0, description="Stage only recordings at least this long.")
     parasagittal_fallback: bool = Field(
         default=False, description="Without midline electrodes, use Fp2-C4 / P4-O2 (left if absent); "
-                                   "enabled only by the increment-13b clinical transfer test.")
+                                   "enabled only by a pre-registered clinical transfer test.")
+    parasagittal_model: Optional[str] = Field(
+        default=None, description="Stager trained on clinical derivations, used with the fallback "
+                                  "(increment 14); None = the main model.")
     provenance: dict = Field(default_factory=dict)
 
 

@@ -125,3 +125,18 @@ def read_cap(edf_path: str | Path, txt: str, target_fs: float = 100.0) -> tuple[
     rec.stages = parse_scoring(txt, start, int(n / target_fs // EPOCH_S))
     rec.start_epoch, rec.end_epoch = analysis_window(rec.stages)
     return sig, rec
+
+
+def select_test_records_14(headers: dict[str, list[str]]) -> list[str]:
+    """Increment-14 held-out rule: usable records NOT used in increment 13b, per
+    diagnostic group in numeric order, every second one (1st, 3rd, ...)."""
+    used = set(select_records(headers))
+    by_group: dict[str, list[tuple[int, str]]] = {}
+    for rec, labels in headers.items():
+        m = re.match(r"([a-z]+)(\d+)\.edf$", rec)
+        if m and usable(labels) and rec not in used:
+            by_group.setdefault(m.group(1), []).append((int(m.group(2)), rec))
+    out = []
+    for g in GROUPS:
+        out += [r for _, r in sorted(by_group.get(g, []))][0::2]
+    return out

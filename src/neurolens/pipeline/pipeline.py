@@ -123,10 +123,14 @@ class Pipeline:
 
         if getattr(self, "_sleep_model", None) is None:
             self._sleep_model = MulticlassTreeModel.load(self.cfg.ml_model_path(sc.model))
+            self._sleep_para = (MulticlassTreeModel.load(self.cfg.ml_model_path(sc.parasagittal_model))
+                                if sc.parasagittal_model else None)
         out = stage_signal(signal.channel_names, signal.signal, signal.sampling_rate_hz, self._sleep_model,
-                           parasagittal_fallback=sc.parasagittal_fallback)
+                           parasagittal_fallback=sc.parasagittal_fallback,
+                           parasagittal_model=self._sleep_para)
         if out is not None:
-            out["model"] = sc.model
+            out["model"] = (sc.parasagittal_model if out["derivations"] == "parasagittal" and sc.parasagittal_model
+                            else sc.model)
             out["provenance"] = sc.provenance
         return out
 

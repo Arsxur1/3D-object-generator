@@ -277,13 +277,19 @@ def derivations(names: list[str], data: np.ndarray, parasagittal_fallback: bool 
 
 
 def stage_signal(names: list[str], data: np.ndarray, fs: float, model: MulticlassTreeModel,
-                 parasagittal_fallback: bool = False) -> dict | None:
-    """Hypnogram + sleep summary for a recording, or None if derivations are missing."""
+                 parasagittal_fallback: bool = False,
+                 parasagittal_model: MulticlassTreeModel | None = None) -> dict | None:
+    """Hypnogram + sleep summary for a recording, or None if derivations are missing.
+    ``parasagittal_model`` (a stager trained on clinical derivations) replaces ``model``
+    when the parasagittal fallback is used."""
     from scipy.signal import resample_poly
 
+    midline = derivations(names, data[:, :1]) is not None
     der = derivations(names, data, parasagittal_fallback)
     if der is None:
         return None
+    if not midline and parasagittal_model is not None:
+        model = parasagittal_model
     if abs(fs - MODEL_FS) > 1e-6:
         from fractions import Fraction
 
@@ -304,7 +310,7 @@ def stage_signal(names: list[str], data: np.ndarray, fs: float, model: Multiclas
         "hypnogram": [STAGES[i] for i in stages],
         "summary": hypnogram_summary(stages),
         "mean_confidence": round(float(proba.max(axis=1).mean()), 3),
-        "derivations": "midline" if derivations(names, data[:, :1]) is not None else "parasagittal",
+        "derivations": "midline" if midline else "parasagittal",
         "eog_source": "eog_channel" if any(n.upper().startswith(("EOG", "LOC")) for n in names)
                       else ("F7-F8" if der["eog"] is not None else "none"),
     }

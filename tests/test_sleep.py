@@ -249,3 +249,65 @@ def test_prereg13b_decision_and_apply(tmp_path):
 def test_default_config_keeps_parasagittal_fallback_off(configs):
     """Increment-13b decision: kappa 0.545 < 0.60 on clinical PSG -> no fallback."""
     assert configs.sleep.parasagittal_fallback is False
+
+
+def test_select_test_records_14_disjoint_from_13b():
+    from neurolens.datasets.capsleep import select_records, select_test_records_14
+
+    chain = ["Fp2-F4", "F4-C4", "C4-P4", "P4-O2", "ROC-LOC"]
+    heads = {f"nfle{i}.edf": chain for i in range(1, 12)} | {f"rbd{i}.edf": chain for i in (1, 2, 3, 4, 5, 8, 10)}
+    used = set(select_records(heads))
+    test = select_test_records_14(heads)
+    assert not used & set(test)
+    assert test == ["nfle5.edf", "nfle7.edf", "nfle9.edf", "nfle11.edf", "rbd5.edf", "rbd10.edf"]
+
+
+def test_parasagittal_model_routing():
+    from sklearn.ensemble import HistGradientBoostingClassifier
+
+    fx, px, eog, y, fs = _night(n_ep=40)
+    F, fn = epoch_features(fx, px, eog, fs, 0, len(y))
+    X, xn = standardise_and_context(F, fn)
+    main = export_multiclass_gbm(HistGradientBoostingClassifier(max_iter=5, random_state=0).fit(X, y), xn, list(STAGES))
+
+    class Const:
+        def predict_proba(self, X):
+            p = np.zeros((len(X), 5))
+            p[:, 3] = 1.0
+            return p
+
+    names = ["Fp2", "C4", "P4", "O2", "ROC-LOC"]
+    data = np.vstack([fx, np.zeros_like(fx), px, np.zeros_like(px), eog])
+    out = stage_signal(names, data, fs, main, parasagittal_fallback=True, parasagittal_model=Const())
+    assert out["derivations"] == "parasagittal" and set(out["hypnogram"]) == {"N3"}
+    assert stage_signal(names, data, fs, main, parasagittal_fallback=False, parasagittal_model=Const()) is None
+
+
+def test_prereg14_decision_and_apply(tmp_path):
+    import shutil
+
+    import yaml
+
+    from neurolens.evaluation.prereg14 import apply_decision, assess, markdown_report
+
+    def sc(k):
+        return {"accuracy": 0.7, "kappa": k, "macro_f1": 0.6, "f1": {s: 0.6 for s in STAGES},
+                "per_night_kappa_median": k, "n_epochs": 100, "n_nights": 3}
+
+    fz = {"cv": {"kappa": 0.64}, "model": {"path": "configs/models/sleep_stager_clinical_v1.json"}}
+    a = assess({"clinical": sc(0.63), "v1": sc(0.55), "rule_based": sc(0.3)}, fz)
+    b = assess({"clinical": sc(0.63), "v1": sc(0.60), "rule_based": sc(0.3)}, fz)  # not 0.05 better than v1
+    assert a["decision"]["parasagittal_fallback_with_clinical_model"]
+    assert not b["decision"]["parasagittal_fallback_with_clinical_model"]
+    assert "клинический" in markdown_report(a)
+    cfg = tmp_path / "sleep.yaml"
+    shutil.copy("configs/sleep.yaml", cfg)
+    apply_decision(a, fz, str(cfg))
+    d = yaml.safe_load(cfg.read_text())
+    assert d["parasagittal_fallback"] is True and d["parasagittal_model"].endswith("clinical_v1.json")
+    apply_decision(b, fz, str(cfg))
+    d = yaml.safe_load(cfg.read_text())
+    assert d["parasagittal_fallback"] is False and d["parasagittal_model"] is None
+    from neurolens.contracts.config import SleepStagingConfig
+
+    SleepStagingConfig(**d)
