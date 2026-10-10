@@ -7,8 +7,12 @@
 enabled: true
 model: configs/models/sleep_stager_v1.json
 min_duration_h: 2.0
-# Fp2-C4 / P4-O2 without midline electrodes: decided by the increment-13b transfer test
-parasagittal_fallback: false
+# Without midline electrodes: Fp2-C4 / P4-O2 with a stager trained on clinical derivations.
+# 13b: v1 on these derivations kappa 0.545 -> off; increment 14 (34 new CAP patients):
+# clinical model kappa 0.708 vs v1 0.563 -> on (docs/increment14_report.md).
+parasagittal_fallback: true
+parasagittal_model: configs/models/sleep_stager_clinical_v1.json
 provenance:
   preregistration: docs/preregistration_increment13.md
   report: docs/increment13_report.md
+  clinical: docs/preregistration_increment14.md

@@ -246,9 +246,16 @@ def test_prereg13b_decision_and_apply(tmp_path):
     assert yaml.safe_load(cfg.read_text())["parasagittal_fallback"] is False
 
 
-def test_default_config_keeps_parasagittal_fallback_off(configs):
-    """Increment-13b decision: kappa 0.545 < 0.60 on clinical PSG -> no fallback."""
-    assert configs.sleep.parasagittal_fallback is False
+def test_default_config_parasagittal_uses_clinical_model(configs):
+    """13b: v1 on parasagittal derivations failed (0.545) -> off; increment 14: the clinical
+    model passed (0.708 vs v1 0.563) -> fallback on with the clinical model (SHA checked)."""
+    import hashlib
+    import json
+
+    sc = configs.sleep
+    assert sc.parasagittal_fallback is True and sc.parasagittal_model.endswith("sleep_stager_clinical_v1.json")
+    fz = json.loads(open("docs/preregistration_increment14_frozen.json", encoding="utf-8").read())
+    assert hashlib.sha256(open(sc.parasagittal_model, "rb").read()).hexdigest() == fz["model"]["sha256"]
 
 
 def test_select_test_records_14_disjoint_from_13b():

@@ -1,0 +1,60 @@
+{
+ "clinical": {
+  "accuracy": 0.7858,
+  "kappa": 0.7081,
+  "macro_f1": 0.7243,
+  "f1": {
+   "W": 0.8129,
+   "N1": 0.396,
+   "N2": 0.7849,
+   "N3": 0.8018,
+   "REM": 0.8261
+  },
+  "per_night_kappa_median": 0.7441,
+  "n_epochs": 33708,
+  "n_nights": 34
+ },
+ "v1": {
+  "accuracy": 0.6713,
+  "kappa": 0.563,
+  "macro_f1": 0.6313,
+  "f1": {
+   "W": 0.7929,
+   "N1": 0.2672,
+   "N2": 0.6892,
+   "N3": 0.6137,
+   "REM": 0.7937
+  },
+  "per_night_kappa_median": 0.5693
+ },
+ "rule_based": {
+  "accuracy": 0.4233,
+  "kappa": 0.288,
+  "macro_f1": 0.3573,
+  "f1": {
+   "W": 0.5057,
+   "N1": 0.0325,
+   "N2": 0.55,
+   "N3": 0.6041,
+   "REM": 0.094
+  },
+  "per_night_kappa_median": 0.2865
+ },
+ "cv_kappa": 0.6665,
+ "by_group_kappa": {
+  "ins": 0.6307,
+  "n": 0.7881,
+  "narco": 0.7325,
+  "nfle": 0.7649,
+  "plm": 0.7887,
+  "rbd": 0.5875
+ },
+ "hypotheses": {
+  "H1_clinical_kappa_at_least_0.60": true,
+  "H2_clinical_beats_v1_by_0.05": true,
+  "H3_transfer_within_0.05_of_cv": true
+ },
+ "decision": {
+  "parasagittal_fallback_with_clinical_model": true
+ }
+}
