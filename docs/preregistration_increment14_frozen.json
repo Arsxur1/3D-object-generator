@@ -1,0 +1,193 @@
+{
+ "candidates": {
+  "A": {
+   "kappa": 0.6665,
+   "accuracy": 0.7522,
+   "macro_f1": 0.6835,
+   "f1": {
+    "W": 0.7587,
+    "N1": 0.3223,
+    "N2": 0.7627,
+    "N3": 0.806,
+    "REM": 0.7676
+   },
+   "per_night_kappa_median": 0.6787,
+   "confusion": [
+    [
+     3318,
+     268,
+     380,
+     7,
+     344
+    ],
+    [
+     303,
+     439,
+     297,
+     1,
+     379
+    ],
+    [
+     470,
+     341,
+     8021,
+     1157,
+     510
+    ],
+    [
+     67,
+     1,
+     1327,
+     5525,
+     49
+    ],
+    [
+     272,
+     256,
+     509,
+     50,
+     3912
+    ]
+   ]
+  },
+  "B": {
+   "kappa": 0.6015,
+   "accuracy": 0.6948,
+   "macro_f1": 0.6606,
+   "f1": {
+    "W": 0.7859,
+    "N1": 0.3023,
+    "N2": 0.6803,
+    "N3": 0.733,
+    "REM": 0.8016
+   },
+   "per_night_kappa_median": 0.6546,
+   "confusion": [
+    [
+     3594,
+     473,
+     76,
+     7,
+     167
+    ],
+    [
+     268,
+     796,
+     102,
+     0,
+     253
+    ],
+    [
+     621,
+     1943,
+     6812,
+     635,
+     488
+    ],
+    [
+     121,
+     99,
+     2290,
+     4407,
+     52
+    ],
+    [
+     225,
+     536,
+     246,
+     6,
+     3986
+    ]
+   ]
+  }
+ },
+ "chosen": "A",
+ "cv": {
+  "kappa": 0.6665,
+  "accuracy": 0.7522,
+  "macro_f1": 0.6835,
+  "f1": {
+   "W": 0.7587,
+   "N1": 0.3223,
+   "N2": 0.7627,
+   "N3": 0.806,
+   "REM": 0.7676
+  },
+  "per_night_kappa_median": 0.6787,
+  "confusion": [
+   [
+    3318,
+    268,
+    380,
+    7,
+    344
+   ],
+   [
+    303,
+    439,
+    297,
+    1,
+    379
+   ],
+   [
+    470,
+    341,
+    8021,
+    1157,
+    510
+   ],
+   [
+    67,
+    1,
+    1327,
+    5525,
+    49
+   ],
+   [
+    272,
+    256,
+    509,
+    50,
+    3912
+   ]
+  ]
+ },
+ "cap_training_records": [
+  "n2.edf",
+  "n3.edf",
+  "n5.edf",
+  "n10.edf",
+  "brux1.edf",
+  "brux2.edf",
+  "ins1.edf",
+  "ins2.edf",
+  "ins3.edf",
+  "ins4.edf",
+  "narco1.edf",
+  "narco2.edf",
+  "narco3.edf",
+  "narco4.edf",
+  "nfle1.edf",
+  "nfle2.edf",
+  "nfle3.edf",
+  "nfle4.edf",
+  "plm1.edf",
+  "plm2.edf",
+  "plm3.edf",
+  "plm4.edf",
+  "rbd1.edf",
+  "rbd2.edf",
+  "rbd3.edf",
+  "rbd4.edf",
+  "sdb1.edf",
+  "sdb2.edf",
+  "sdb4.edf"
+ ],
+ "n_epochs": 28203,
+ "model": {
+  "path": "configs/models/sleep_stager_clinical_v1.json",
+  "sha256": "c3bfcabe0c0f4a2944d6cc04be7363c36a57c880762bac6c8c4c07f5de4bd8d5",
+  "n_iterations": 98,
+  "size_bytes": 1557463
+ }
+}
