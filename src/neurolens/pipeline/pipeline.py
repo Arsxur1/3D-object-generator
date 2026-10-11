@@ -62,7 +62,7 @@ class PipelineOutput:
 
     @property
     def protocol_text(self) -> str:
-        return render_protocol(self.report)
+        return render_protocol(self.report, self.result_json.get("sleep_staging"))
 
 
 class Pipeline:
@@ -309,6 +309,11 @@ class Pipeline:
             paths["causal_graph"] = plot_causal_graph(
                 output.graph, out_dir / "causal_graph.png"
             )
+            if output.result_json.get("sleep_staging"):
+                from ..outputs.sleep_section import plot_hypnogram
+
+                paths["hypnogram"] = plot_hypnogram(output.result_json["sleep_staging"],
+                                                    out_dir / "hypnogram.png")
         except Exception as exc:  # plotting must not break the run
             (out_dir / "plot_error.txt").write_text(str(exc), encoding="utf-8")
 
@@ -317,6 +322,7 @@ class Pipeline:
             paths["pdf"] = build_pdf_report(
                 output.report, output.detection, output.signal,
                 output.montage_name, paths, out_dir / "report.pdf",
+                sleep=output.result_json.get("sleep_staging"),
             )
         except Exception as exc:  # report generation must not break the run
             (out_dir / "pdf_error.txt").write_text(str(exc), encoding="utf-8")

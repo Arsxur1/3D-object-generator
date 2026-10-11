@@ -217,6 +217,9 @@ def scores_from_confusion(m: np.ndarray) -> dict:
             "confusion": m.tolist()}
 
 
+REM_MIN_RUN = 3  # epochs (1.5 min)
+
+
 def hypnogram_summary(stages: np.ndarray) -> dict:
     """Sleep metrics from a stage sequence (indices into STAGES), 30-s epochs."""
     stages = np.asarray(stages)
@@ -224,7 +227,12 @@ def hypnogram_summary(stages: np.ndarray) -> dict:
     tib_min = len(stages) * EPOCH_S / 60
     tst = sleep.sum() * EPOCH_S / 60
     first = int(np.argmax(sleep)) if sleep.any() else None
-    rem = np.where(stages == STAGES.index("REM"))[0]
+    # REM latency to the first *sustained* REM (>= REM_MIN_RUN consecutive epochs): a single
+    # misstaged REM epoch early in the night would otherwise mimic a sleep-onset REM period
+    # (a diagnostic sign of narcolepsy)
+    is_rem = (stages == STAGES.index("REM")).astype(int)
+    run = np.convolve(is_rem, np.ones(REM_MIN_RUN, dtype=int), mode="valid") if len(is_rem) >= REM_MIN_RUN else np.array([])
+    rem = np.where(run == REM_MIN_RUN)[0]
     return {
         "time_in_bed_min": round(tib_min, 1), "total_sleep_min": round(tst, 1),
         "sleep_efficiency": round(tst / tib_min, 3) if tib_min else None,

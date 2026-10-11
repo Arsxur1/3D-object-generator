@@ -318,3 +318,44 @@ def test_prereg14_decision_and_apply(tmp_path):
     from neurolens.contracts.config import SleepStagingConfig
 
     SleepStagingConfig(**d)
+
+
+def _fake_sleep():
+    st = ["W"] * 40 + ["N1"] * 10 + ["N2"] * 60 + ["N3"] * 40 + ["REM"] * 30 + ["N2"] * 20 + ["W"] * 10
+    return {"epoch_s": 30.0, "hypnogram": st,
+            "summary": hypnogram_summary(np.array([STAGES.index(s) for s in st])),
+            "mean_confidence": 0.8, "derivations": "parasagittal", "eog_source": "eog_channel"}
+
+
+def test_sleep_section_text_protocol_and_hypnogram(tmp_path):
+    from neurolens.outputs.sleep_section import plot_hypnogram, sleep_text
+
+    sl = _fake_sleep()
+    txt = sleep_text(sl)
+    assert "эффективность" in txt.ru and "REM" in txt.ru and "samaradorlik" in txt.uz
+    assert "каппа 0.71" in txt.ru and "N1" in txt.ru  # validation basis + N1 caveat stated
+    p = plot_hypnogram(sl, tmp_path / "h.png")
+    assert p.exists() and p.stat().st_size > 1000
+
+
+def test_pipeline_outputs_include_sleep(demo_edf, configs, tmp_path, monkeypatch):
+    import copy
+
+    from neurolens.pipeline.pipeline import Pipeline
+
+    cfg = copy.deepcopy(configs)
+    pipe = Pipeline(config=cfg, provider_pref="deterministic", run_ica=False)
+    monkeypatch.setattr(pipe, "_sleep_staging", lambda signal: _fake_sleep())
+    out = pipe.analyze_file(demo_edf)
+    assert "— Сон / Uyqu —" in out.protocol_text
+    paths = pipe.save_outputs(out, tmp_path) if hasattr(pipe, "save_outputs") else None
+    if paths is None:
+        pytest.skip("pipeline has no save_outputs entry point")
+    assert paths["hypnogram"].exists() and paths["pdf"].exists()
+
+
+def test_rem_latency_ignores_isolated_rem_epoch():
+    """A lone misstaged REM epoch must not produce a spurious sleep-onset REM latency."""
+    st = np.array([0] * 10 + [2] * 5 + [4] + [2] * 60 + [4] * 5 + [2] * 10)
+    s = hypnogram_summary(st)
+    assert s["sleep_latency_min"] == 5.0 and s["rem_latency_min"] == 33.0  # (76 - 10) epochs

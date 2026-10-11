@@ -72,6 +72,7 @@ def build_pdf_report(
     montage_name: str,
     image_paths: Mapping[str, Path],
     out_path: str | Path,
+    sleep: dict | None = None,
 ) -> Path:
     _register_fonts()
     st = _styles()
@@ -142,6 +143,29 @@ def build_pdf_report(
                 acns = " ".join(bits)
             rows.append([e.code, loc, f"{e.t_start:.0f}–{e.t_end:.0f}", f"{e.confidence:.2f}", acns])
         story.append(_table(rows, header=True))
+        story.append(Spacer(1, 6))
+
+    # sleep staging (hypnogram summary)
+    if sleep:
+        from .sleep_section import sleep_text
+
+        s = sleep["summary"]
+        pct = s["stage_percent_of_sleep"]
+        eff = s.get("sleep_efficiency")
+        story.append(Paragraph("Сон (автоматическое стадирование AASM)", st["h"]))
+        story.append(_table([
+            ["Время записи, мин", _fmt(s["time_in_bed_min"]), "Сон, мин", _fmt(s["total_sleep_min"])],
+            ["Эффективность", "—" if eff is None else f"{100 * float(eff):.0f}%",
+             "Латентность сна / REM, мин", f"{_fmt(s['sleep_latency_min'])} / {_fmt(s['rem_latency_min'])}"],
+            ["N1 / N2 / N3 / REM, % сна", " / ".join(f"{float(pct.get(k, 0)):.0f}" for k in ("N1", "N2", "N3", "REM")),
+             "Производные", sleep.get("derivations", "—")],
+        ]))
+        txt = sleep_text(sleep)
+        story.append(Paragraph(txt.ru, st["small"]))
+        story.append(Paragraph(f"<i>UZ:</i> {txt.uz}", st["small"]))
+        img = _img(image_paths.get("hypnogram", "")) if image_paths.get("hypnogram") else None
+        if img is not None:
+            story.append(img)
         story.append(Spacer(1, 6))
 
     # impression + confidence

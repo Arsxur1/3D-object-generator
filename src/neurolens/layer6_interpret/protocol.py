@@ -13,7 +13,8 @@ _SECTION_TITLES = {
 }
 
 
-def render_protocol(report: LLMReport) -> str:
+def render_protocol(report: LLMReport, sleep: dict | None = None) -> str:
+    """``sleep``: ``result_json["sleep_staging"]`` when the recording was staged."""
     lines: list[str] = []
     lines.append("=" * 72)
     lines.append("ПРОТОКОЛ ЭЭГ / EEG BAYONNOMASI — NeuroLens")
@@ -49,6 +50,15 @@ def render_protocol(report: LLMReport) -> str:
             lines.append(f"  UZ: {s.text.uz}")
             if s.grounding_refs:
                 lines.append(f"     [обоснование/grounding: {', '.join(s.grounding_refs)}]")
+
+    if sleep:
+        from ..outputs.sleep_section import sleep_text
+
+        txt = sleep_text(sleep)
+        lines.append("")
+        lines.append("— Сон / Uyqu —")
+        lines.append(f"  RU: {txt.ru}")
+        lines.append(f"  UZ: {txt.uz}")
 
     lines.append("")
     lines.append("— Заключение / Xulosa —")
