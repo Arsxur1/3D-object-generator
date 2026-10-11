@@ -462,3 +462,17 @@ def test_sleep_period_window_found_in_long_recording():
 
     _, (a, b) = _stage_sleep_period(F, names, Full())
     assert abs(a - (500 - 60)) <= 5 and abs(b - (900 + 60)) <= 5  # 5-min smoothing shifts edges slightly
+
+
+def test_monitor_reports_detector_and_warns_on_few_eeg_channels(tmp_path, demo_edf, configs):
+    from neurolens.contracts.signal import PatientInfo
+    from neurolens.realtime.monitor import RealtimeMonitor
+    from neurolens.realtime.stream import EdfReplaySource
+
+    psg = _psg_edf(tmp_path / "psg.edf", hours=0.05)
+    s = RealtimeMonitor(config=configs).run(EdfReplaySource(psg, chunk_s=configs.realtime.step_s))
+    assert s.warnings and s.warnings[0].startswith("insufficient_eeg_channels")
+    ok = RealtimeMonitor(config=configs).run(EdfReplaySource(demo_edf, chunk_s=configs.realtime.step_s))
+    assert not ok.warnings and ok.seizure_detector.endswith("realtime_v2.json")
+    neo = RealtimeMonitor(config=configs, patient=PatientInfo(postmenstrual_age_weeks=40))
+    assert neo._ml_name.endswith("realtime_neo1.json")

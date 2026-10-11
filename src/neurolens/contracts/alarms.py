@@ -75,3 +75,5 @@ class MonitorSummary(BaseModel):
     latency_ms_mean: float = 0.0
     latency_ms_p95: float = 0.0
     realtime_feasible: bool = True  # per-window latency << step
+    seizure_detector: str = "threshold"  # "threshold" or the learned model file used
+    warnings: list[str] = Field(default_factory=list)  # e.g. too few EEG channels analysed

@@ -89,6 +89,7 @@ class RealtimeMonitor:
 
             self._ml = StreamingIctalML(load_model(self.cfg.ml_model_path(ml_mode.model)),
                                         ml_mode.threshold, ml_mode.min_epochs)
+            self._ml_name = ml_mode.model
             if ml_mode.calibration:
                 from ..calibration.calibrator import ConfidenceCalibrator
 
@@ -173,7 +174,7 @@ class RealtimeMonitor:
             self.trace.append((feats, self._baseline.copy()))
 
         det = run_detectors(analysis, feats, self.thresholds, detectors=self.detectors)
-        if self._ml is not None:
+        if self._ml is not None and len(feats.eeg_channels) > 0:  # no EEG channels: nothing to score
             ml_events = self._ml.update(t0, feats)
             if self._ml_cal is not None:
                 for e in ml_events:
@@ -251,7 +252,17 @@ class RealtimeMonitor:
             status_epilepticus_suspected=total_sz >= STATUS_DURATION_S,
         )
         p95 = float(np.percentile(lat, 95))
+        from ..layer1_ingest.electrodes import is_eeg_channel
+        from ..pipeline.pipeline import MIN_EEG_CHANNELS
+
+        n_eeg = sum(is_eeg_channel(n) for n in source.channel_names)
+        warnings = []
+        if n_eeg < MIN_EEG_CHANNELS:
+            warnings.append(f"insufficient_eeg_channels:{n_eeg}<{MIN_EEG_CHANNELS}: seizure/background "
+                            "analysis not performed - absence of alarms does not mean absence of seizures")
         return MonitorSummary(
+            seizure_detector=getattr(self, "_ml_name", None) or "threshold",
+            warnings=warnings,
             source=getattr(source, "source_name", "stream"),
             montage=self.montage_name,
             duration_s=round(duration_s, 1),

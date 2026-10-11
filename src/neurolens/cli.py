@@ -97,6 +97,9 @@ def _monitor(args) -> int:
 
     print(f"=== cEEG мониторинг / cEEG monitoring: {summary.source} ===")
     print(f"Окон/Oynalar: {summary.n_windows}  окно/step: {summary.window_s}/{summary.step_s}с")
+    print(f"Детектор приступов / Tutqanoq detektori: {summary.seizure_detector}")
+    for w in summary.warnings:
+        print(f"⚠ {w}")
     print(f"Тревоги/Alarms: {summary.n_alarms_raised} (подавлено/suppressed: {summary.n_alarms_suppressed})"
           f"  {summary.alarms_per_hour}/час (бюджет {summary.false_alarm_budget_per_hour})"
           f"  в пределах бюджета: {summary.within_budget}")
