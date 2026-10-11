@@ -1,0 +1,1265 @@
+[
+ {
+  "subject": "eeg1",
+  "hours": 1.9416666666666667,
+  "n_alarms": 29,
+  "alarms_per_hour": 14.94,
+  "by_type": {
+   "iic": 14,
+   "seizure": 15
+  },
+  "seizures": 26,
+  "seizures_alarmed": 10,
+  "seizure_alarms_outside": 5,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg2",
+  "hours": 1.0444444444444445,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg3",
+  "hours": 1.225,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg4",
+  "hours": 0.9513888888888888,
+  "n_alarms": 13,
+  "alarms_per_hour": 13.66,
+  "by_type": {
+   "iic": 1,
+   "seizure": 12
+  },
+  "seizures": 1,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 5,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg5",
+  "hours": 1.0666666666666667,
+  "n_alarms": 44,
+  "alarms_per_hour": 41.25,
+  "by_type": {
+   "iic": 3,
+   "status_epilepticus": 2,
+   "seizure": 39
+  },
+  "seizures": 7,
+  "seizures_alarmed": 7,
+  "seizure_alarms_outside": 0,
+  "status_alarm": true,
+  "expert_status": true,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg6",
+  "hours": 1.3055555555555556,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.77,
+  "by_type": {
+   "iic": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg7",
+  "hours": 1.0138888888888888,
+  "n_alarms": 49,
+  "alarms_per_hour": 48.33,
+  "by_type": {
+   "iic": 4,
+   "status_epilepticus": 2,
+   "seizure": 43
+  },
+  "seizures": 5,
+  "seizures_alarmed": 4,
+  "seizure_alarms_outside": 28,
+  "status_alarm": true,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg8",
+  "hours": 1.2805555555555554,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg9",
+  "hours": 0.9861111111111112,
+  "n_alarms": 45,
+  "alarms_per_hour": 45.63,
+  "by_type": {
+   "iic": 1,
+   "status_epilepticus": 3,
+   "seizure": 41
+  },
+  "seizures": 2,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 25,
+  "status_alarm": true,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg10",
+  "hours": 1.5069444444444444,
+  "n_alarms": 2,
+  "alarms_per_hour": 1.33,
+  "by_type": {
+   "seizure": 2
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg11",
+  "hours": 2.0791666666666666,
+  "n_alarms": 2,
+  "alarms_per_hour": 0.96,
+  "by_type": {
+   "seizure": 2
+  },
+  "seizures": 1,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg12",
+  "hours": 1.2402777777777778,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg13",
+  "hours": 4.281944444444444,
+  "n_alarms": 21,
+  "alarms_per_hour": 4.9,
+  "by_type": {
+   "seizure": 21
+  },
+  "seizures": 5,
+  "seizures_alarmed": 5,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg14",
+  "hours": 1.0347222222222223,
+  "n_alarms": 10,
+  "alarms_per_hour": 9.66,
+  "by_type": {
+   "seizure": 10
+  },
+  "seizures": 44,
+  "seizures_alarmed": 5,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": true,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg15",
+  "hours": 1.9152777777777779,
+  "n_alarms": 7,
+  "alarms_per_hour": 3.65,
+  "by_type": {
+   "seizure": 7
+  },
+  "seizures": 5,
+  "seizures_alarmed": 3,
+  "seizure_alarms_outside": 3,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg16",
+  "hours": 1.65,
+  "n_alarms": 18,
+  "alarms_per_hour": 10.91,
+  "by_type": {
+   "iic": 1,
+   "seizure": 17
+  },
+  "seizures": 12,
+  "seizures_alarmed": 5,
+  "seizure_alarms_outside": 10,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg17",
+  "hours": 1.525,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.66,
+  "by_type": {
+   "seizure": 1
+  },
+  "seizures": 1,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg18",
+  "hours": 1.0138888888888888,
+  "n_alarms": 3,
+  "alarms_per_hour": 2.96,
+  "by_type": {
+   "seizure": 3
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 3,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg19",
+  "hours": 2.501388888888889,
+  "n_alarms": 7,
+  "alarms_per_hour": 2.8,
+  "by_type": {
+   "seizure": 7
+  },
+  "seizures": 9,
+  "seizures_alarmed": 3,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": true,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg20",
+  "hours": 1.1069444444444445,
+  "n_alarms": 4,
+  "alarms_per_hour": 3.61,
+  "by_type": {
+   "seizure": 4
+  },
+  "seizures": 15,
+  "seizures_alarmed": 4,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg21",
+  "hours": 1.5847222222222221,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.63,
+  "by_type": {
+   "seizure": 1
+  },
+  "seizures": 1,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg22",
+  "hours": 1.0666666666666667,
+  "n_alarms": 3,
+  "alarms_per_hour": 2.81,
+  "by_type": {
+   "iic": 1,
+   "seizure": 2
+  },
+  "seizures": 5,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg23",
+  "hours": 1.2305555555555556,
+  "n_alarms": 10,
+  "alarms_per_hour": 8.13,
+  "by_type": {
+   "iic": 6,
+   "seizure": 4
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 4,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg24",
+  "hours": 1.0291666666666666,
+  "n_alarms": 8,
+  "alarms_per_hour": 7.77,
+  "by_type": {
+   "iic": 7,
+   "seizure": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg25",
+  "hours": 1.8625,
+  "n_alarms": 6,
+  "alarms_per_hour": 3.22,
+  "by_type": {
+   "seizure": 6
+  },
+  "seizures": 2,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 6,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg26",
+  "hours": 1.1611111111111112,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg27",
+  "hours": 0.9708333333333333,
+  "n_alarms": 4,
+  "alarms_per_hour": 4.12,
+  "by_type": {
+   "seizure": 4
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 4,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg28",
+  "hours": 1.5986111111111112,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg29",
+  "hours": 2.2319444444444443,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg30",
+  "hours": 1.0930555555555554,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg31",
+  "hours": 0.9791666666666666,
+  "n_alarms": 6,
+  "alarms_per_hour": 6.13,
+  "by_type": {
+   "iic": 2,
+   "seizure": 4
+  },
+  "seizures": 2,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg32",
+  "hours": 1.2805555555555554,
+  "n_alarms": 11,
+  "alarms_per_hour": 8.59,
+  "by_type": {
+   "iic": 11
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg33",
+  "hours": 1.0402777777777779,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg34",
+  "hours": 1.8027777777777778,
+  "n_alarms": 6,
+  "alarms_per_hour": 3.33,
+  "by_type": {
+   "iic": 1,
+   "seizure": 5
+  },
+  "seizures": 1,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg35",
+  "hours": 1.0458333333333334,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg36",
+  "hours": 1.4111111111111112,
+  "n_alarms": 8,
+  "alarms_per_hour": 5.67,
+  "by_type": {
+   "seizure": 8
+  },
+  "seizures": 2,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg37",
+  "hours": 1.2708333333333333,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.79,
+  "by_type": {
+   "seizure": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg38",
+  "hours": 1.6930555555555555,
+  "n_alarms": 30,
+  "alarms_per_hour": 17.72,
+  "by_type": {
+   "seizure": 30
+  },
+  "seizures": 21,
+  "seizures_alarmed": 16,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": true,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg39",
+  "hours": 1.2847222222222223,
+  "n_alarms": 34,
+  "alarms_per_hour": 26.46,
+  "by_type": {
+   "seizure": 34
+  },
+  "seizures": 6,
+  "seizures_alarmed": 6,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": true,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg40",
+  "hours": 1.6208333333333333,
+  "n_alarms": 3,
+  "alarms_per_hour": 1.85,
+  "by_type": {
+   "iic": 1,
+   "seizure": 2
+  },
+  "seizures": 2,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg41",
+  "hours": 2.688888888888889,
+  "n_alarms": 174,
+  "alarms_per_hour": 64.71,
+  "by_type": {
+   "status_epilepticus": 26,
+   "seizure": 148
+  },
+  "seizures": 55,
+  "seizures_alarmed": 55,
+  "seizure_alarms_outside": 0,
+  "status_alarm": true,
+  "expert_status": true,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg42",
+  "hours": 1.3805555555555555,
+  "n_alarms": 2,
+  "alarms_per_hour": 1.45,
+  "by_type": {
+   "iic": 2
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg43",
+  "hours": 2.022222222222222,
+  "n_alarms": 8,
+  "alarms_per_hour": 3.96,
+  "by_type": {
+   "iic": 2,
+   "seizure": 6
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 6,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg44",
+  "hours": 0.9333333333333333,
+  "n_alarms": 3,
+  "alarms_per_hour": 3.21,
+  "by_type": {
+   "seizure": 3
+  },
+  "seizures": 7,
+  "seizures_alarmed": 4,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg45",
+  "hours": 1.0611111111111111,
+  "n_alarms": 2,
+  "alarms_per_hour": 1.88,
+  "by_type": {
+   "seizure": 2
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg46",
+  "hours": 1.4222222222222223,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.7,
+  "by_type": {
+   "seizure": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg47",
+  "hours": 1.0013888888888889,
+  "n_alarms": 4,
+  "alarms_per_hour": 3.99,
+  "by_type": {
+   "seizure": 4
+  },
+  "seizures": 3,
+  "seizures_alarmed": 3,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg48",
+  "hours": 1.0666666666666667,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg49",
+  "hours": 2.4,
+  "n_alarms": 32,
+  "alarms_per_hour": 13.33,
+  "by_type": {
+   "iic": 7,
+   "seizure": 25
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 25,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg50",
+  "hours": 2.736111111111111,
+  "n_alarms": 36,
+  "alarms_per_hour": 13.16,
+  "by_type": {
+   "iic": 2,
+   "seizure": 34
+  },
+  "seizures": 10,
+  "seizures_alarmed": 10,
+  "seizure_alarms_outside": 21,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg51",
+  "hours": 1.3055555555555556,
+  "n_alarms": 31,
+  "alarms_per_hour": 23.74,
+  "by_type": {
+   "iic": 25,
+   "seizure": 6
+  },
+  "seizures": 1,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg52",
+  "hours": 1.0888888888888888,
+  "n_alarms": 14,
+  "alarms_per_hour": 12.86,
+  "by_type": {
+   "iic": 12,
+   "seizure": 2
+  },
+  "seizures": 2,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg53",
+  "hours": 0.9638888888888889,
+  "n_alarms": 32,
+  "alarms_per_hour": 33.2,
+  "by_type": {
+   "iic": 24,
+   "seizure": 8
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 8,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg54",
+  "hours": 1.2055555555555555,
+  "n_alarms": 19,
+  "alarms_per_hour": 15.76,
+  "by_type": {
+   "iic": 14,
+   "seizure": 5
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 5,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg55",
+  "hours": 1.4333333333333333,
+  "n_alarms": 5,
+  "alarms_per_hour": 3.49,
+  "by_type": {
+   "seizure": 5
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 5,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg56",
+  "hours": 1.0638888888888889,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.94,
+  "by_type": {
+   "iic": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg57",
+  "hours": 0.8694444444444445,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg58",
+  "hours": 1.301388888888889,
+  "n_alarms": 2,
+  "alarms_per_hour": 1.54,
+  "by_type": {
+   "seizure": 2
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg59",
+  "hours": 1.0888888888888888,
+  "n_alarms": 2,
+  "alarms_per_hour": 1.84,
+  "by_type": {
+   "iic": 1,
+   "seizure": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg60",
+  "hours": 1.0486111111111112,
+  "n_alarms": 43,
+  "alarms_per_hour": 41.01,
+  "by_type": {
+   "status_epilepticus": 2,
+   "seizure": 41
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 41,
+  "status_alarm": true,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg61",
+  "hours": 1.6180555555555556,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg62",
+  "hours": 1.625,
+  "n_alarms": 11,
+  "alarms_per_hour": 6.77,
+  "by_type": {
+   "iic": 5,
+   "seizure": 6
+  },
+  "seizures": 1,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg63",
+  "hours": 1.0833333333333333,
+  "n_alarms": 4,
+  "alarms_per_hour": 3.69,
+  "by_type": {
+   "iic": 2,
+   "seizure": 2
+  },
+  "seizures": 5,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg64",
+  "hours": 1.7597222222222222,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg65",
+  "hours": 1.3333333333333333,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg66",
+  "hours": 3.1527777777777777,
+  "n_alarms": 45,
+  "alarms_per_hour": 14.27,
+  "by_type": {
+   "iic": 1,
+   "seizure": 44
+  },
+  "seizures": 2,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 21,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg67",
+  "hours": 1.3611111111111112,
+  "n_alarms": 13,
+  "alarms_per_hour": 9.55,
+  "by_type": {
+   "iic": 5,
+   "seizure": 8
+  },
+  "seizures": 16,
+  "seizures_alarmed": 6,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg68",
+  "hours": 1.0041666666666667,
+  "n_alarms": 5,
+  "alarms_per_hour": 4.98,
+  "by_type": {
+   "seizure": 5
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 5,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg69",
+  "hours": 1.1027777777777779,
+  "n_alarms": 61,
+  "alarms_per_hour": 55.31,
+  "by_type": {
+   "iic": 17,
+   "status_epilepticus": 3,
+   "seizure": 41
+  },
+  "seizures": 14,
+  "seizures_alarmed": 14,
+  "seizure_alarms_outside": 0,
+  "status_alarm": true,
+  "expert_status": true,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg70",
+  "hours": 1.3625,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg71",
+  "hours": 1.1875,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg72",
+  "hours": 1.3875,
+  "n_alarms": 33,
+  "alarms_per_hour": 23.78,
+  "by_type": {
+   "iic": 2,
+   "seizure": 31
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 31,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg73",
+  "hours": 1.0361111111111112,
+  "n_alarms": 13,
+  "alarms_per_hour": 12.55,
+  "by_type": {
+   "seizure": 13
+  },
+  "seizures": 7,
+  "seizures_alarmed": 5,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg74",
+  "hours": 1.211111111111111,
+  "n_alarms": 1,
+  "alarms_per_hour": 0.83,
+  "by_type": {
+   "iic": 1
+  },
+  "seizures": 0,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg75",
+  "hours": 1.0986111111111112,
+  "n_alarms": 3,
+  "alarms_per_hour": 2.73,
+  "by_type": {
+   "iic": 1,
+   "seizure": 2
+  },
+  "seizures": 1,
+  "seizures_alarmed": 1,
+  "seizure_alarms_outside": 1,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg76",
+  "hours": 1.0611111111111111,
+  "n_alarms": 4,
+  "alarms_per_hour": 3.77,
+  "by_type": {
+   "seizure": 4
+  },
+  "seizures": 3,
+  "seizures_alarmed": 2,
+  "seizure_alarms_outside": 2,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg77",
+  "hours": 1.163888888888889,
+  "n_alarms": 0,
+  "alarms_per_hour": 0.0,
+  "by_type": {},
+  "seizures": 1,
+  "seizures_alarmed": 0,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg78",
+  "hours": 1.3805555555555555,
+  "n_alarms": 35,
+  "alarms_per_hour": 25.35,
+  "by_type": {
+   "iic": 6,
+   "seizure": 29
+  },
+  "seizures": 22,
+  "seizures_alarmed": 19,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": false,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ },
+ {
+  "subject": "eeg79",
+  "hours": 0.9152777777777777,
+  "n_alarms": 4,
+  "alarms_per_hour": 4.37,
+  "by_type": {
+   "iic": 1,
+   "seizure": 3
+  },
+  "seizures": 5,
+  "seizures_alarmed": 3,
+  "seizure_alarms_outside": 0,
+  "status_alarm": false,
+  "expert_status": false,
+  "within_budget": true,
+  "detector": "configs/models/ictal_gbm_realtime_neo1.json"
+ }
+]

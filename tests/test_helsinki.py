@@ -264,3 +264,16 @@ def test_neonatal_discontinuity_rule(configs):
     assert discontinuity_abnormal_for_age(bs(12.0), norms, term)      # long IBI at term: abnormal
     assert not discontinuity_abnormal_for_age(bs(12.0), norms, preterm)  # normal for 27 weeks
     assert discontinuity_abnormal_for_age(bs(4.0), norms, PatientInfo(age_years=40))  # adults unchanged
+
+
+def test_iic_not_alarmed_for_neonates(configs):
+    from neurolens.contracts.events import AcnsModifiers, DetectionResult, Event, Localization
+    from neurolens.contracts.signal import PatientInfo
+    from neurolens.realtime.monitor import RealtimeMonitor
+
+    ev = Event(code="periodic", label_ru="", label_uz="", group="periodic", localization=Localization(),
+               t_start=0, t_end=10, confidence=0.8, acns=AcnsModifiers(iic=True))
+    adult = RealtimeMonitor(config=configs, patient=PatientInfo(age_years=50))._candidates(DetectionResult(events=[ev]), 0.0)
+    neo = RealtimeMonitor(config=configs, patient=PatientInfo(postmenstrual_age_weeks=40))._candidates(
+        DetectionResult(events=[ev]), 0.0)
+    assert any(c.type.value == "iic" for c in adult) and not any(c.type.value == "iic" for c in neo)

@@ -224,7 +224,7 @@ class RealtimeMonitor:
             ))
 
         for e in det.by_group("periodic"):
-            if e.acns and e.acns.iic:
+            if e.acns and e.acns.iic and not self._neonate:  # IIC: ACNS 2021 adult/child term
                 cands.append(AlarmCandidate(
                     type=AlarmType.IIC, severity=AlarmSeverity.WARNING,
                     message=_MSG[AlarmType.IIC], confidence=e.confidence,

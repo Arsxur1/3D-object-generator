@@ -233,6 +233,12 @@ class Pipeline:
 
             kept = [e for e in detection.events if e.code != "burst_suppression"
                     or discontinuity_abnormal_for_age(e, self.norms, analysis.patient)]
+            # ACNS ictal-interictal continuum (IIC) is defined for adults/children (ACNS 2021);
+            # the neonatal terminology (ACNS 2013) does not use it: keep the pattern, drop the label
+            for e in kept:
+                if e.acns is not None and e.acns.iic:
+                    e.acns.iic = False
+                    e.metadata["iic_not_applicable_neonate"] = True
             n_drop = len(detection.events) - len(kept)
             if n_drop:
                 detection.events = kept
