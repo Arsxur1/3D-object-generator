@@ -30,17 +30,20 @@ _EXTENDED_ONLY = {
 }
 
 
-def normalize_channel_name(raw: str) -> str:
+def normalize_channel_name(raw: str, strip_cz: bool = True) -> str:
     """Map a raw channel label to a canonical electrode name.
 
     Strips common prefixes/suffixes ("EEG ", "-Ref", "-LE"), fixes case, and
     applies 10-10 -> classic aliases. Non-EEG channels (ECG/EKG/EOG/EMG) are
-    passed through in a canonical upper-case form.
+    passed through in a canonical upper-case form. ``strip_cz``: treat "-Cz" as a
+    reference tag (vertex-referenced recording); with False, "Fpz-Cz" stays a
+    bipolar label (PSG derivation) - see :func:`cz_is_reference`.
     """
     s = raw.strip()
     s = re.sub(r"(?i)^eeg[\s:]*", "", s)  # drop leading "EEG "
     # Drop a trailing reference tag: "-Ref", "-REF", "-LE", "-A1", "-AVG"...
-    s = re.sub(r"(?i)[-_ ](ref|le|avg|average|a1|a2|m1|m2|cz|linked.*)$", "", s)
+    tags = "ref|le|avg|average|a1|a2|m1|m2|linked.*" + ("|cz" if strip_cz else "")
+    s = re.sub(rf"(?i)[-_ ]({tags})$", "", s)
     s = s.strip(" -_")
 
     up = s.upper()
@@ -90,3 +93,12 @@ def is_eeg_channel(name: str) -> bool:
     if any(up.startswith(m) for m in ("ECG", "EKG", "EOG", "EMG", "RESP", "SPO2", "PHOTIC", "TRIG")):
         return False
     return bool(re.match(r"^(FP|AF|F|FC|FT|C|CP|T|TP|P|PO|O|A|M)\d|^[FCPO]Z$", up))
+
+
+def cz_is_reference(labels: list[str], min_fraction: float = 0.6) -> bool:
+    """A "-Cz" suffix is a reference tag only in a vertex-referenced recording, i.e.
+    when most EEG-like labels share it. Otherwise (e.g. a PSG with "EEG Fpz-Cz" and
+    "EEG Pz-Oz") the label is a bipolar derivation and must keep both electrodes."""
+    eeg = [lb for lb in labels if re.match(r"(?i)^(eeg[\s:]*)?[a-z]{1,3}\d{0,2}[-_ ]", lb.strip())]
+    cz = [lb for lb in eeg if re.search(r"(?i)[-_ ]cz$", lb.strip())]
+    return bool(eeg) and len(cz) >= min_fraction * len(eeg)

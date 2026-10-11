@@ -84,6 +84,19 @@ class MontageEngine:
             sampling_rate_hz=self.signal.sampling_rate_hz,
         )
 
+    def as_recorded(self) -> MontagedSignal:
+        """Fallback view: the EEG channels exactly as recorded (e.g. a PSG with two
+        bipolar EEG derivations, where no standard montage pair exists)."""
+        idx = [i for i, n in enumerate(self.signal.channel_names)
+               if is_eeg_channel(n) or "-" in n] or list(range(len(self.signal.channel_names)))
+        return MontagedSignal(
+            montage_name="as_recorded",
+            montage_type=MontageType.REFERENTIAL,
+            derivation_names=[self.signal.channel_names[i] for i in idx],
+            data=self.signal.signal[idx].astype(np.float32),
+            sampling_rate_hz=self.signal.sampling_rate_hz,
+        )
+
     def _reference_vector(self, reference: str | None) -> np.ndarray:
         n_samples = self.signal.n_samples
         if reference in (None, "average"):

@@ -257,6 +257,11 @@ def derivations(names: list[str], data: np.ndarray, parasagittal_fallback: bool 
     ``parasagittal_fallback``: Fp2-C4 / P4-O2 (left side if the right is missing),
     as validated on clinical PSG in increment 13b. None when electrodes are missing."""
     idx = {n.upper(): i for i, n in enumerate(names)}
+    if "FPZ-CZ" in idx and "PZ-OZ" in idx:
+        # a PSG that already carries the training derivations (Sleep-EDF style)
+        eog_name = next((n for n in names if n.upper().startswith(("EOG", "LOC", "ROC"))), None)
+        return {"frontal": data[idx["FPZ-CZ"]], "parietal": data[idx["PZ-OZ"]],
+                "eog": data[names.index(eog_name)] if eog_name else None}
 
     def ch(*opts):
         got = [data[idx[o.upper()]] for o in opts if o.upper() in idx]
@@ -282,6 +287,49 @@ def derivations(names: list[str], data: np.ndarray, parasagittal_fallback: bool 
     else:
         eog = None
     return {"frontal": frontal, "parietal": parietal, "eog": eog}
+
+
+SLEEP_SMOOTH_EPOCHS = 10  # 5 min
+WINDOW_PAD_EPOCHS = int(30 * 60 / EPOCH_S)  # 30 min, as in training
+
+
+def _stage_sleep_period(F: np.ndarray, names: list[str], model) -> tuple[np.ndarray, tuple[int, int]]:
+    """Two passes, matching the training preprocessing (features standardised over the
+    sleep period +- 30 min): pass 1 on the whole recording finds the sleep period
+    (5-min smoothed sleep probability > 0.5); pass 2 re-standardises and stages only
+    that window (the longest sleep block, gaps < 30 min bridged); epochs outside it are wake. Without the second pass a ~20-h recording
+    with long daytime wake was standardised over the wrong distribution."""
+    X, _ = standardise_and_context(F, names)
+    p1 = model.predict_proba(X)
+    sleep_p = 1.0 - p1[:, STAGES.index("W")]
+    smooth = np.convolve(sleep_p, np.ones(SLEEP_SMOOTH_EPOCHS) / SLEEP_SMOOTH_EPOCHS, mode="same")
+    # main sleep period: the longest block of "asleep" epochs, bridging gaps < 30 min
+    # (first-to-last would stretch over scattered daytime false positives)
+    runs, start = [], None
+    for i, v in enumerate(np.append(smooth > 0.5, False)):
+        if v and start is None:
+            start = i
+        elif not v and start is not None:
+            runs.append([start, i])
+            start = None
+    if not runs:
+        return p1, (0, len(F))
+    merged = [runs[0]]
+    for r0, r1 in runs[1:]:
+        if r0 - merged[-1][1] < WINDOW_PAD_EPOCHS:
+            merged[-1][1] = r1
+        else:
+            merged.append([r0, r1])
+    s0, s1 = max(merged, key=lambda r: r[1] - r[0])
+    a = max(0, s0 - WINDOW_PAD_EPOCHS)
+    b = min(len(F), s1 + WINDOW_PAD_EPOCHS)
+    if b - a < 2 * CONTEXT + 1 or (a == 0 and b == len(F)):
+        return p1, (a, b)
+    Xw, _ = standardise_and_context(F[a:b], names)
+    proba = np.zeros_like(p1)
+    proba[:, STAGES.index("W")] = 1.0
+    proba[a:b] = model.predict_proba(Xw)
+    return proba, (a, b)
 
 
 def stage_signal(names: list[str], data: np.ndarray, fs: float, model: MulticlassTreeModel,
@@ -310,10 +358,10 @@ def stage_signal(names: list[str], data: np.ndarray, fs: float, model: Multiclas
     if der["eog"] is None:  # model expects EOG features: neutral (median) values
         F = np.column_stack([F, np.zeros((n_ep, 3))])
         names_f = names_f + ["eog_log_slow", "eog_log_fast", "eog_logvar"]
-    X, _ = standardise_and_context(F, names_f)
-    proba = model.predict_proba(X)
+    proba, window = _stage_sleep_period(F, names_f, model)
     stages = proba.argmax(axis=1)
     return {
+        "analysis_window_epochs": list(window),
         "epoch_s": EPOCH_S,
         "hypnogram": [STAGES[i] for i in stages],
         "summary": hypnogram_summary(stages),

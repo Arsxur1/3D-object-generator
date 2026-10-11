@@ -23,7 +23,7 @@ from ..contracts.signal import (
 )
 from .base import Ingestor
 from .bipolar import is_bipolar_recording, parse_bipolar_label, reconstruct_average_reference
-from .electrodes import detect_electrode_system, is_eeg_channel, normalize_channel_name
+from .electrodes import cz_is_reference, detect_electrode_system, is_eeg_channel, normalize_channel_name
 
 # EDF physical-dimension strings -> multiplier to microvolts.
 _UNIT_TO_UV = {
@@ -62,6 +62,7 @@ class EdfIngestor(Ingestor):
             dims = [reader.getPhysicalDimension(i) for i in range(n)]
             target_fs = float(max(sample_rates))
 
+            strip_cz = cz_is_reference(labels)
             channel_names: list[str] = []
             channels: list[np.ndarray] = []
             for i in range(n):
@@ -70,7 +71,7 @@ class EdfIngestor(Ingestor):
                 if sample_rates[i] != target_fs:
                     sig_uv = _resample_linear(sig_uv, sample_rates[i], target_fs)
                 channels.append(sig_uv.astype(np.float32))
-                channel_names.append(normalize_channel_name(labels[i]))
+                channel_names.append(normalize_channel_name(labels[i], strip_cz=strip_cz))
 
             n_samples = min(len(c) for c in channels)
             signal = np.stack([c[:n_samples] for c in channels], axis=0)

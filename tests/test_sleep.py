@@ -393,3 +393,72 @@ def test_pdf_fits_tall_images(tmp_path):
     from reportlab.lib.units import cm
 
     assert img.drawHeight <= 23 * cm + 1e-6 and img.drawWidth <= 17 * cm + 1e-6
+
+
+def _psg_edf(path, hours=0.2):
+    import pyedflib
+
+    names = ["EEG Fpz-Cz", "EEG Pz-Oz", "EOG horizontal"]
+    fs = 100
+    rng = np.random.default_rng(0)
+    w = pyedflib.EdfWriter(str(path), len(names), file_type=pyedflib.FILETYPE_EDF)
+    w.setSignalHeaders([{"label": n, "dimension": "uV", "sample_frequency": fs, "physical_min": -500,
+                         "physical_max": 500, "digital_min": -32768, "digital_max": 32767} for n in names])
+    n = int(hours * 3600 * fs)
+    w.writeSamples([rng.normal(0, 20, n) for _ in names])
+    w.close()
+    return path
+
+
+def test_psg_with_two_eeg_derivations(tmp_path):
+    """A Sleep-EDF-style PSG: labels keep both electrodes, the run does not crash on the
+    display montage, and the report states that seizure analysis was NOT performed."""
+    from neurolens.layer1_ingest.registry import ingest
+    from neurolens.pipeline.pipeline import Pipeline
+
+    edf = _psg_edf(tmp_path / "psg.edf")
+    assert ingest(edf).channel_names[:2] == ["Fpz-Cz", "Pz-Oz"]
+    out = Pipeline(provider_pref="deterministic", run_ica=False).analyze_file(edf)
+    assert out.montage_name == "as_recorded"
+    assert any(f.startswith("insufficient_eeg_channels") for f in out.signal.quality.flags)
+    assert out.report.escalation_reason and "НЕ выполнены" in out.report.escalation_reason.ru
+    assert not out.gate.passed
+    d = derivations(["Fpz-Cz", "Pz-Oz", "EOG HORIZONTAL"], np.ones((3, 5)))
+    assert d is not None and d["eog"] is not None
+
+
+def test_cz_suffix_rules():
+    from neurolens.layer1_ingest.electrodes import cz_is_reference, normalize_channel_name
+
+    assert cz_is_reference(["EEG Fp1-Cz", "EEG Fp2-Cz", "EEG C3-Cz", "EEG O1-Cz"])
+    assert not cz_is_reference(["EEG Fpz-Cz", "EEG Pz-Oz", "EOG horizontal"])
+    assert normalize_channel_name("EEG Fp1-Cz") == "Fp1"
+    assert normalize_channel_name("EEG Fpz-Cz", strip_cz=False) == "Fpz-Cz"
+    assert normalize_channel_name("EEG Fp1-REF", strip_cz=False) == "Fp1"
+
+
+def test_sleep_period_window_found_in_long_recording():
+    """Long wake before/after the night must not distort staging: the window is the
+    main sleep block (+30 min), epochs outside are wake."""
+    from neurolens.layer4_detect.sleep_staging import _stage_sleep_period
+
+    n = 1200
+    F = np.random.default_rng(0).normal(size=(n, 4))
+    names = ["a", "b", "c", "d"]
+
+    class Model:  # "asleep" only for epochs 500-899, a lone daytime blip at 100
+        def predict_proba(self, X):
+            p = np.zeros((len(X), 5))
+            p[:, 0] = 1.0
+            return p
+
+    class Full(Model):
+        def predict_proba(self, X):
+            p = super().predict_proba(X)
+            if len(X) == n:
+                p[500:900] = [0, 0, 1, 0, 0]
+                p[100:104] = [0, 0, 1, 0, 0]
+            return p
+
+    _, (a, b) = _stage_sleep_period(F, names, Full())
+    assert abs(a - (500 - 60)) <= 5 and abs(b - (900 + 60)) <= 5  # 5-min smoothing shifts edges slightly

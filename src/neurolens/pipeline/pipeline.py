@@ -47,6 +47,9 @@ from ..outputs.topomap import plot_band_topomaps
 from .config_loader import ConfigBundle, load_configs
 
 
+MIN_EEG_CHANNELS = 4  # below this, seizure/background detectors are not considered run
+
+
 @dataclass
 class PipelineOutput:
     signal: UnifiedSignal
@@ -245,6 +248,17 @@ class Pipeline:
             mode, features, detection, graph, signal_quality,
             artifacts.artifact_fraction, cfg.thresholds,
         )
+        # Too few scalp-EEG channels: detectors had (almost) nothing to analyse. "No events"
+        # must then not read as a normal result (e.g. a PSG with two bipolar EEG derivations).
+        from ..layer1_ingest.electrodes import is_eeg_channel
+
+        n_eeg = sum(is_eeg_channel(n) for n in analysis.channel_names)
+        limited = n_eeg < MIN_EEG_CHANNELS
+        if limited:
+            analysis.quality.flags.append(f"insufficient_eeg_channels:{n_eeg}<{MIN_EEG_CHANNELS}")
+            gate.passed = False
+            gate.reasons_ru.append(f"мало ЭЭГ-отведений ({n_eeg}): анализ приступов и фона не выполнен")
+            gate.reasons_uz.append(f"EEG kanallari kam ({n_eeg}): tutqanoq va fon tahlili bajarilmadi")
 
         # --- Layer 6: interpretation (grounded) ---
         llm_input = build_llm_input(
@@ -254,9 +268,26 @@ class Pipeline:
         report = provider.generate(llm_input)
         validate_grounding(report, set(llm_input.allowed_grounding_keys))
         report.critical_findings = critical  # always attached
+        if limited:
+            from ..contracts.report import Bilingual
 
+            report.escalation_reason = Bilingual(
+                ru=f"В записи {n_eeg} скальповых ЭЭГ-отведений (нужно не менее {MIN_EEG_CHANNELS}): поиск "
+                   "приступов, разрядов и оценка фона НЕ выполнены — отсутствие событий не означает их "
+                   "отсутствия. Требуется просмотр записи врачом.",
+                uz=f"Yozuvda {n_eeg} ta skalp EEG kanali bor (kamida {MIN_EEG_CHANNELS} kerak): tutqanoq, "
+                   "razryadlar va fon tahlili BAJARILMADI — hodisalar yo‘qligi ularning yo‘qligini anglatmaydi. "
+                   "Shifokor ko‘rigi zarur.",
+            )
         # --- montage view for plotting/localization ---
-        montaged = MontageEngine(analysis).apply(cfg.montage(montage_name))
+        try:
+            montaged = MontageEngine(analysis).apply(cfg.montage(montage_name))
+        except ValueError:
+            # too few electrodes for the requested display montage (e.g. a PSG with two
+            # EEG derivations): show the channels as recorded instead of failing the run
+            montaged = MontageEngine(analysis).as_recorded()
+            analysis.quality.flags.append(f"montage_fallback:{montage_name}->as_recorded")
+            montage_name = "as_recorded"
 
         result_json = build_result_json(
             analysis, features, detection, graph, report, gate, montage_name
