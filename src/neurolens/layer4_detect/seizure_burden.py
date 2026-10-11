@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from ..contracts.events import DetectionResult, SeizureBurden
 
-# Continuous ictal activity beyond this suggests status epilepticus (lenient demo value).
-STATUS_DURATION_S = 30.0
+from .status_criteria import status_epilepticus
 
 
-def compute_seizure_burden(detection: DetectionResult, duration_s: float) -> SeizureBurden:
+def compute_seizure_burden(detection: DetectionResult, duration_s: float, neonate: bool = False) -> SeizureBurden:
+    """``status_epilepticus_suspected`` follows ACNS criteria (status_criteria.py)."""
     ictal = detection.by_group("ictal")
     total = sum(e.duration_s for e in ictal)
     longest = max((e.duration_s for e in ictal), default=0.0)
@@ -25,5 +25,6 @@ def compute_seizure_burden(detection: DetectionResult, duration_s: float) -> Sei
         seizure_fraction=round(min(1.0, frac), 4),
         seizures_per_hour=round(per_hour, 2),
         longest_seizure_s=round(longest, 1),
-        status_epilepticus_suspected=longest >= STATUS_DURATION_S,
+        status_epilepticus_suspected=status_epilepticus(
+            [(e.t_start, e.t_end) for e in ictal], neonate)["suspected"],
     )

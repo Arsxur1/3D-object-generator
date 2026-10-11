@@ -57,5 +57,6 @@ def run_detectors(
         # keep only events above the detection confidence floor
         events.extend(e for e in found if e.confidence >= thresholds.detection_min_confidence)
     result = DetectionResult(events=events, detectors_run=ran, notes=notes)
-    result.seizure_burden = compute_seizure_burden(result, sig.duration_s or 0.0)
+    result.seizure_burden = compute_seizure_burden(
+        result, sig.duration_s or 0.0, neonate=sig.patient.postmenstrual_age_weeks is not None)
     return result

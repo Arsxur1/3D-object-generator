@@ -42,8 +42,9 @@ def test_e2e_causal_edges(demo_edf, configs):
 def test_e2e_critical_findings_present(demo_edf, configs):
     _, out = _run(demo_edf, configs)
     codes = {cf.code for cf in out.report.critical_findings}
-    # sustained ictal -> status; burst-suppression -> critical
-    assert "status_epilepticus_suspected" in codes
+    # the synthetic seizure is short: a seizure finding, not status epilepticus (ACNS
+    # requires >= 10 continuous min or >= 20% of an hour); burst-suppression -> critical
+    assert "ongoing_seizure" in codes and "status_epilepticus_suspected" not in codes
     assert "burst_suppression" in codes
 
 

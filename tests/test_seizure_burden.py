@@ -23,8 +23,9 @@ def test_burden_aggregates_multiple_seizures():
 
 
 def test_burden_flags_status():
-    det = DetectionResult(events=[_ictal(0, 45)])
-    sb = compute_seizure_burden(det, duration_s=300.0)
+    # ACNS: >= 10 continuous minutes (a 45-s seizure is not status epilepticus)
+    assert compute_seizure_burden(DetectionResult(events=[_ictal(0, 45)]), 300.0).status_epilepticus_suspected is False
+    sb = compute_seizure_burden(DetectionResult(events=[_ictal(0, 700)]), 3600.0)
     assert sb.status_epilepticus_suspected is True
 
 

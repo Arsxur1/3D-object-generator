@@ -341,13 +341,15 @@ def test_critical_findings_merged_per_code():
         return Event(code=code, label_ru=code, label_uz=code, group="ictal", localization=Localization(),
                      t_start=a, t_end=b, confidence=0.7)
 
-    det = DetectionResult(events=[ev("ictal_ml", 10, 50), ev("ictal_ml", 100, 190), ev("ictal_rhythm", 300, 310)])
+    det = DetectionResult(events=[ev("ictal_ml", 10, 50), ev("ictal_ml", 100, 800), ev("ictal_rhythm", 900, 910)])
     found = scan_critical_findings(det)
     codes = [f.code for f in found]
     assert codes.count("status_epilepticus_suspected") == 1 and "ongoing_seizure" not in codes
     se = next(f for f in found if f.code == "status_epilepticus_suspected")
-    assert "90" in se.text.ru  # longest event's duration
-    assert set(se.grounding_refs) == {"ictal_ml"}
+    assert "700" in se.text.ru  # longest seizure (ACNS: >= 10 continuous min)
+    assert set(se.grounding_refs) == {"ictal_ml", "ictal_rhythm"}
+    short = scan_critical_findings(DetectionResult(events=[ev("ictal_ml", 10, 50), ev("ictal_ml", 100, 190)]))
+    assert [f.code for f in short] == ["ongoing_seizure"]
 
 
 def test_feature_version4_appends_age():

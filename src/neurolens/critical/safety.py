@@ -12,29 +12,32 @@ from __future__ import annotations
 from ..contracts.events import DetectionResult, Event
 from ..contracts.report import Bilingual, CriticalFinding
 
-# Seconds of continuous ictal activity that should prompt status-epilepticus review.
-STATUS_DURATION_S = 30.0
+from ..layer4_detect.status_criteria import status_epilepticus
 
 
-def scan_critical_findings(detection: DetectionResult) -> list[CriticalFinding]:
+def scan_critical_findings(detection: DetectionResult, neonate: bool = False) -> list[CriticalFinding]:
     findings: list[CriticalFinding] = []
+    ictal = detection.by_group("ictal")
+    ese = status_epilepticus([(e.t_start, e.t_end) for e in ictal], neonate)
 
     # longest first, so a merged finding's text states the longest duration
-    for ev in sorted(detection.by_group("ictal"), key=lambda e: -e.duration_s):
+    for ev in sorted(ictal, key=lambda e: -e.duration_s):
         dur = ev.duration_s
-        if dur >= STATUS_DURATION_S:
+        if ese["suspected"]:
             findings.append(
                 CriticalFinding(
                     code="status_epilepticus_suspected",
                     text=Bilingual(
                         ru=(
-                            f"Продолжающаяся иктальная активность ~{dur:.0f} с — "
-                            "рассмотреть эпилептический статус (в т.ч. бессудорожный). "
-                            "Требуется немедленная верификация врачом."
+                            f"Критерии электрографического эпилептического статуса (ACNS): самый "
+                            f"длинный приступ ~{ese['longest_s']:.0f} с, до {ese['max_seizure_s_per_hour'] / 60:.0f} мин "
+                            "приступов за 60 мин — рассмотреть эпилептический статус (в т.ч. "
+                            "бессудорожный). Требуется немедленная верификация врачом."
                         ),
                         uz=(
-                            f"~{dur:.0f} s davom etayotgan iktal faollik — epileptik "
-                            "status (jumladan, tutqanoqsiz) ko‘rib chiqilsin. "
+                            f"Elektrografik epileptik status mezonlari (ACNS): eng uzun tutqanoq "
+                            f"~{ese['longest_s']:.0f} s, 60 daqiqada {ese['max_seizure_s_per_hour'] / 60:.0f} daqiqagacha "
+                            "tutqanoq — epileptik status (jumladan, tutqanoqsiz) ko‘rib chiqilsin. "
                             "Zudlik bilan shifokor tekshiruvi zarur."
                         ),
                     ),

@@ -33,7 +33,7 @@ from .alarms import AlarmCandidate, AlarmManager
 from .buffer import WindowBuffer
 from .stream import StreamSource
 
-STATUS_DURATION_S = 30.0
+from ..layer4_detect.status_criteria import status_epilepticus
 
 _MSG = {
     AlarmType.SEIZURE: Bilingual(
@@ -74,6 +74,7 @@ class RealtimeMonitor:
         ml_mode = self.cfg.ml.realtime
         use_ml = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
         neonate = patient is not None and patient.postmenstrual_age_weeks is not None
+        self._neonate = neonate
         if learned is None and neonate and self.cfg.ml.neonatal is not None:
             # neonatal routing (configs/ml.yaml neonatal.realtime): general / threshold / neonatal
             ml_mode = self.cfg.ml.select("realtime", neonate=True)
@@ -198,7 +199,7 @@ class RealtimeMonitor:
                 channels=e.localization.channels, evidence=[e.code], is_critical=True,
             ))
         self._seizure_intervals = _merge(self._seizure_intervals)
-        if _total(self._seizure_intervals) >= STATUS_DURATION_S:
+        if status_epilepticus(self._seizure_intervals, self._neonate)["suspected"]:
             cands.append(AlarmCandidate(
                 type=AlarmType.STATUS_EPILEPTICUS, severity=AlarmSeverity.CRITICAL,
                 message=_MSG[AlarmType.STATUS_EPILEPTICUS], confidence=0.9,
@@ -249,7 +250,7 @@ class RealtimeMonitor:
             seizure_fraction=round(min(1.0, total_sz / duration_s) if duration_s else 0.0, 4),
             seizures_per_hour=round(len(merged) / hours, 2) if hours > 0 else 0.0,
             longest_seizure_s=round(max((b - a for a, b in merged), default=0.0), 1),
-            status_epilepticus_suspected=total_sz >= STATUS_DURATION_S,
+            status_epilepticus_suspected=status_epilepticus(merged, self._neonate)["suspected"],
         )
         p95 = float(np.percentile(lat, 95))
         from ..layer1_ingest.electrodes import is_eeg_channel
