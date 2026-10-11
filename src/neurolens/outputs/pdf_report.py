@@ -56,12 +56,14 @@ def _styles():
     return {"body": body, "h": h, "title": title, "crit": crit, "small": small}
 
 
-def _img(path: str | Path, max_w: float = 17 * cm):
+def _img(path: str | Path, max_w: float = 17 * cm, max_h: float = 23 * cm):
+    """Image scaled to fit the A4 frame in both dimensions (a tall causal graph of a
+    long recording overflowed the page and aborted the whole PDF)."""
     path = Path(path)
     if not path.exists():
         return None
     w, hgt = ImageReader(str(path)).getSize()
-    scale = min(max_w / w, 1.0)
+    scale = min(max_w / w, max_h / hgt, 1.0)
     return Image(str(path), width=w * scale, height=hgt * scale)
 
 

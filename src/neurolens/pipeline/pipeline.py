@@ -62,7 +62,7 @@ class PipelineOutput:
 
     @property
     def protocol_text(self) -> str:
-        return render_protocol(self.report, self.result_json.get("sleep_staging"))
+        return render_protocol(self.report, self.result_json.get("sleep_staging"))  # skip note handled there
 
 
 class Pipeline:
@@ -119,6 +119,12 @@ class Pipeline:
         sc = self.cfg.sleep
         if not sc.enabled or not sc.model or signal.duration_s < sc.min_duration_h * 3600:
             return None
+        p = signal.patient
+        if p.postmenstrual_age_weeks is not None or (p.age_years is not None and p.age_years < sc.min_age_years):
+            # adult-validated stagers; neonatal sleep has different states (active/quiet sleep)
+            return {"skipped": True,
+                    "reason": {"ru": "стадирование сна не применяется: модели проверены только у взрослых",
+                               "uz": "uyqu bosqichlash qo‘llanilmaydi: modellar faqat kattalarda tekshirilgan"}}
         from ..layer4_detect.sleep_staging import MulticlassTreeModel, stage_signal
 
         if getattr(self, "_sleep_model", None) is None:
@@ -309,7 +315,7 @@ class Pipeline:
             paths["causal_graph"] = plot_causal_graph(
                 output.graph, out_dir / "causal_graph.png"
             )
-            if output.result_json.get("sleep_staging"):
+            if output.result_json.get("sleep_staging", {}).get("hypnogram"):
                 from ..outputs.sleep_section import plot_hypnogram
 
                 paths["hypnogram"] = plot_hypnogram(output.result_json["sleep_staging"],
@@ -322,7 +328,8 @@ class Pipeline:
             paths["pdf"] = build_pdf_report(
                 output.report, output.detection, output.signal,
                 output.montage_name, paths, out_dir / "report.pdf",
-                sleep=output.result_json.get("sleep_staging"),
+                sleep=(output.result_json.get("sleep_staging")
+                       if output.result_json.get("sleep_staging", {}).get("hypnogram") else None),
             )
         except Exception as exc:  # report generation must not break the run
             (out_dir / "pdf_error.txt").write_text(str(exc), encoding="utf-8")

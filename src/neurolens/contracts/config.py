@@ -223,6 +223,9 @@ class SleepStagingConfig(BaseModel):
     enabled: bool = False
     model: Optional[str] = None
     min_duration_h: float = Field(default=2.0, description="Stage only recordings at least this long.")
+    min_age_years: float = Field(
+        default=18.0, description="Validated on adults only (Sleep-EDF 25-101 y, CAP adults): younger "
+                                  "patients and neonates (postmenstrual age set) are not staged.")
     parasagittal_fallback: bool = Field(
         default=False, description="Without midline electrodes, use Fp2-C4 / P4-O2 (left if absent); "
                                    "enabled only by a pre-registered clinical transfer test.")

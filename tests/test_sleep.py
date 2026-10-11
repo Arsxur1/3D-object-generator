@@ -359,3 +359,37 @@ def test_rem_latency_ignores_isolated_rem_epoch():
     st = np.array([0] * 10 + [2] * 5 + [4] + [2] * 60 + [4] * 5 + [2] * 10)
     s = hypnogram_summary(st)
     assert s["sleep_latency_min"] == 5.0 and s["rem_latency_min"] == 33.0  # (76 - 10) epochs
+
+
+def test_sleep_staging_skipped_for_neonates_and_children(demo_edf, configs):
+    import copy
+
+    from neurolens.contracts.signal import PatientInfo
+    from neurolens.pipeline.pipeline import Pipeline
+
+    cfg = copy.deepcopy(configs)
+    cfg.sleep = cfg.sleep.model_copy(update={"min_duration_h": 0.0})
+    pipe = Pipeline(config=cfg, provider_pref="deterministic", run_ica=False)
+    for patient in (PatientInfo(postmenstrual_age_weeks=40), PatientInfo(age_years=6)):
+        out = pipe.analyze_file(demo_edf, patient=patient)
+        sl = out.result_json["sleep_staging"]
+        assert sl["skipped"] and "взрослых" in sl["reason"]["ru"]
+        assert "модели проверены только у взрослых" in out.protocol_text
+
+
+def test_pdf_fits_tall_images(tmp_path):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from neurolens.outputs.pdf_report import _img
+
+    fig = plt.figure(figsize=(5, 12), dpi=100)
+    p = tmp_path / "tall.png"
+    fig.savefig(p)
+    plt.close(fig)
+    img = _img(p)
+    from reportlab.lib.units import cm
+
+    assert img.drawHeight <= 23 * cm + 1e-6 and img.drawWidth <= 17 * cm + 1e-6

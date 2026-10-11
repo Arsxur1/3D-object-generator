@@ -51,7 +51,12 @@ def render_protocol(report: LLMReport, sleep: dict | None = None) -> str:
             if s.grounding_refs:
                 lines.append(f"     [обоснование/grounding: {', '.join(s.grounding_refs)}]")
 
-    if sleep:
+    if sleep and sleep.get("skipped"):
+        lines.append("")
+        lines.append("— Сон / Uyqu —")
+        lines.append(f"  RU: {sleep['reason']['ru']}")
+        lines.append(f"  UZ: {sleep['reason']['uz']}")
+    elif sleep:
         from ..outputs.sleep_section import sleep_text
 
         txt = sleep_text(sleep)
