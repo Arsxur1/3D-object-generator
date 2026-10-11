@@ -23,6 +23,7 @@ from typing import Optional
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 from .. import __version__
+from ..contracts.signal import PatientInfo
 from ..feedback.log import Correction, FeedbackLogger
 from ..pipeline.config_loader import load_configs
 from .audit import AuditLogger
@@ -88,11 +89,13 @@ def create_app(config=None, audit_path=None, feedback_path=None) -> FastAPI:
         montage: str = Form("double_banana"),
         provider: str = Form("deterministic"),
         age_years: Optional[float] = Form(None),
+        postmenstrual_age_weeks: Optional[float] = Form(None),
         clinical_question: Optional[str] = Form(None),
     ) -> dict:
         params = AnalyzeParams(
             mode=mode, montage=montage, provider=provider,
-            age_years=age_years, clinical_question=clinical_question,
+            age_years=age_years, postmenstrual_age_weeks=postmenstrual_age_weeks,
+            clinical_question=clinical_question,
         )
         suffix = Path(file.filename or "upload.edf").suffix or ".edf"
         tmp = Path(tempfile.mkdtemp()) / f"upload{suffix}"
@@ -108,7 +111,9 @@ def create_app(config=None, audit_path=None, feedback_path=None) -> FastAPI:
     def monitor(req: MonitorRequest) -> dict:
         if not Path(req.path).exists():
             raise HTTPException(status_code=404, detail=f"file not found: {req.path}")
-        return run_monitor(req.path, req.montage, req.window_s, req.step_s, cfg, audit)
+        return run_monitor(req.path, req.montage, req.window_s, req.step_s, cfg, audit,
+                           patient=PatientInfo(age_years=req.age_years,
+                                               postmenstrual_age_weeks=req.postmenstrual_age_weeks))
 
     @app.post("/feedback")
     def post_feedback(req: FeedbackRequest) -> dict:

@@ -108,3 +108,33 @@ def test_deid_unit():
     assert out["subject_id"] == sid == hash_identifier("patient_john.edf")
     # original untouched (deep copy)
     assert result["recording"]["provenance"]["source_file"] == "patient_john.edf"
+
+
+def test_monitor_and_upload_accept_neonatal_age(client_and_paths, demo_edf, monkeypatch):
+    import neurolens.realtime.monitor as mon_mod
+
+    seen = []
+    real_init = mon_mod.RealtimeMonitor.__init__
+
+    def spy(self, *a, patient=None, **k):
+        seen.append(patient)
+        real_init(self, *a, patient=patient, **k)
+
+    monkeypatch.setattr(mon_mod.RealtimeMonitor, "__init__", spy)
+    client, _, _ = client_and_paths
+    r = client.post("/monitor", json={"path": str(demo_edf), "window_s": 10, "step_s": 5,
+                                      "postmenstrual_age_weeks": 40})
+    assert r.status_code == 200 and seen[-1].postmenstrual_age_weeks == 40
+    with open(demo_edf, "rb") as fh:
+        r = client.post("/analyze/upload", files={"file": ("x.edf", fh)},
+                        data={"provider": "deterministic", "postmenstrual_age_weeks": "40"})
+    assert r.status_code == 200
+
+
+def test_monitor_request_overrides_do_not_leak(client_and_paths, demo_edf, configs):
+    """Regression: per-request window/step must not mutate the server's shared config."""
+    before = (configs.realtime.window_s, configs.realtime.step_s)
+    client, _, _ = client_and_paths
+    r = client.post("/monitor", json={"path": str(demo_edf), "window_s": 10, "step_s": 5})
+    assert r.status_code == 200
+    assert (configs.realtime.window_s, configs.realtime.step_s) == before

@@ -56,14 +56,19 @@ def run_monitor(
     step_s: float | None,
     config: ConfigBundle,
     audit: AuditLogger,
+    patient: PatientInfo | None = None,
 ) -> dict[str, Any]:
+    import dataclasses
+
     cfg = config or load_configs()
-    if window_s is not None:
-        cfg.realtime.window_s = window_s
-    if step_s is not None:
-        cfg.realtime.step_s = step_s
+    # per-request overrides on a copy: the server's shared config must not change
+    # between requests (a window set by one caller leaked into all later ones)
+    rt = cfg.realtime.model_copy(update={k: v for k, v in (("window_s", window_s), ("step_s", step_s))
+                                         if v is not None})
+    cfg = dataclasses.replace(cfg, realtime=rt)
     src = EdfReplaySource(path, chunk_s=cfg.realtime.step_s)
-    summary = RealtimeMonitor(config=cfg, montage_name=montage).run(src)
+    # patient drives detector routing (neonates: configs/ml.yaml neonatal.realtime)
+    summary = RealtimeMonitor(config=cfg, montage_name=montage, patient=patient).run(src)
 
     d = summary.model_dump(mode="json")
     subject_id = hash_identifier(str(d.get("source", "unknown")))

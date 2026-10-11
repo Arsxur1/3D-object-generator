@@ -87,7 +87,12 @@ def _monitor(args) -> int:
     if args.step is not None:
         cfg.realtime.step_s = args.step
     source = EdfReplaySource(args.file, chunk_s=cfg.realtime.step_s, realtime=args.realtime)
-    monitor = RealtimeMonitor(config=cfg, montage_name=args.montage, out_dir=args.out)
+    from .contracts.signal import PatientInfo
+
+    patient = (PatientInfo(age_years=args.age, postmenstrual_age_weeks=args.pma)
+               if (args.age is not None or args.pma is not None) else None)
+    # patient drives detector routing (neonates: configs/ml.yaml neonatal.realtime)
+    monitor = RealtimeMonitor(config=cfg, montage_name=args.montage, out_dir=args.out, patient=patient)
     summary = monitor.run(source)
 
     print(f"=== cEEG мониторинг / cEEG monitoring: {summary.source} ===")
@@ -527,6 +532,9 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--out", default=None, help="Output dir for alarm fragments + summary.")
     m.add_argument("--realtime", action="store_true", help="Pace replay to wall-clock.")
     m.add_argument("--overrides", default=None, help="Threshold override YAML.")
+    m.add_argument("--age", type=float, default=None, help="Age in years.")
+    m.add_argument("--pma", type=float, default=None,
+                   help="Postmenstrual age (weeks) — neonate: neonatal seizure detector (configs/ml.yaml).")
     m.set_defaults(func=_monitor)
 
     cal = sub.add_parser("calibrate", help="Fit confidence calibration from a feedback log.")

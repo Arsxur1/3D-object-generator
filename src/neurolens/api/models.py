@@ -30,6 +30,9 @@ class MonitorRequest(BaseModel):
     montage: str = "double_banana"
     window_s: Optional[float] = None
     step_s: Optional[float] = None
+    # patient descriptors route the seizure detector (neonates: configs/ml.yaml neonatal)
+    age_years: Optional[float] = None
+    postmenstrual_age_weeks: Optional[float] = None
 
 
 class FeedbackRequest(BaseModel):

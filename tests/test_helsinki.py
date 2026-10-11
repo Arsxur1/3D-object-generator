@@ -220,3 +220,27 @@ def test_open_edf_reads_file_shorter_than_header(tmp_path):
     r = open_edf(cut)
     assert isinstance(r, PlainEdfReader) and r.truncated_records == 3
     assert len(r.readSignal(0)) == 700 and r.getStartdatetime().year >= 2000
+
+
+def test_entry_points_pass_neonatal_age_to_monitor(demo_edf, monkeypatch, tmp_path):
+    """CLI `monitor --pma` and API /monitor must hand the patient to RealtimeMonitor,
+    otherwise neonates silently get the general model (increment-12 decision)."""
+    import neurolens.realtime.monitor as mon_mod
+    from neurolens.api import service
+    from neurolens.api.audit import AuditLogger
+    from neurolens.cli import main
+    from neurolens.pipeline.config_loader import load_configs
+
+    seen = []
+    real_init = mon_mod.RealtimeMonitor.__init__
+
+    def spy(self, *a, patient=None, **k):
+        seen.append(patient)
+        real_init(self, *a, patient=patient, **k)
+
+    monkeypatch.setattr(mon_mod.RealtimeMonitor, "__init__", spy)
+    main(["monitor", str(demo_edf), "--pma", "40", "--window", "10", "--step", "5"])
+    assert seen[-1] is not None and seen[-1].postmenstrual_age_weeks == 40
+    service.run_monitor(demo_edf, "double_banana", 10.0, 5.0, load_configs(), AuditLogger(tmp_path / "a.jsonl"),
+                        patient=mon_mod.PatientInfo(postmenstrual_age_weeks=39))
+    assert seen[-1].postmenstrual_age_weeks == 39
