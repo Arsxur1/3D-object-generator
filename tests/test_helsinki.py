@@ -244,3 +244,23 @@ def test_entry_points_pass_neonatal_age_to_monitor(demo_edf, monkeypatch, tmp_pa
     service.run_monitor(demo_edf, "double_banana", 10.0, 5.0, load_configs(), AuditLogger(tmp_path / "a.jsonl"),
                         patient=mon_mod.PatientInfo(postmenstrual_age_weeks=39))
     assert seen[-1].postmenstrual_age_weeks == 39
+
+
+def test_neonatal_discontinuity_rule(configs):
+    """Burst-suppression in a neonate only when IBI exceeds the PMA norm (term: 6 s)."""
+    from neurolens.contracts.events import Event, EventEvidence, Localization
+    from neurolens.contracts.signal import PatientInfo
+    from neurolens.layer3_features.norms import NormsEngine
+    from neurolens.layer4_detect.neonatal import discontinuity_abnormal_for_age
+
+    def bs(ibi):
+        return Event(code="burst_suppression", label_ru="", label_uz="", group="suppression",
+                     localization=Localization(), t_start=0, t_end=60, confidence=0.8,
+                     evidence=[EventEvidence(feature="mean_ibi_s", value=ibi)])
+
+    norms = NormsEngine(configs.norms)
+    term, preterm = PatientInfo(postmenstrual_age_weeks=40), PatientInfo(postmenstrual_age_weeks=27)
+    assert not discontinuity_abnormal_for_age(bs(4.0), norms, term)   # trace alternant: normal
+    assert discontinuity_abnormal_for_age(bs(12.0), norms, term)      # long IBI at term: abnormal
+    assert not discontinuity_abnormal_for_age(bs(12.0), norms, preterm)  # normal for 27 weeks
+    assert discontinuity_abnormal_for_age(bs(4.0), norms, PatientInfo(age_years=40))  # adults unchanged

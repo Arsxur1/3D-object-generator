@@ -107,3 +107,18 @@ class NeonatalBackgroundDetector(Detector):
                 metadata=meta,
             ))
         return events
+
+
+def discontinuity_abnormal_for_age(event: Event, norms: NormsEngine, patient) -> bool:
+    """For a neonate, keep a generic burst-suppression event only when its mean
+    interburst interval exceeds the normal maximum for the postmenstrual age
+    (configs/norms/age_norms.yaml): discontinuous background (trace alternant, trace
+    discontinu) is normal in neonates and must not raise a burst-suppression alarm.
+    Non-neonates: always True (unchanged)."""
+    exp = norms.neonatal_expectations(patient) if patient is not None else None
+    if exp is None:
+        return True
+    ibi = next((ev.value for ev in event.evidence if ev.feature == "mean_ibi_s" and ev.value is not None), None)
+    if ibi is None:
+        return True  # cannot judge: keep (sensitivity first)
+    return float(ibi) > float(exp.get("max_normal_ibi_s", 30.0))

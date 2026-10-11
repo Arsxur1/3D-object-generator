@@ -75,6 +75,11 @@ class RealtimeMonitor:
         use_ml = (ml_mode is not None and ml_mode.enabled) if learned is None else bool(learned)
         neonate = patient is not None and patient.postmenstrual_age_weeks is not None
         self._neonate = neonate
+        self._patient = patient
+        if neonate:
+            from ..layer3_features.norms import NormsEngine
+
+            self._norms = NormsEngine(self.cfg.norms)
         if learned is None and neonate and self.cfg.ml.neonatal is not None:
             # neonatal routing (configs/ml.yaml neonatal.realtime): general / threshold / neonatal
             ml_mode = self.cfg.ml.select("realtime", neonate=True)
@@ -207,6 +212,11 @@ class RealtimeMonitor:
             ))
 
         for e in det.by_group("suppression"):
+            if self._neonate and e.code == "burst_suppression":
+                from ..layer4_detect.neonatal import discontinuity_abnormal_for_age
+
+                if not discontinuity_abnormal_for_age(e, self._norms, self._patient):
+                    continue  # discontinuity normal for the postmenstrual age
             cands.append(AlarmCandidate(
                 type=AlarmType.BURST_SUPPRESSION, severity=AlarmSeverity.CRITICAL,
                 message=_MSG[AlarmType.BURST_SUPPRESSION], confidence=e.confidence,

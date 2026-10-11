@@ -228,7 +228,15 @@ class Pipeline:
 
             detectors = detectors + [NeonatalBackgroundDetector(self.norms)]
         detection = run_detectors(analysis, features, cfg.thresholds, artifacts, detectors=detectors)
+        if analysis.patient.postmenstrual_age_weeks is not None:
+            from ..layer4_detect.neonatal import discontinuity_abnormal_for_age
 
+            kept = [e for e in detection.events if e.code != "burst_suppression"
+                    or discontinuity_abnormal_for_age(e, self.norms, analysis.patient)]
+            n_drop = len(detection.events) - len(kept)
+            if n_drop:
+                detection.events = kept
+                analysis.quality.flags.append(f"neonatal_discontinuity_age_appropriate:{n_drop}")
         # --- confidence calibration (TZ §13): calibrated confidences feed the
         #     causal graph, mode-B gate, and alarms so thresholds are reliable ---
         if calibrator is not None:
