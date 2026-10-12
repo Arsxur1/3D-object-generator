@@ -186,6 +186,8 @@ class HttpRangeFile(io.RawIOBase):
                     if r.status != 206:
                         raise IOError(f"range request not honoured (HTTP {r.status})")
                     data = r.read()
+                if len(data) != n:  # truncated transfer: retry rather than hand zipfile garbage
+                    raise IOError(f"short range read {len(data)}/{n} at {self.pos}")
                 break
             except Exception:
                 if attempt == self.retries - 1:
