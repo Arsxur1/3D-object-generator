@@ -267,6 +267,18 @@ class IEDConfig(BaseModel):
     provenance: dict = Field(default_factory=dict)
 
 
+class ImpressionConfig(BaseModel):
+    """configs/impression.yaml — what the report may claim about its own normal/abnormal
+    conclusion on routine EEG (set by the increment-17 pre-registered decision)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    routine_validated: bool = False
+    specificity: Optional[float] = None
+    sensitivity: Optional[float] = None
+    provenance: dict = Field(default_factory=dict)
+
+
 class NeonatalPolicy(BaseModel):
     """Which seizure detector serves neonates (patient with postmenstrual age set):
     ``general`` — the offline/realtime settings above; ``threshold`` — the

@@ -152,3 +152,41 @@ def test_mechanism_never_more_certain_than_its_trigger(configs):
     assert mech and all(n.physiology.value != "pathologic" for n in mech)
     g2 = eng.build(DetectionResult(events=[ds]), ClinicalContext(), PatientInfo(age_years=40))
     assert any(n.physiology.value == "pathologic" for n in g2.nodes if n.id.startswith("mech:"))
+
+
+def _rows(tn, n_n, tp, n_a, extra=None):
+    rows = [{"abnormal": False, "impression_abnormal": i >= tn} for i in range(n_n)]
+    rows += [{"abnormal": True, "impression_abnormal": i < tp} for i in range(n_a)]
+    return {"records": rows, "summary": {"detector_rate": extra or {}}}
+
+
+def test_prereg17_rule_and_apply(tmp_path):
+    import yaml
+
+    from neurolens.contracts.config import ImpressionConfig
+    from neurolens.evaluation import prereg17
+
+    ok = prereg17.assess(_rows(55, 95, 70, 90), _rows(2, 95, 90, 90))
+    assert ok["decision"]["routine_impression_validated"]
+    assert "подтверждена" in prereg17.markdown_report(ok)
+    out = tmp_path / "impression.yaml"
+    prereg17.apply_decision(ok, str(out))
+    cfg = ImpressionConfig(**yaml.safe_load(out.read_text()))
+    assert cfg.routine_validated and cfg.specificity == pytest.approx(55 / 95, abs=1e-3)
+    low_sens = prereg17.assess(_rows(55, 95, 50, 90), _rows(2, 95, 90, 90))
+    assert not low_sens["decision"]["routine_impression_validated"]
+    prereg17.apply_decision(low_sens, str(out))
+    assert ImpressionConfig(**yaml.safe_load(out.read_text())).routine_validated is False
+    no_gain = prereg17.assess(_rows(55, 95, 70, 90), _rows(40, 95, 90, 90))
+    assert not no_gain["hypotheses"]["H2_specificity_gain_at_least_0.30"]
+
+
+def test_impression_caveat(configs):
+    from neurolens.contracts.config import ImpressionConfig
+    from neurolens.contracts.report import Bilingual
+    from neurolens.pipeline.pipeline import _impression_with_validation
+
+    imp = Bilingual(ru="Заключение: x.", uz="Xulosa: x.")
+    assert "не прошло проверку" in _impression_with_validation(imp, ImpressionConfig()).ru
+    v = _impression_with_validation(imp, ImpressionConfig(routine_validated=True, specificity=0.6, sensitivity=0.75))
+    assert "специфичность 0.60" in v.ru and "sezgirlik 0.75" in v.uz

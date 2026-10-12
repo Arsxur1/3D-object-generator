@@ -1,0 +1,6 @@
+# What the report may claim about its own normal/abnormal conclusion on routine EEG.
+# Written by evaluation/prereg17.apply_decision (docs/preregistration_increment17.md).
+# Not validated: the impression carries a caveat and mode B is blocked.
+routine_validated: false
+provenance:
+  preregistration: docs/preregistration_increment17.md

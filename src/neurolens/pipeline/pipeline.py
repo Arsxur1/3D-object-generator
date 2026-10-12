@@ -47,6 +47,24 @@ from ..outputs.topomap import plot_band_topomaps
 from .config_loader import ConfigBundle, load_configs
 
 
+def _impression_with_validation(imp, icfg):
+    """Append what is known about the normal/abnormal conclusion on routine EEG
+    (configs/impression.yaml, increment 17)."""
+    from ..contracts.report import Bilingual
+
+    if icfg.routine_validated and icfg.specificity is not None and icfg.sensitivity is not None:
+        ru = (f" (Разделение «норма/отклонения» на рутинной ЭЭГ проверено на внешних данных: "
+              f"специфичность {icfg.specificity:.2f}, чувствительность {icfg.sensitivity:.2f}.)")
+        uz = (f" (Rutin EEGda «norma/og‘ish» ajratilishi tashqi ma'lumotlarda tekshirilgan: "
+              f"o‘ziga xoslik {icfg.specificity:.2f}, sezgirlik {icfg.sensitivity:.2f}.)")
+    else:
+        ru = (" (Автоматическое разделение «норма/отклонения» на рутинной ЭЭГ не прошло проверку — "
+              "заключение формирует врач по просмотру записи.)")
+        uz = (" (Rutin EEGda avtomatik «norma/og‘ish» ajratilishi tekshiruvdan o‘tmagan — xulosani "
+              "shifokor yozuvni ko‘rib chiqib chiqaradi.)")
+    return Bilingual(ru=imp.ru + ru, uz=imp.uz + uz)
+
+
 MIN_EEG_CHANNELS = 4  # below this, seizure/background detectors are not considered run
 
 
@@ -292,6 +310,11 @@ class Pipeline:
             gate.passed = False
             gate.reasons_ru.append(f"мало ЭЭГ-отведений ({n_eeg}): анализ приступов и фона не выполнен")
             gate.reasons_uz.append(f"EEG kanallari kam ({n_eeg}): tutqanoq va fon tahlili bajarilmadi")
+        if not cfg.impression.routine_validated and analysis.patient.postmenstrual_age_weeks is None:
+            # increment 17: no autonomous normal/abnormal conclusion until validated
+            gate.passed = False
+            gate.reasons_ru.append("заключение «норма/отклонения» на рутинной ЭЭГ не прошло проверку")
+            gate.reasons_uz.append("rutin EEGda «norma/og‘ish» xulosasi tekshiruvdan o‘tmagan")
         if amp_flag:
             gate.passed = False
             gate.reasons_ru.append("амплитуда ЭЭГ неправдоподобна (ошибка единиц/усиления в файле или крайнее подавление)")
@@ -305,6 +328,8 @@ class Pipeline:
         report = provider.generate(llm_input)
         validate_grounding(report, set(llm_input.allowed_grounding_keys))
         report.critical_findings = critical  # always attached
+        if analysis.patient.postmenstrual_age_weeks is None and report.impression is not None:
+            report.impression = _impression_with_validation(report.impression, cfg.impression)
         if limited:
             from ..contracts.report import Bilingual
 

@@ -20,6 +20,7 @@ from ..contracts.config import (
     RealtimeConfig,
     RuleBase,
     IEDConfig,
+    ImpressionConfig,
     SleepStagingConfig,
     Thresholds,
 )
@@ -55,6 +56,7 @@ class ConfigBundle:
     ml: LearnedDetectorConfig = field(default_factory=LearnedDetectorConfig)
     sleep: SleepStagingConfig = field(default_factory=SleepStagingConfig)
     ied: IEDConfig = field(default_factory=IEDConfig)
+    impression: ImpressionConfig = field(default_factory=ImpressionConfig)
 
     def ml_model_path(self, rel: str) -> Path:
         """Resolve a model path from configs/ml.yaml (relative to the repo root)."""
@@ -98,6 +100,8 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
     sleep_file = cfg / "sleep.yaml"
     sleep = SleepStagingConfig(**_read_yaml(sleep_file)) if sleep_file.exists() else SleepStagingConfig()
 
+    imp_file = cfg / "impression.yaml"
+    impression = ImpressionConfig(**_read_yaml(imp_file)) if imp_file.exists() else ImpressionConfig()
     ied_file = cfg / "ied.yaml"
     ied = IEDConfig(**_read_yaml(ied_file)) if ied_file.exists() else IEDConfig()
 
@@ -114,6 +118,7 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
         ml=ml,
         sleep=sleep,
         ied=ied,
+        impression=impression,
     )
 
 
