@@ -1,0 +1,446 @@
+{
+ "test_curve_exploratory": [
+  {
+   "threshold": 0.3,
+   "sensitivity": 0.9013698630136986,
+   "sensitivity_ci95_record_bootstrap": [
+    0.8148313289496713,
+    0.9691784419516882
+   ],
+   "sensitivity_macro": 0.9370097999976126,
+   "n_ref": 2190,
+   "n_hit": 1974,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 198.23987426080853,
+   "n_false_normal": 9880,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 110,
+   "slowing_hit_rate": 0.45716573258606885,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 398.62372881355947
+  },
+  {
+   "threshold": 0.35,
+   "sensitivity": 0.8849315068493151,
+   "sensitivity_ci95_record_bootstrap": [
+    0.7873320891536492,
+    0.9619942226107601
+   ],
+   "sensitivity_macro": 0.927472839101488,
+   "n_ref": 2190,
+   "n_hit": 1938,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 183.9537618646855,
+   "n_false_normal": 9168,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 109,
+   "slowing_hit_rate": 0.4419535628502802,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 382.6372881355934
+  },
+  {
+   "threshold": 0.4,
+   "sensitivity": 0.8726027397260274,
+   "sensitivity_ci95_record_bootstrap": [
+    0.7669419009845329,
+    0.9550118817683836
+   ],
+   "sensitivity_macro": 0.9190733267164246,
+   "n_ref": 2190,
+   "n_hit": 1911,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 171.85470881010377,
+   "n_false_normal": 8565,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 106,
+   "slowing_hit_rate": 0.41793434747798236,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 365.3694915254239
+  },
+  {
+   "threshold": 0.45,
+   "sensitivity": 0.8593607305936073,
+   "sensitivity_ci95_record_bootstrap": [
+    0.750346396760845,
+    0.9481991541178657
+   ],
+   "sensitivity_macro": 0.9119887053362777,
+   "n_ref": 2190,
+   "n_hit": 1882,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 161.6016140988413,
+   "n_false_normal": 8054,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 104,
+   "slowing_hit_rate": 0.4011208967173739,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 348.7728813559323
+  },
+  {
+   "threshold": 0.5,
+   "sensitivity": 0.8461187214611872,
+   "sensitivity_ci95_record_bootstrap": [
+    0.7311316785471192,
+    0.9426982789353265
+   ],
+   "sensitivity_macro": 0.9040469392884221,
+   "n_ref": 2190,
+   "n_hit": 1853,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 152.51227573445402,
+   "n_false_normal": 7601,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 101,
+   "slowing_hit_rate": 0.3819055244195356,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 326.31864406779675
+  },
+  {
+   "threshold": 0.55,
+   "sensitivity": 0.8237442922374429,
+   "sensitivity_ci95_record_bootstrap": [
+    0.7029591647406193,
+    0.9311534779295443
+   ],
+   "sensitivity_macro": 0.8904777451779456,
+   "n_ref": 2190,
+   "n_hit": 1804,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 143.96468601430175,
+   "n_false_normal": 7175,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 101,
+   "slowing_hit_rate": 0.36429143314651724,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 305.75593220338993
+  },
+  {
+   "threshold": 0.6,
+   "sensitivity": 0.8073059360730593,
+   "sensitivity_ci95_record_bootstrap": [
+    0.6742176316445354,
+    0.9250066229782488
+   ],
+   "sensitivity_macro": 0.880999968413428,
+   "n_ref": 2190,
+   "n_hit": 1768,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 134.39379329948338,
+   "n_false_normal": 6698,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 99,
+   "slowing_hit_rate": 0.3514811849479584,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 283.3627118644069
+  },
+  {
+   "threshold": 0.65,
+   "sensitivity": 0.7849315068493151,
+   "sensitivity_ci95_record_bootstrap": [
+    0.6506457527509616,
+    0.9141290026757056
+   ],
+   "sensitivity_macro": 0.8703592677078416,
+   "n_ref": 2190,
+   "n_hit": 1719,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 124.28115194042998,
+   "n_false_normal": 6194,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 97,
+   "slowing_hit_rate": 0.33386709367493994,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 261.5796610169493
+  },
+  {
+   "threshold": 0.7,
+   "sensitivity": 0.7593607305936073,
+   "sensitivity_ci95_record_bootstrap": [
+    0.6216787416155181,
+    0.8998645536329664
+   ],
+   "sensitivity_macro": 0.858915302899515,
+   "n_ref": 2190,
+   "n_hit": 1663,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 113.90766864155972,
+   "n_false_normal": 5677,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 92,
+   "slowing_hit_rate": 0.311449159327462,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 236.98983050847468
+  },
+  {
+   "threshold": 0.75,
+   "sensitivity": 0.7315068493150685,
+   "sensitivity_ci95_record_bootstrap": [
+    0.5876257357640685,
+    0.8846026853276177
+   ],
+   "sensitivity_macro": 0.8446762990028296,
+   "n_ref": 2190,
+   "n_hit": 1602,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 101.90893940998447,
+   "n_false_normal": 5079,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 84,
+   "slowing_hit_rate": 0.28823058446757405,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 213.19322033898314
+  },
+  {
+   "threshold": 0.8,
+   "sensitivity": 0.6949771689497717,
+   "sensitivity_ci95_record_bootstrap": [
+    0.5416291702874397,
+    0.8590177066465399
+   ],
+   "sensitivity_macro": 0.8142333047952115,
+   "n_ref": 2190,
+   "n_hit": 1522,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 88.52574142091977,
+   "n_false_normal": 4412,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 74,
+   "slowing_hit_rate": 0.2602081665332266,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 182.68474576271194
+  },
+  {
+   "threshold": 0.85,
+   "sensitivity": 0.6502283105022831,
+   "sensitivity_ci95_record_bootstrap": [
+    0.4859263714499727,
+    0.8337957387658497
+   ],
+   "sensitivity_macro": 0.788794029540473,
+   "n_ref": 2190,
+   "n_hit": 1424,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 72.45386497528135,
+   "n_false_normal": 3611,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 62,
+   "slowing_hit_rate": 0.22177742193755004,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 144.61016949152548
+  },
+  {
+   "threshold": 0.9,
+   "sensitivity": 0.5881278538812785,
+   "sensitivity_ci95_record_bootstrap": [
+    0.42192097744321266,
+    0.7788661746632143
+   ],
+   "sensitivity_macro": 0.7392809429864242,
+   "n_ref": 2190,
+   "n_hit": 1288,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 54.09460536509513,
+   "n_false_normal": 2696,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 51,
+   "slowing_hit_rate": 0.17614091273018415,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 104.58305084745767
+  },
+  {
+   "threshold": 0.91,
+   "sensitivity": 0.5730593607305936,
+   "sensitivity_ci95_record_bootstrap": [
+    0.4076779715765555,
+    0.762312167054005
+   ],
+   "sensitivity_macro": 0.7248513222026683,
+   "n_ref": 2190,
+   "n_hit": 1255,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 50.202041032443624,
+   "n_false_normal": 2502,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 50,
+   "slowing_hit_rate": 0.1633306645316253,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 94.75932203389834
+  },
+  {
+   "threshold": 0.92,
+   "sensitivity": 0.5557077625570777,
+   "sensitivity_ci95_record_bootstrap": [
+    0.3880544628330682,
+    0.7477920070137967
+   ],
+   "sensitivity_macro": 0.7153912526238612,
+   "n_ref": 2190,
+   "n_hit": 1217,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 45.205914646720814,
+   "n_false_normal": 2253,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 49,
+   "slowing_hit_rate": 0.1545236188951161,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 85.9118644067797
+  },
+  {
+   "threshold": 0.93,
+   "sensitivity": 0.5287671232876713,
+   "sensitivity_ci95_record_bootstrap": [
+    0.3567804190557075,
+    0.7214218634025111
+   ],
+   "sensitivity_macro": 0.7016829939077659,
+   "n_ref": 2190,
+   "n_hit": 1158,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 40.91205502204338,
+   "n_false_normal": 2039,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 47,
+   "slowing_hit_rate": 0.13851080864691753,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 76.39322033898308
+  },
+  {
+   "threshold": 0.94,
+   "sensitivity": 0.4922374429223744,
+   "sensitivity_ci95_record_bootstrap": [
+    0.32212832749199355,
+    0.6828212511443804
+   ],
+   "sensitivity_macro": 0.6668845574686563,
+   "n_ref": 2190,
+   "n_hit": 1078,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 36.016252459327056,
+   "n_false_normal": 1795,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 44,
+   "slowing_hit_rate": 0.12409927942353884,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 66.08135593220342
+  },
+  {
+   "threshold": 0.95,
+   "sensitivity": 0.4611872146118721,
+   "sensitivity_ci95_record_bootstrap": [
+    0.2914818914141024,
+    0.6504437025960568
+   ],
+   "sensitivity_macro": 0.6375100678989644,
+   "n_ref": 2190,
+   "n_hit": 1010,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 31.000061309002955,
+   "n_false_normal": 1545,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 40,
+   "slowing_hit_rate": 0.1088871096877502,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 54.793220338983076
+  },
+  {
+   "threshold": 0.96,
+   "sensitivity": 0.4178082191780822,
+   "sensitivity_ci95_record_bootstrap": [
+    0.25418869443684866,
+    0.5984461845761926
+   ],
+   "sensitivity_macro": 0.5995419209437088,
+   "n_ref": 2190,
+   "n_hit": 915,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 25.241473868430887,
+   "n_false_normal": 1258,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 34,
+   "slowing_hit_rate": 0.09047237790232186,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 42.46779661016951
+  },
+  {
+   "threshold": 0.97,
+   "sensitivity": 0.36164383561643837,
+   "sensitivity_ci95_record_bootstrap": [
+    0.2083049238864875,
+    0.5353964262889824
+   ],
+   "sensitivity_macro": 0.5293056538943088,
+   "n_ref": 2190,
+   "n_hit": 792,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 18.981267312826404,
+   "n_false_normal": 946,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 30,
+   "slowing_hit_rate": 0.0656525220176141,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 31.60677966101696
+  },
+  {
+   "threshold": 0.98,
+   "sensitivity": 0.2808219178082192,
+   "sensitivity_ci95_record_bootstrap": [
+    0.16236656988602885,
+    0.43540265208612605
+   ],
+   "sensitivity_macro": 0.4594233104327268,
+   "n_ref": 2190,
+   "n_hit": 615,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 12.660866463418035,
+   "n_false_normal": 631,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 21,
+   "slowing_hit_rate": 0.044035228182546036,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 19.09830508474577
+  },
+  {
+   "threshold": 0.99,
+   "sensitivity": 0.13515981735159818,
+   "sensitivity_ci95_record_bootstrap": [
+    0.06976186492666332,
+    0.23363253808538292
+   ],
+   "sensitivity_macro": 0.2745749558909042,
+   "n_ref": 2190,
+   "n_hit": 296,
+   "n_records_with_ref": 37,
+   "fa_per_h_normal": 5.878976028179848,
+   "n_false_normal": 293,
+   "hours_normal": 49.8386111111111,
+   "n_normal": 119,
+   "normal_records_with_any_detection": 13,
+   "slowing_hit_rate": 0.01521216973578863,
+   "n_slowing": 1249,
+   "unannotated_per_h_abnormal": 6.223728813559324
+  }
+ ],
+ "fa_excluding_857_737": 12.97975555822206,
+ "sensitivity_excluding_1065_337_219": 0.5525164113785558
+}

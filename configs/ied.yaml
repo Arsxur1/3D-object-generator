@@ -1,0 +1,13 @@
+# Learned interictal epileptiform discharge (spike / sharp wave) detector.
+# Written by evaluation/prereg15.apply_decision (docs/preregistration_increment15.md).
+# Held-out NMT-Events test split: sensitivity 0.461, 31.0 false detections/h of normal EEG (docs/increment15_report.md).
+# Disabled = the heuristic SpikeDetector (not validated: see the report).
+enabled: false
+model: configs/models/ied_gbm_v1.json
+threshold: 0.95
+max_events: 200
+apply_to_neonates: false
+provenance:
+  preregistration: docs/preregistration_increment15.md
+  report: docs/increment15_report.md
+  model_sha256: 2f9754f90be86e36cfb45ebea90d66e95da90d1c9b8419677eefa6c82fc47abf
