@@ -11,7 +11,8 @@ max_false_alarms_per_hour: 2.0  # cEEG alarm budget (placeholder; real-time is v
 
 # Detector thresholds (kept in config, never hardcoded — TZ §0)
 diffuse_slowing_delta_theta_ratio: 0.55
-asymmetry_index_abnormal: 0.5
+asymmetry_index_abnormal: 0.5      # legacy (report's global asymmetry)
+focal_slowing_min_diff: 0.25        # increment 17: persistent relative slow-power difference
 suppression_amplitude_uv: 10.0
 burst_suppression_ratio: 0.5
 ictal_min_duration_s: 8.0        # sustained rhythmic discharge to call ictal
@@ -25,7 +26,8 @@ pd_min_discharges: 6               # min discharges to call a pattern periodic
 pd_isi_cv_max: 0.35                # max coeff. of variation of inter-discharge interval
 pd_freq_hz_min: 0.5
 pd_freq_hz_max: 3.0
-pd_plus_fast_ratio: 0.15           # beta+gamma power fraction during discharges -> +F
+pd_plus_fast_ratio: 0.15
+pd_min_duration_s: 10.0            # increment 17: ACNS "very brief" (< 10 s) not reported           # beta+gamma power fraction during discharges -> +F
 
 # Rhythmic delta activity (GRDA/LRDA)
 rda_min_duration_s: 6.0

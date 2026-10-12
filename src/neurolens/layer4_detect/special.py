@@ -92,29 +92,39 @@ class FirdaDetector(Detector):
     group = "special"
 
     def detect(self, sig, features, thresholds, artifacts=None) -> list[Event]:
-        frontal_idx = [
-            features.eeg_channels.index(c) for c in _FRONTAL if c in features.eeg_channels
-        ]
-        if len(frontal_idx) < 3 or features.epoch_times.size == 0:
-            return []
+        """Increment 17: rhythmicity from the delta-band autocorrelation (a repeating
+        waveform; 3 s windows, hop 1 s), not the spectral-concentration test that
+        ordinary 1/f background passes; at least one of F3/F4/Fz must take part
+        (Fp-only frontal delta is typically eye movement). FIRDA in 59% of normal
+        routine EEGs before."""
+        from ..layer3_features.rhythmicity import delta_rhythmicity_map
 
-        domf = features.epoch_domfreq[:, frontal_idx]
-        conc = features.epoch_band_conc[:, frontal_idx]
-        active = ((domf >= 1.5) & (domf <= 3.0) & (conc >= thresholds.rda_rhythmicity)).mean(axis=1) >= 0.5
+        WIN_S, HOP_S = 3.0, 1.0  # FIRDA comes in brief bursts (~1.5-3 Hz: >= 4.5 cycles)
+
+        names = sig.channel_names
+        idx = [names.index(c) for c in _FRONTAL if c in names]
+        if len(idx) < 3:
+            return []
+        fr = [names[i] for i in idx]
+        t, freq, rho, _ = delta_rhythmicity_map(sig.signal[idx], sig.sampling_rate_hz,
+                                                win_s=WIN_S, hop_s=HOP_S)
+        if t.size == 0:
+            return []
+        act = rho >= thresholds.rda_autocorr_min
+        core = [k for k, c in enumerate(fr) if c in ("F3", "F4", "Fz")]
+        active = (act.mean(axis=0) >= 0.5) & (act[core].any(axis=0) if core else False)
         if not active.any():
             return []
-
         runs = _runs(active)
         coverage = float(active.mean())
         n_runs = len(runs)
         # must be INTERMITTENT: multiple runs, not continuously present
         if n_runs < thresholds.firda_min_runs or coverage >= thresholds.firda_max_continuous_fraction:
             return []
-
-        times = features.epoch_times
-        t0 = float(times[active][0])
-        t1 = float(times[active][-1])
-        mean_freq = float(np.median(domf[(domf >= 1.5) & (domf <= 3.0)])) if (domf >= 1.5).any() else 2.0
+        t0 = float(max(0.0, t[active][0] - WIN_S / 2))
+        t1 = float(t[active][-1] + WIN_S / 2)
+        f = freq[:, active][act[:, active]]
+        mean_freq = float(np.median(f)) if f.size else 2.0
         ru, uz = self.labels(self.code)
         return [
             Event(
@@ -122,7 +132,7 @@ class FirdaDetector(Detector):
                 label_ru=ru,
                 label_uz=uz,
                 group=self.group,
-                localization=Localization(channels=_FRONTAL, region="frontal",
+                localization=Localization(channels=fr, region="frontal",
                                           lateralization="generalized"),
                 t_start=round(t0, 1),
                 t_end=round(t1, 1),
@@ -130,11 +140,13 @@ class FirdaDetector(Detector):
                 acns=AcnsModifiers(frequency_hz=round(mean_freq, 2)),
                 evidence=[
                     EventEvidence(feature="firda_freq_hz", value=round(mean_freq, 2), unit="Hz",
-                                  reference="1.5-3 Hz frontal"),
+                                  reference="frontal rhythmic delta"),
                     EventEvidence(feature="firda_n_runs", value=float(n_runs),
                                   reference=f">= {thresholds.firda_min_runs} (intermittent)"),
                     EventEvidence(feature="firda_coverage", value=round(coverage, 3),
                                   reference=f"< {thresholds.firda_max_continuous_fraction}"),
+                    EventEvidence(feature="rda_autocorr_min", value=thresholds.rda_autocorr_min,
+                                  reference="delta autocorrelation at one period"),
                 ],
             )
         ]

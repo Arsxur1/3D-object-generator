@@ -56,6 +56,15 @@ def run_detectors(
             notes.append(f"detector {det.code} failed: {exc}")
         # keep only events above the detection confidence floor
         events.extend(e for e in found if e.confidence >= thresholds.detection_min_confidence)
+    # ACNS 2021: "triphasic waves" are GPDs with triphasic morphology. The spectral
+    # triphasic detector cannot see morphology, so its event is kept only alongside
+    # GPDs overlapping in time (increment 17: 35% of normal routine EEGs otherwise).
+    gpds = [(e.t_start, e.t_end) for e in events if e.code == "gpds"]
+    dropped = [e for e in events if e.code == "triphasic_waves"
+               and not any(a < e.t_end and b > e.t_start for a, b in gpds)]
+    if dropped:
+        events = [e for e in events if not any(e is d for d in dropped)]
+        notes.append("triphasic_waves dropped: no overlapping GPDs (ACNS 2021)")
     result = DetectionResult(events=events, detectors_run=ran, notes=notes)
     result.seizure_burden = compute_seizure_burden(
         result, sig.duration_s or 0.0, neonate=sig.patient.postmenstrual_age_weeks is not None)

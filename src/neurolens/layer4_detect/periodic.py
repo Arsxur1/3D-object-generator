@@ -125,6 +125,9 @@ class PeriodicPatternDetector(Detector):
                     periodic.setdefault(c, run)
         if len(periodic) < 2:
             return []
+        span = max(r["t1"] for r in periodic.values()) - min(r["t0"] for r in periodic.values())
+        if span < thr.pd_min_duration_s:
+            return []  # ACNS: < 10 s is "very brief" - not reported as a periodic pattern
         for c, run in periodic.items():
             s0, s1 = int(run["t0"] * fs), int(run["t1"] * fs)
             seg = data[names.index(c)][s0:s1]
@@ -143,6 +146,8 @@ class PeriodicPatternDetector(Detector):
             code, region, lat = "bipds", "bilateral", "bilateral_independent"
         else:
             majority = "left" if len(left) >= len(right) else "right"
+            if len(left if majority == "left" else right) < 2:
+                return []  # a lateralized pattern needs >= 2 lateral (non-midline) channels
             code, region, lat = "lpds", "hemispheric", majority
 
         freqs = [periodic[c]["freq"] for c in chans]

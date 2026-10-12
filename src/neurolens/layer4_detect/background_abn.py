@@ -82,48 +82,55 @@ def _grade(frac: float) -> tuple[str, str, str]:
 
 
 class FocalSlowingDetector(Detector):
-    """Focal slowing / persistent interhemispheric asymmetry (TZ §7.1)."""
+    """Focal slowing: *persistent* excess of slow activity on one side (TZ §7.1).
+
+    Increment 17: per epoch, the difference of relative delta+theta power between
+    homologous channels; focal when its median over the record is >= the threshold and
+    it has the same sign in >= 70% of epochs. Relative power is insensitive to electrode
+    impedance, and the median to artefact bursts; Fp1/Fp2 and F7/F8 (eye movements) are
+    excluded. The previous whole-record absolute-power index flagged 39% of normal
+    routine EEGs (one noisy electrode suffices)."""
 
     code = "focal_slowing"
     group = "background"
+    PAIRS = (("F3", "F4"), ("C3", "C4"), ("P3", "P4"), ("O1", "O2"), ("T3", "T4"), ("T5", "T6"))
 
     def detect(self, sig, features, thresholds, artifacts=None) -> list[Event]:
-        thr = thresholds.asymmetry_index_abnormal
-        # strongest homologous asymmetry
-        if not features.asymmetry:
+        ch = features.eeg_channels
+        if features.epoch_times.size == 0:
             return []
-        pair, ai = max(features.asymmetry.items(), key=lambda kv: abs(kv[1]))
-        if abs(ai) < thr:
+        dt = features.epoch_relpow["delta"] + features.epoch_relpow["theta"]
+        thr = thresholds.focal_slowing_min_diff
+        best = None
+        for left, right in self.PAIRS:
+            if left not in ch or right not in ch:
+                continue
+            d = dt[:, ch.index(left)] - dt[:, ch.index(right)]
+            med = float(np.median(d))
+            consistency = float(max((d > 0).mean(), (d < 0).mean()))
+            if consistency >= 0.7 and abs(med) >= thr and (best is None or abs(med) > abs(best[2])):
+                best = (left, right, med, consistency)
+        if best is None:
             return []
-
-        left, right = pair.split("/")
-        higher = left if ai > 0 else right
-        lateralization = "left" if ai > 0 else "right"
-        region = _region_of(higher)
-        conf = float(np.clip(abs(ai), 0.4, 0.9))
+        left, right, med, consistency = best
+        higher = left if med > 0 else right
+        lateralization = "left" if med > 0 else "right"
         ru, uz = self.labels(self.code)
         return [
             Event(
-                code=self.code,
-                label_ru=ru,
-                label_uz=uz,
-                group=self.group,
-                localization=Localization(
-                    channels=[higher], region=region, lateralization=lateralization
-                ),
-                t_start=0.0,
-                t_end=features.duration_s,
-                confidence=conf,
+                code=self.code, label_ru=ru, label_uz=uz, group=self.group,
+                localization=Localization(channels=[higher], region=_region_of(higher),
+                                          lateralization=lateralization),
+                t_start=0.0, t_end=features.duration_s,
+                confidence=float(np.clip(0.4 + abs(med), 0.4, 0.9)),
                 evidence=[
-                    EventEvidence(
-                        feature="asymmetry_index",
-                        value=round(ai, 3),
-                        reference=f"|AI| >= {thr}",
-                        channels=[left, right],
-                        note=f"slow-power higher over {higher}",
-                    )
+                    EventEvidence(feature="rel_slow_power_difference", value=round(med, 3),
+                                  reference=f"|median| >= {thr}", channels=[left, right],
+                                  note=f"more slow activity over {higher}"),
+                    EventEvidence(feature="same_sign_epoch_fraction", value=round(consistency, 3),
+                                  reference=">= 0.7"),
                 ],
-                metadata={"pair": pair, "lateralization": lateralization},
+                metadata={"pair": f"{left}/{right}", "lateralization": lateralization},
             )
         ]
 

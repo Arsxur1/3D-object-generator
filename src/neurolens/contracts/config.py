@@ -100,6 +100,11 @@ class Thresholds(BaseModel):
         default=0.7, ge=0, le=1,
         description="Delta-band autocorrelation at one period (6 s windows) for a channel to "
                     "count as rhythmic (increment 17; replaces the spectral-concentration test).")
+    pd_min_duration_s: float = Field(default=10.0, gt=0, description="ACNS: < 10 s = very brief.")
+    focal_slowing_min_diff: float = Field(
+        default=0.25, ge=0, le=1,
+        description="Persistent difference of relative delta+theta power between homologous "
+                    "channels (median over epochs, same sign in >= 70% of epochs).")
     grda_min_windows: int = Field(default=2, ge=1, description="Consecutive 6 s windows (hop 2 s): 2 = 8 s.")
     lrda_min_windows: int = Field(default=3, ge=1, description="Consecutive 6 s windows (hop 2 s): 3 = 10 s.")
     # Ictal-interictal continuum
