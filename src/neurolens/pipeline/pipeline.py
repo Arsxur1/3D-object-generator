@@ -226,6 +226,15 @@ class Pipeline:
 
             detectors = [d for d in detectors if not isinstance(d, IctalRhythmDetector)]
             detectors.append(ml_detector)
+        ied_cfg = cfg.ied
+        if ied_cfg.enabled and ied_cfg.model and (
+                analysis.patient.postmenstrual_age_weeks is None or ied_cfg.apply_to_neonates):
+            from ..layer4_detect.ied import SpikeDetector
+            from ..layer4_detect.ied_ml import MLSpikeDetector
+
+            detectors = [d for d in detectors if not isinstance(d, SpikeDetector)]
+            detectors.append(MLSpikeDetector.from_path(
+                cfg.ml_model_path(ied_cfg.model), ied_cfg.threshold, ied_cfg.max_events))
         if analysis.patient.postmenstrual_age_weeks is not None:
             from ..layer4_detect.neonatal import NeonatalBackgroundDetector
 

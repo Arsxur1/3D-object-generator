@@ -19,6 +19,7 @@ from ..contracts.config import (
     MontageConfig,
     RealtimeConfig,
     RuleBase,
+    IEDConfig,
     SleepStagingConfig,
     Thresholds,
 )
@@ -53,6 +54,7 @@ class ConfigBundle:
     root: Path | None = None
     ml: LearnedDetectorConfig = field(default_factory=LearnedDetectorConfig)
     sleep: SleepStagingConfig = field(default_factory=SleepStagingConfig)
+    ied: IEDConfig = field(default_factory=IEDConfig)
 
     def ml_model_path(self, rel: str) -> Path:
         """Resolve a model path from configs/ml.yaml (relative to the repo root)."""
@@ -96,6 +98,9 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
     sleep_file = cfg / "sleep.yaml"
     sleep = SleepStagingConfig(**_read_yaml(sleep_file)) if sleep_file.exists() else SleepStagingConfig()
 
+    ied_file = cfg / "ied.yaml"
+    ied = IEDConfig(**_read_yaml(ied_file)) if ied_file.exists() else IEDConfig()
+
     return ConfigBundle(
         filters=filters,
         thresholds=thresholds,
@@ -108,6 +113,7 @@ def load_configs(root: str | Path | None = None) -> ConfigBundle:
         root=cfg,
         ml=ml,
         sleep=sleep,
+        ied=ied,
     )
 
 

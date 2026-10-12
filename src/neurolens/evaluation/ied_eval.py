@@ -257,3 +257,88 @@ def operating_point(curve: list[dict], fa_target: float, key: str) -> Optional[d
     if not ok:
         return None
     return max(ok, key=lambda c: (c["sensitivity"], -c["fa_per_h_normal"], c[key] if key == "threshold" else -c[key]))
+
+
+def type_key(comment: str) -> str:
+    c = comment.lower()
+    if "poly" in c:
+        return "polyspikes"
+    if "spike" in c:
+        return "spike_and_wave"
+    if "sharp" in c and ("slow" in c or "delta" in c):
+        return "sharp_and_slow_wave"
+    if "sharp" in c:
+        return "sharp_wave"
+    return "other"
+
+
+def per_type_sensitivity(records: list[IEDRecord], anns: dict[int, NMTAnnotation], dets_of) -> dict:
+    """Hit rate per discharge type on the *raw* (unmerged) epileptiform annotations."""
+    out: dict[str, dict] = {}
+    for rec in records:
+        if rec.normal or rec.record_id not in anns:
+            continue
+        D = np.asarray(dets_of(rec), float).reshape(-1, 2)
+        for e in anns[rec.record_id].events:
+            if e.category != EPILEPTIFORM:
+                continue
+            k = type_key(e.comment)
+            t = out.setdefault(k, {"n": 0, "hit": 0})
+            t["n"] += 1
+            t["hit"] += int(_overlaps(e.onset_s, e.offset_s, D, TOL_S))
+    for t in out.values():
+        t["sensitivity"] = t["hit"] / t["n"] if t["n"] else float("nan")
+    return dict(sorted(out.items()))
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def freeze(records: list[IEDRecord], anns: dict[int, NMTAnnotation], model_path: Path,
+           frozen_path: Path, fa_budget: float, cv_probs: list[np.ndarray] | None = None,
+           progress=None) -> dict:
+    """Cross-validate on the training split, pick the threshold (max sensitivity at
+    FA/h <= budget on training normals), fit on all training records, save."""
+    probs = cv_probs if cv_probs is not None else cross_val_probabilities(records, anns, progress=progress)
+    curve = learned_curve(records, anns, probs)
+    op = operating_point(curve, fa_budget, "threshold")
+    if op is None:
+        raise RuntimeError(f"no threshold reaches {fa_budget} FA/h in cross-validation")
+    xy = [training_xy(r, None if r.normal else anns.get(r.record_id)) for r in records]
+    model = fit_ied_gbm(np.vstack([a for a, _ in xy]), np.concatenate([b for _, b in xy]))
+    model.meta.update({"threshold": op["threshold"], "fa_budget_per_h": fa_budget,
+                       "training_records": len(records)})
+    model.save(model_path)
+    frozen = {
+        "model": {"path": str(model_path), "sha256": _sha256(model_path)},
+        "threshold": op["threshold"], "fa_budget_per_h": fa_budget,
+        "cv_operating_point": op, "cv_curve": curve,
+        "heuristic_cv_curve": heuristic_curve(records, anns),
+        "training_records": sorted([[r.record_id, r.normal] for r in records]),
+        "feature_version": FEATURE_VERSION, "amplitude_scale": AMPLITUDE_SCALE,
+        "merge_gap_s": MERGE_GAP_S, "tolerance_s": TOL_S,
+    }
+    frozen_path.parent.mkdir(parents=True, exist_ok=True)
+    frozen_path.write_text(json.dumps(frozen, indent=1, default=float) + "\n", encoding="utf-8")
+    return frozen
+
+
+def evaluate_frozen(records: list[IEDRecord], anns: dict[int, NMTAnnotation], frozen: dict) -> dict:
+    from ..layer4_detect.ml_ictal import load_model
+
+    path = Path(frozen["model"]["path"])
+    if _sha256(path) != frozen["model"]["sha256"]:
+        raise RuntimeError("IED model does not match the frozen sha256")
+    model = load_model(path)
+    thr = frozen["threshold"]
+    probs = {id(r): (model.predict_proba(r.X) if r.X.shape[0] else np.zeros(0)) for r in records}
+    dets = lambda r: learned_detections(r, probs[id(r)], thr)  # noqa: E731
+    learned = evaluate(records, anns, dets)
+    return {
+        "learned": learned["aggregate"], "learned_records": learned["records"],
+        "learned_by_type": per_type_sensitivity(records, anns, dets),
+        "heuristic_curve": heuristic_curve(records, anns),
+        "heuristic_default_by_type": per_type_sensitivity(records, anns, lambda r: r.heuristic[6.0]),
+        "threshold": thr, "n_records": len(records),
+    }

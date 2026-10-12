@@ -235,6 +235,22 @@ class SleepStagingConfig(BaseModel):
     provenance: dict = Field(default_factory=dict)
 
 
+class IEDConfig(BaseModel):
+    """configs/ied.yaml — learned interictal epileptiform discharge (spike/sharp wave)
+    detector in the offline report (increment 15). Disabled = heuristic SpikeDetector."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    model: Optional[str] = None
+    threshold: float = Field(default=0.5, ge=0.0, le=1.0)
+    max_events: int = Field(default=200, ge=1, description="Most confident events kept per record.")
+    apply_to_neonates: bool = Field(
+        default=False, description="Trained/validated on routine EEG of children and adults "
+                                   "(NMT-Events); neonates keep the heuristic detector.")
+    provenance: dict = Field(default_factory=dict)
+
+
 class NeonatalPolicy(BaseModel):
     """Which seizure detector serves neonates (patient with postmenstrual age set):
     ``general`` — the offline/realtime settings above; ``threshold`` — the

@@ -504,6 +504,74 @@ def _export_schemas(args) -> int:
     return export_main([args.dir] if args.dir else [])
 
 
+def _ied_prep(item):
+    rid, normal, member, cache, feat = item
+    from .datasets.nmt_events import NMTEventsClient
+    from .evaluation.ied_eval import prepare_record
+    from .pipeline.config_loader import load_configs
+
+    c = NMTEventsClient(cache)
+    return prepare_record(c.local_path(member), rid, normal, load_configs(), Path(feat))
+
+
+def _ied(args) -> int:
+    """NMT-Events: fetch a split, freeze the learned IED detector (training split), or
+    evaluate the frozen detector on the held-out split (increment 15)."""
+    import json
+    import threading
+    from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+
+    from .datasets.nmt_events import NMTEventsClient
+
+    client = NMTEventsClient(args.cache)
+    members = client.split_members(args.split)
+    if args.action == "fetch":
+        local = threading.local()
+
+        def get(m):
+            if not hasattr(local, "c"):
+                local.c = NMTEventsClient(args.cache)
+            return local.c.fetch(m)
+
+        client.annotations()
+        with ThreadPoolExecutor(args.workers) as ex:
+            for i, p in enumerate(ex.map(get, [m for _, _, m in members]), 1):
+                if i % 10 == 0 or i == len(members):
+                    print(f"{i}/{len(members)} {p}", flush=True)
+        return 0
+
+    from .evaluation import ied_eval as E
+
+    anns = client.annotations()
+    items = [(rid, n, m, args.cache, args.feature_cache) for rid, n, m in members]
+    with ProcessPoolExecutor(args.workers) as ex:
+        records = list(ex.map(_ied_prep, items))
+    print(f"{len(records)} records prepared", flush=True)
+    if args.action == "freeze":
+        if args.split != "train":
+            raise SystemExit("freeze uses the training split only")
+        from .evaluation.prereg15 import FA_BUDGET_PER_H
+
+        fr = E.freeze(records, anns, Path(args.model), Path(args.frozen), FA_BUDGET_PER_H,
+                      progress=lambda f: print(f"fold {f} done", flush=True))
+        print(json.dumps({k: fr[k] for k in ("threshold", "cv_operating_point", "model")}, indent=1,
+                         default=float))
+        return 0
+    frozen = json.loads(Path(args.frozen).read_text(encoding="utf-8"))
+    res = E.evaluate_frozen(records, anns, frozen)
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(res, indent=1, default=float) + "\n", encoding="utf-8")
+    print(json.dumps(res["learned"], indent=1, default=float))
+    if args.assess:
+        from .evaluation import prereg15
+
+        a = prereg15.assess(res, frozen)
+        Path(args.assessment).write_text(json.dumps(a, indent=1, default=float) + "\n", encoding="utf-8")
+        print(prereg15.markdown_report(a))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="neurolens", description="EEG interpretation (NeuroLens).")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -617,6 +685,19 @@ def build_parser() -> argparse.ArgumentParser:
     sl.add_argument("--assess", action="store_true")
     sl.add_argument("--out", default="out_eval/sleep")
     sl.set_defaults(func=_sleep)
+
+    ie = sub.add_parser("ied", help="NMT-Events: fetch a split, freeze or evaluate the learned IED detector.")
+    ie.add_argument("action", choices=["fetch", "freeze", "eval"])
+    ie.add_argument("--split", choices=["train", "test"], default="test")
+    ie.add_argument("--cache", default="data/nmt_events")
+    ie.add_argument("--feature-cache", default="data/nmt_events/.features", dest="feature_cache")
+    ie.add_argument("--workers", type=int, default=4)
+    ie.add_argument("--model", default="configs/models/ied_gbm_v1.json")
+    ie.add_argument("--frozen", default="docs/preregistration_increment15_frozen.json")
+    ie.add_argument("--out", default="docs/increment15_metrics.json")
+    ie.add_argument("--assess", action="store_true")
+    ie.add_argument("--assessment", default="docs/increment15_assessment.json")
+    ie.set_defaults(func=_ied)
 
     sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
     sv.add_argument("--host", default="127.0.0.1")

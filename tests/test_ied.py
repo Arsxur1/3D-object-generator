@@ -178,3 +178,78 @@ def test_heuristic_spike_at_record_start_does_not_crash():
         pytest.skip("UnifiedSignal requires additional fields")
     evs = SpikeDetector(max_events=None).detect(sig, None, None)
     assert evs and min(e.t_start for e in evs) >= 0.0
+
+
+def _agg(sens, fa, slow=0.2):
+    return {"sensitivity": sens, "sensitivity_ci95_record_bootstrap": [sens - 0.1, sens + 0.1],
+            "sensitivity_macro": sens, "fa_per_h_normal": fa, "slowing_hit_rate": slow,
+            "n_ref": 100, "n_records_with_ref": 10, "n_normal": 20, "hours_normal": 5.0,
+            "unannotated_per_h_abnormal": 3.0}
+
+
+def test_prereg15_assess_and_apply(tmp_path):
+    import yaml
+
+    from neurolens.contracts.config import IEDConfig
+    from neurolens.evaluation import prereg15
+
+    curve = [{"sharpness_z": z, **_agg(s, f)} for z, s, f in ((6.0, 0.95, 1600.0), (30.0, 0.04, 43.0))]
+    frozen = {"threshold": 0.95, "cv_operating_point": _agg(0.64, 12.8),
+              "model": {"path": "configs/models/ied_gbm_v1.json", "sha256": "ab"}}
+    a = prereg15.assess({"learned": _agg(0.6, 14.0), "heuristic_curve": curve}, frozen)
+    assert all(a["hypotheses"].values()) and a["decision"]["enable_learned_ied_detector"]
+    assert "подтверждена" in prereg15.markdown_report(a)
+    out = tmp_path / "ied.yaml"
+    prereg15.apply_decision(a, frozen, str(out))
+    cfg = IEDConfig(**yaml.safe_load(out.read_text()))
+    assert cfg.enabled and cfg.threshold == 0.95 and not cfg.apply_to_neonates
+
+    bad = prereg15.assess({"learned": _agg(0.6, 30.0), "heuristic_curve": curve}, frozen)
+    assert not bad["hypotheses"]["H2_fa_per_h_normal_within_1.5x_budget"]
+    assert not bad["decision"]["enable_learned_ied_detector"]
+    dominated = prereg15.assess({"learned": _agg(0.03, 14.0), "heuristic_curve":
+                                 curve + [{"sharpness_z": 40.0, **_agg(0.05, 10.0)}]}, frozen)
+    assert not dominated["hypotheses"]["H3_dominates_heuristic_curve"]
+
+
+def test_type_key():
+    assert E.type_key("polyspikes and wave") == "polyspikes"
+    assert E.type_key("spike and wave") == "spike_and_wave"
+    assert E.type_key("sharp and slow waves") == "sharp_and_slow_wave"
+    assert E.type_key("sharp and delta slow waves") == "sharp_and_slow_wave"
+    assert E.type_key("sharp waves") == "sharp_wave"
+
+
+def test_ied_config_default_disabled():
+    from neurolens.pipeline.config_loader import load_configs
+
+    c = load_configs().ied
+    assert c.apply_to_neonates is False
+
+
+def test_pipeline_uses_learned_ied_detector_when_enabled(demo_edf, tmp_path):
+    """configs/ied.yaml enabled -> the heuristic SpikeDetector is replaced and spike
+    events carry the learned detector's provenance."""
+    pytest.importorskip("sklearn")
+    import copy
+
+    from sklearn.ensemble import HistGradientBoostingClassifier
+
+    from neurolens.contracts.config import IEDConfig
+    from neurolens.layer4_detect.ml_ictal import export_hist_gbm
+    from neurolens.pipeline.config_loader import load_configs
+    from neurolens.pipeline.pipeline import Pipeline
+
+    names = ied_ml.feature_names()
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(400, len(names)))
+    y = (X[:, names.index("slope_bg_max")] > 1.0).astype(int)
+    clf = HistGradientBoostingClassifier(max_iter=5).fit(X, y)
+    path = export_hist_gbm(clf, names).save(tmp_path / "ied.json")
+
+    cfg = copy.deepcopy(load_configs())
+    cfg.ied = IEDConfig(enabled=True, model=str(path), threshold=0.0, max_events=5)
+    out = Pipeline(cfg, provider_pref="template", run_ica=False).analyze_file(demo_edf)
+    spikes = [e for e in out.detection.events if e.code == "spike"]
+    assert spikes and all(e.metadata.get("detector") == "ied" for e in spikes)
+    assert len(spikes) <= 5
