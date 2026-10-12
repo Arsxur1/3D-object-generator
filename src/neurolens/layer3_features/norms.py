@@ -31,15 +31,17 @@ class NormsEngine:
         if age is None:
             return "adult", self.norms.get("adult", {})
 
-        for name in ("adult", "child_school", "child_early"):
+        # the band with the largest min_age_years <= age (contiguous: a 5.5-year-old
+        # belongs to child_early, not to a gap that fell back to adult norms)
+        best = None
+        for name in ("adult", "child_school", "child_early", "toddler", "infant"):
             band = self.norms.get(name)
             if not band:
                 continue
             lo = band.get("min_age_years", -1)
-            hi = band.get("max_age_years", 200)
-            if lo <= age <= hi:
-                return name, band
-        return "adult", self.norms.get("adult", {})
+            if lo <= age and (best is None or lo > best[1].get("min_age_years", -1)):
+                best = (name, band)
+        return best if best else ("adult", self.norms.get("adult", {}))
 
     def pdr_expected_range(self, patient: PatientInfo) -> Optional[tuple[float, float]]:
         _, band = self.band_for_patient(patient)

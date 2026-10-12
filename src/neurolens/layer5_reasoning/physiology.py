@@ -91,6 +91,10 @@ class PhysiologyEngine:
                 (e.value for e in event.evidence if e.feature == "pdr_hz" and e.value is not None),
                 None,
             )
+            if (pdr is None or pdr <= 0) and patient.age_years is not None and patient.age_years < 6:
+                # slow background is normal in young children: without an identifiable
+                # posterior rhythm, relative slow power alone cannot establish slowing
+                return PhysiologyLabel.UNCERTAIN
             if pdr is not None and pdr > 0:  # 0 = no posterior rhythm identified
                 normal = self.norms.pdr_is_normal(pdr, patient)
                 if normal is True:

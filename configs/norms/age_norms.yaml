@@ -17,10 +17,24 @@ child_school:
   expected_background: alpha_developing
   physiologic_variants: [posterior_slow_waves_of_youth, hypnagogic_hypersynchrony]
 child_early:
-  min_age_years: 1
+  min_age_years: 3
   max_age_years: 5
-  posterior_dominant_rhythm_hz: [6.0, 9.0]
+  posterior_dominant_rhythm_hz: [6.0, 10.0]   # ~8 Hz by 3 years
   expected_background: theta_alpha
+  physiologic_variants: [hypnagogic_hypersynchrony]
+# increment 17: infants and toddlers had no band (age 0 and fractional ages between
+# bands fell back to ADULT norms, so a normal 6 Hz infant rhythm read as slowing)
+toddler:
+  min_age_years: 1
+  max_age_years: 2
+  posterior_dominant_rhythm_hz: [5.0, 9.0]    # ~5-6 Hz at 12 months, rising
+  expected_background: theta_alpha
+  physiologic_variants: [hypnagogic_hypersynchrony]
+infant:
+  min_age_years: 0
+  max_age_years: 0.999
+  posterior_dominant_rhythm_hz: [3.0, 7.0]    # ~3-4 Hz at 3-4 months, ~5-6 Hz at 12 months
+  expected_background: delta_theta
   physiologic_variants: [hypnagogic_hypersynchrony]
 neonate:
   # Selected by postmenstrual_age_weeks (PMA), not age_years.
