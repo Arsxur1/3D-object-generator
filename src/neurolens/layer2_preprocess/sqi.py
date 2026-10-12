@@ -57,3 +57,28 @@ def overall_quality(sqi: list[float], channel_names: list[str]) -> float:
     """Mean SQI over EEG channels (used by mode-B gating)."""
     vals = [s for s, n in zip(sqi, channel_names) if is_eeg_channel(n)]
     return float(np.mean(vals)) if vals else 0.0
+
+
+# Robust amplitude (MAD x 1.4826 of the band-passed signal, median over EEG channels)
+# outside this range in µV means the file's physical unit/gain is almost certainly
+# wrong (found on NMT-Events: samples labelled "uV" are in units of 10 µV, so every
+# amplitude rule saw ~0.2 µV EEG and produced no detections).
+PLAUSIBLE_ROBUST_SD_UV = (0.5, 300.0)
+
+
+def robust_amplitude_uv(sig: UnifiedSignal) -> float:
+    idx = [i for i, n in enumerate(sig.channel_names) if is_eeg_channel(n)]
+    if not idx:
+        return float("nan")
+    x = np.asarray(sig.signal[idx], dtype=np.float64)
+    mad = np.median(np.abs(x - np.median(x, axis=1, keepdims=True)), axis=1)
+    return float(np.median(1.4826 * mad))
+
+
+def amplitude_flag(sig: UnifiedSignal) -> str | None:
+    """Quality flag when the EEG amplitude is physiologically implausible."""
+    a = robust_amplitude_uv(sig)
+    lo, hi = PLAUSIBLE_ROBUST_SD_UV
+    if np.isfinite(a) and not (lo <= a <= hi):
+        return f"amplitude_implausible:{a:.3g}uV"
+    return None

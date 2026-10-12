@@ -21,9 +21,11 @@ class SpikeDetector(Detector):
     code = "spike"
     group = "ied"
 
-    def __init__(self, sharpness_z: float = 6.0, max_width_ms: float = 70.0):
+    def __init__(self, sharpness_z: float = 6.0, max_width_ms: float = 70.0,
+                 max_events: int | None = 8):
         self.sharpness_z = sharpness_z
         self.max_width_ms = max_width_ms
+        self.max_events = max_events  # None = uncapped (evaluation)
 
     def detect(self, sig, features, thresholds, artifacts=None) -> list[Event]:
         fs = sig.sampling_rate_hz
@@ -72,4 +74,4 @@ class SpikeDetector(Detector):
                 )
         # cap the number reported in the skeleton to avoid flooding
         events.sort(key=lambda e: e.confidence, reverse=True)
-        return events[:8]
+        return events if self.max_events is None else events[: self.max_events]

@@ -25,7 +25,7 @@ from ..layer2_preprocess.bad_channels import detect_bad_channels
 from ..layer2_preprocess.filters import apply_filters
 from ..layer2_preprocess.montage_engine import MontageEngine, MontagedSignal
 from ..layer2_preprocess.reref import rereference
-from ..layer2_preprocess.sqi import compute_sqi, overall_quality
+from ..layer2_preprocess.sqi import amplitude_flag, compute_sqi, overall_quality
 from ..layer3_features.feature_set import FeatureSet, compute_features
 from ..layer3_features.norms import NormsEngine
 from ..layer4_detect.registry import default_detectors, run_detectors
@@ -195,6 +195,9 @@ class Pipeline:
         # --- Layer 2: preprocess / quality / artifacts ---
         filtered = apply_filters(signal, cfg.filters)
         filtered.quality.per_channel_sqi = compute_sqi(filtered, mains_hz=cfg.filters.notch_hz)
+        amp_flag = amplitude_flag(filtered)
+        if amp_flag:  # unit/gain error in the file: amplitude criteria are unreliable
+            filtered.quality.flags.append(amp_flag)
         bad = detect_bad_channels(filtered)
         if bad:
             filtered.quality.flags.append(f"bad_channels:{','.join(bad)}")
@@ -273,6 +276,10 @@ class Pipeline:
             gate.passed = False
             gate.reasons_ru.append(f"мало ЭЭГ-отведений ({n_eeg}): анализ приступов и фона не выполнен")
             gate.reasons_uz.append(f"EEG kanallari kam ({n_eeg}): tutqanoq va fon tahlili bajarilmadi")
+        if amp_flag:
+            gate.passed = False
+            gate.reasons_ru.append("амплитуда ЭЭГ неправдоподобна (ошибка единиц/усиления в файле или крайнее подавление)")
+            gate.reasons_uz.append("EEG amplitudasi ishonchsiz (fayldagi birlik/kuchaytirish xatosi yoki o‘ta susayish)")
 
         # --- Layer 6: interpretation (grounded) ---
         llm_input = build_llm_input(
@@ -292,6 +299,18 @@ class Pipeline:
                 uz=f"Yozuvda {n_eeg} ta skalp EEG kanali bor (kamida {MIN_EEG_CHANNELS} kerak): tutqanoq, "
                    "razryadlar va fon tahlili BAJARILMADI — hodisalar yo‘qligi ularning yo‘qligini anglatmaydi. "
                    "Shifokor ko‘rigi zarur.",
+            )
+        if amp_flag and not limited:
+            from ..contracts.report import Bilingual
+
+            report.escalation_reason = Bilingual(
+                ru=f"Амплитуда ЭЭГ в файле физиологически неправдоподобна ({amp_flag.split(':')[1]} "
+                   "вместо обычных единиц–десятков мкВ): либо ошибка единиц или усиления в EDF, либо "
+                   "крайне выраженное подавление активности. Амплитудные критерии (разряды, подавление, вспышки) ненадёжны — отсутствие событий "
+                   "не означает их отсутствия. Требуется проверка записи врачом.",
+                uz=f"Fayldagi EEG amplitudasi fiziologik jihatdan ishonchsiz ({amp_flag.split(':')[1]}): "
+                   "EDF birligi yoki kuchaytirishida xato yoki faollikning o‘ta kuchli susayishi. Amplituda mezonlari ishonchsiz — "
+                   "hodisalar yo‘qligi ularning yo‘qligini anglatmaydi. Shifokor tekshiruvi zarur.",
             )
         # --- montage view for plotting/localization ---
         try:
