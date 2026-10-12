@@ -609,6 +609,42 @@ def _ied_kural(args) -> int:
     return 0
 
 
+def _routine_one(item):
+    rec, cache = item
+    from .datasets.nmt import NMTClient
+    from .evaluation.routine_eval import run_record
+
+    c = NMTClient(cache)
+    try:
+        return run_record(c.fetch(rec.member), rec)
+    except Exception as exc:  # one bad file must not sink the run
+        return {"record_id": rec.record_id, "abnormal": rec.abnormal, "error": repr(exc)}
+
+
+def _routine(args) -> int:
+    """Routine-EEG specificity on the NMT dataset (increment 17)."""
+    import json
+    from concurrent.futures import ProcessPoolExecutor
+
+    from .datasets.nmt import NMTClient
+    from .evaluation import routine_eval as R
+
+    client = NMTClient(args.cache)
+    labels = client.labels()
+    if args.action == "diagnose":
+        recs = R.diagnostic_subset(labels, args.n_normal, args.n_abnormal)
+    else:
+        recs = [r for r in labels if r.loc == "eval"]
+    with ProcessPoolExecutor(args.workers) as ex:
+        rows = list(ex.map(_routine_one, [(r, args.cache) for r in recs]))
+    errors = [r for r in rows if "error" in r]
+    ok = [r for r in rows if "error" not in r]
+    s = R.save(ok, Path(args.out), {"errors": errors, "action": args.action})
+    print(json.dumps({k: v for k, v in s.items() if k != "pathologic_node_rate"}, indent=1, default=float))
+    print(f"errors: {len(errors)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="neurolens", description="EEG interpretation (NeuroLens).")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -736,6 +772,16 @@ def build_parser() -> argparse.ArgumentParser:
     ie.add_argument("--assess", action="store_true")
     ie.add_argument("--assessment", default="docs/increment15_assessment.json")
     ie.set_defaults(func=_ied)
+
+    ro = sub.add_parser("routine", help="NMT: routine-EEG specificity of the offline pipeline.")
+    ro.add_argument("action", choices=["diagnose", "eval"],
+                    help="diagnose: seeded subset of the authors' train split; eval: their eval split")
+    ro.add_argument("--cache", default="data/nmt")
+    ro.add_argument("--n-normal", type=int, default=120, dest="n_normal")
+    ro.add_argument("--n-abnormal", type=int, default=80, dest="n_abnormal")
+    ro.add_argument("--workers", type=int, default=4)
+    ro.add_argument("--out", default="out_eval/routine_diagnose.json")
+    ro.set_defaults(func=_routine)
 
     sv = sub.add_parser("serve", help="Run the REST API (requires the 'api' extra).")
     sv.add_argument("--host", default="127.0.0.1")
