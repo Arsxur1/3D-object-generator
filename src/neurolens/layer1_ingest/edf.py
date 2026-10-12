@@ -10,6 +10,7 @@ resampling is a v2 option).
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pyedflib
@@ -153,6 +154,20 @@ class PlainEdfReader:
             self._signals.append((dig - dmin[i]) * gain + pmin[i])
         self.signals_in_file = len(keep)
         self.truncated_records = max(0, int(raw[236:244].decode("ascii").strip()) - n_records)
+        # EDF+ time-stamped annotation lists: the first TAL of every data record holds
+        # the record's onset (needed for EDF+D files, whose records are not contiguous)
+        self.record_onsets: list[float] = []
+        self._annotations: list[tuple[float, float, str]] = []
+        for i in range(ns):
+            if labels[i] != "EDF Annotations":
+                continue
+            block = data[:, starts[i]:starts[i + 1]]
+            for r in range(n_records):
+                onset, anns = parse_tal_record(block[r].tobytes())
+                if onset is not None and len(self.record_onsets) < n_records:
+                    self.record_onsets.append(onset)
+                self._annotations.extend(anns)
+        self.record_duration_s = duration
         self._start = (raw[168:176].decode("ascii"), raw[176:184].decode("ascii"))
 
     def getStartdatetime(self):
@@ -178,8 +193,44 @@ class PlainEdfReader:
     def readSignal(self, i: int) -> np.ndarray:
         return self._signals[i]
 
+    def readAnnotations(self):
+        """(onsets, durations, texts) like pyedflib (timekeeping TALs excluded)."""
+        a = sorted(self._annotations)
+        return (np.array([x[0] for x in a]), np.array([x[1] for x in a]), [x[2] for x in a])
+
+    def is_discontinuous(self, tol_s: float = 1e-3) -> bool:
+        o = self.record_onsets
+        return any(abs(o[k + 1] - o[k] - self.record_duration_s) > tol_s for k in range(len(o) - 1))
+
     def close(self) -> None:
         self._signals = []
+
+
+def parse_tal_record(b: bytes) -> tuple[Optional[float], list[tuple[float, float, str]]]:
+    """Parse one data record of an 'EDF Annotations' signal (EDF+ spec, TAL syntax
+    ``+onset[\x15duration]\x14text\x14...\x14\x00``). Returns the record's timekeeping
+    onset and the real annotations."""
+    record_onset: Optional[float] = None
+    out: list[tuple[float, float, str]] = []
+    for tal in b.split(b"\x00"):
+        if not tal or tal[:1] not in (b"+", b"-"):
+            continue
+        parts = tal.split(b"\x14")
+        head = parts[0].split(b"\x15")
+        try:
+            onset = float(head[0])
+            dur = float(head[1]) if len(head) > 1 and head[1] else 0.0
+        except ValueError:
+            continue
+        texts = [t.decode("latin-1").strip() for t in parts[1:] if t.strip()]
+        if not texts:
+            if record_onset is None:
+                record_onset = onset
+            continue
+        if record_onset is None and len(parts) > 1 and parts[1] == b"":
+            record_onset = onset
+        out.extend((onset, dur, t) for t in texts)
+    return record_onset, out
 
 
 def _from_bipolar(

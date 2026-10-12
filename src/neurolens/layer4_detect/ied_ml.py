@@ -181,6 +181,30 @@ def probability_events(t0: np.ndarray, p: np.ndarray, threshold: float,
     return out
 
 
+def annotate_candidates(model, sig, events, threshold: float, half_window_s: float = 0.5) -> int:
+    """Attach the learned IED probability to heuristic spike candidates (in place).
+
+    The probability is the maximum over windows overlapping the candidate +- half_window_s.
+    Returns the number of candidates rated >= ``threshold``."""
+    spikes = [e for e in events if e.code == "spike"]
+    if not spikes:
+        return 0
+    X, t0 = window_features(sig.signal, sig.sampling_rate_hz, sig.channel_names)
+    if X.shape[0] == 0:
+        return 0
+    p = model.predict_proba(X)
+    high = 0
+    for e in spikes:
+        lo, hi = e.t_start - half_window_s, e.t_end + half_window_s
+        near = (t0 < hi) & (t0 + WIN_S > lo)
+        prob = float(p[near].max()) if near.any() else 0.0
+        e.evidence.append(EventEvidence(feature="ied_probability_learned", value=round(prob, 3),
+                                        reference=f">= {threshold}"))
+        e.metadata["ied_probability_learned"] = round(prob, 3)
+        high += prob >= threshold
+    return int(high)
+
+
 @dataclass
 class IEDModelConfig:
     model_path: str

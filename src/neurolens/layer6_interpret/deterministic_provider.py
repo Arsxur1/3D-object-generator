@@ -102,6 +102,15 @@ class DeterministicProvider(LLMProvider):
                 )
             else:
                 regions = sorted({e["localization"].get("region") or "?" for e in ied})
+                rated = [e["metadata"]["ied_probability_learned"] for e in ied
+                         if "ied_probability_learned" in (e.get("metadata") or {})]
+                extra_ru = extra_uz = ""
+                if rated:
+                    hi = sum(1 for v in rated if v >= 0.95)
+                    extra_ru = (f" Обученная модель оценивает как вероятно эпилептиформные {hi} из "
+                                f"{len(rated)} (вероятность ≥ 0.95) — порядок просмотра, не вывод.")
+                    extra_uz = (f" O‘qitilgan model {len(rated)} tadan {hi} tasini ehtimoliy epileptiform "
+                                "deb baholaydi (ehtimollik ≥ 0.95) — ko‘rib chiqish tartibi, xulosa emas.")
                 # Increment 15: neither IED detector met the pre-registered criteria on
                 # expert-annotated EEG (docs/increment15_report.md) - the count is a list of
                 # places to look at, never a finding.
@@ -109,11 +118,11 @@ class DeterministicProvider(LLMProvider):
                     ru=f"Кандидаты в эпилептиформные разряды (спайки/острые волны), автоматическая "
                        f"разметка: {len(ied)}; локализация: {', '.join(regions)}. Детектор разрядов не прошёл "
                        "проверку на размеченной ЭЭГ (много ложных меток, в том числе на нормальной ЭЭГ) — "
-                       "наличие разрядов устанавливается только визуальной оценкой врача.",
+                       "наличие разрядов устанавливается только визуальной оценкой врача." + extra_ru,
                     uz=f"Epileptiform razryad nomzodlari (spike/o‘tkir to‘lqin), avtomatik belgilash: "
                        f"{len(ied)}; lokalizatsiya: {', '.join(regions)}. Razryad detektori belgilangan EEG "
                        "tekshiruvidan o‘tmadi (ko‘p soxta belgilar, shu jumladan normal EEGda) — razryadlar "
-                       "faqat shifokorning vizual bahosi bilan aniqlanadi.",
+                       "faqat shifokorning vizual bahosi bilan aniqlanadi." + extra_uz,
                 )
             sections.append(
                 ReportSection(key="epileptiform", text=txt, grounding_refs=["spike", "ecg_artifact"])

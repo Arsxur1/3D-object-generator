@@ -28,3 +28,4 @@ feedback.jsonl
 # PhysioNet cache (downloaded data + derived features; never committed)
 data/physionet/
 data/nmt_events/
+data/kural_ied/

@@ -523,6 +523,8 @@ def _ied(args) -> int:
 
     from .datasets.nmt_events import NMTEventsClient
 
+    if args.action == "kural":
+        return _ied_kural(args)
     client = NMTEventsClient(args.cache)
     members = client.split_members(args.split)
     if args.action == "fetch":
@@ -569,6 +571,41 @@ def _ied(args) -> int:
         a = prereg15.assess(res, frozen)
         Path(args.assessment).write_text(json.dumps(a, indent=1, default=float) + "\n", encoding="utf-8")
         print(prereg15.markdown_report(a))
+    return 0
+
+
+def _ied_kural(args) -> int:
+    """Increment 16: frozen IED model vs heuristic on the IFCN criteria dataset."""
+    import json
+    from concurrent.futures import ThreadPoolExecutor
+
+    from .datasets.kural_ied import KuralClient
+    from .evaluation import kural_eval as K
+    from .layer4_detect.ml_ictal import load_model
+    from .pipeline.config_loader import load_configs
+
+    frozen = json.loads(Path(args.frozen).read_text(encoding="utf-8"))
+    import hashlib
+
+    mpath = Path(frozen["model"]["path"])
+    if hashlib.sha256(mpath.read_bytes()).hexdigest() != frozen["model"]["sha256"]:
+        raise RuntimeError("IED model does not match the frozen sha256")
+    client = KuralClient("data/kural_ied")
+    cases = client.cases()
+    with ThreadPoolExecutor(args.workers) as ex:
+        paths = list(ex.map(client.fetch, [c.file for c in cases]))
+    cfg, model = load_configs(), load_model(mpath)
+    scores = [K.score_case(c, p, cfg, model, frozen["threshold"]) for c, p in zip(cases, paths)]
+    summary = K.summarize(scores)
+    K.save(scores, summary, Path("docs/increment16_metrics.json"))
+    print(json.dumps(summary, indent=1, default=float))
+    if args.assess:
+        from .evaluation import prereg16
+
+        a = prereg16.assess(summary)
+        Path("docs/increment16_assessment.json").write_text(
+            json.dumps(a, indent=1, default=float) + "\n", encoding="utf-8")
+        print(prereg16.markdown_report(a))
     return 0
 
 
@@ -687,7 +724,8 @@ def build_parser() -> argparse.ArgumentParser:
     sl.set_defaults(func=_sleep)
 
     ie = sub.add_parser("ied", help="NMT-Events: fetch a split, freeze or evaluate the learned IED detector.")
-    ie.add_argument("action", choices=["fetch", "freeze", "eval"])
+    ie.add_argument("action", choices=["fetch", "freeze", "eval", "kural"],
+                    help="kural: external validation on the IFCN criteria dataset (increment 16)")
     ie.add_argument("--split", choices=["train", "test"], default="test")
     ie.add_argument("--cache", default="data/nmt_events")
     ie.add_argument("--feature-cache", default="data/nmt_events/.features", dest="feature_cache")

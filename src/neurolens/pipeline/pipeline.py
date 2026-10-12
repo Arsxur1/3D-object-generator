@@ -240,6 +240,13 @@ class Pipeline:
 
             detectors = detectors + [NeonatalBackgroundDetector(self.norms)]
         detection = run_detectors(analysis, features, cfg.thresholds, artifacts, detectors=detectors)
+        if (ied_cfg.annotate_candidates and not ied_cfg.enabled and ied_cfg.model
+                and analysis.patient.postmenstrual_age_weeks is None):
+            from ..layer4_detect.ied_ml import annotate_candidates
+            from ..layer4_detect.ml_ictal import load_model
+
+            annotate_candidates(load_model(cfg.ml_model_path(ied_cfg.model)), analysis,
+                                detection.events, ied_cfg.threshold)
         if analysis.patient.postmenstrual_age_weeks is not None:
             from ..layer4_detect.neonatal import discontinuity_abnormal_for_age
 

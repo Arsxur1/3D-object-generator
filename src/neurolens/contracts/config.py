@@ -248,6 +248,11 @@ class IEDConfig(BaseModel):
     apply_to_neonates: bool = Field(
         default=False, description="Trained/validated on routine EEG of children and adults "
                                    "(NMT-Events); neonates keep the heuristic detector.")
+    annotate_candidates: bool = Field(
+        default=False, description="With the learned detector disabled: attach the learned "
+                                   "model's probability to every heuristic spike candidate "
+                                   "(evidence only; the candidates themselves are unchanged). "
+                                   "Set only by a pre-registered decision (increment 16).")
     provenance: dict = Field(default_factory=dict)
 
 
