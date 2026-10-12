@@ -129,3 +129,21 @@ def test_annotate_candidates_adds_probability():
     ev2 = ev.model_copy(deep=True)
     ev2.metadata = {}
     assert ied_ml.annotate_candidates(Const(0.2), Sig, [ev2], 0.95) == 0
+
+
+def test_report_never_reassures_on_low_learned_probability(demo_edf):
+    """With annotate_candidates on (configs/ied.yaml), spike candidates carry the learned
+    probability and the text states that a low value does not exclude a discharge."""
+    from neurolens.pipeline.config_loader import load_configs
+    from neurolens.pipeline.pipeline import Pipeline
+
+    cfg = load_configs()
+    assert cfg.ied.annotate_candidates and not cfg.ied.enabled
+    out = Pipeline(cfg, provider_pref="template", run_ica=False).analyze_file(demo_edf)
+    spikes = [e for e in out.detection.events if e.code == "spike"]
+    if not spikes:
+        pytest.skip("demo record produced no spike candidates")
+    assert all("ied_probability_learned" in e.metadata for e in spikes)
+    sec = next(s for s in out.report.sections if s.key == "epileptiform")
+    if "ЭКГ-артефакт" not in sec.text.ru:
+        assert "НЕ исключает" in sec.text.ru and "ISTISNO QILMAYDI" in sec.text.uz

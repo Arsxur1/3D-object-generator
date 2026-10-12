@@ -107,10 +107,17 @@ class DeterministicProvider(LLMProvider):
                 extra_ru = extra_uz = ""
                 if rated:
                     hi = sum(1 for v in rated if v >= 0.95)
+                    # increment 16: the ranking separates epileptiform from benign sharp
+                    # transients (AUC 0.72), but at 0.95 only 4% of epileptiform ones are
+                    # flagged - a low value must never read as "not epileptiform"
                     extra_ru = (f" Обученная модель оценивает как вероятно эпилептиформные {hi} из "
-                                f"{len(rated)} (вероятность ≥ 0.95) — порядок просмотра, не вывод.")
+                                f"{len(rated)} (вероятность ≥ 0.95) — порядок просмотра, не вывод; "
+                                "низкая оценка разряд НЕ исключает (на внешней проверке порог 0.95 "
+                                "достигнут лишь у 4% эпилептиформных транзиентов).")
                     extra_uz = (f" O‘qitilgan model {len(rated)} tadan {hi} tasini ehtimoliy epileptiform "
-                                "deb baholaydi (ehtimollik ≥ 0.95) — ko‘rib chiqish tartibi, xulosa emas.")
+                                "deb baholaydi (ehtimollik ≥ 0.95) — ko‘rib chiqish tartibi, xulosa emas; "
+                                "past baho razryadni ISTISNO QILMAYDI (tashqi tekshiruvda 0.95 chegarasiga "
+                                "epileptiform tranzientlarning atigi 4% i yetgan).")
                 # Increment 15: neither IED detector met the pre-registered criteria on
                 # expert-annotated EEG (docs/increment15_report.md) - the count is a list of
                 # places to look at, never a finding.

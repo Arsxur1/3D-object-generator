@@ -1,0 +1,71 @@
+{
+ "summary": {
+  "n": 100,
+  "n_epileptic": 54,
+  "n_non_epileptic": 46,
+  "learned": {
+   "auc": 0.7222222222222222,
+   "auc_ci95": [
+    0.619524959742351,
+    0.8188405797101449
+   ],
+   "at_frozen_threshold": {
+    "tp": 2,
+    "fn": 52,
+    "tn": 46,
+    "fp": 0,
+    "sensitivity": 0.037037037037037035,
+    "sensitivity_ci95": [
+     0.004517256294460498,
+     0.12747177223094738
+    ],
+    "specificity": 1.0,
+    "specificity_ci95": [
+     0.9229381729480993,
+     1.0
+    ],
+    "accuracy": 0.48,
+    "balanced_accuracy": 0.5185185185185185
+   }
+  },
+  "heuristic": {
+   "auc": 0.4921497584541063,
+   "auc_ci95": [
+    0.38042471819645735,
+    0.6157659017713364
+   ],
+   "at_default_z": {
+    "tp": 51,
+    "fn": 3,
+    "tn": 6,
+    "fp": 40,
+    "sensitivity": 0.9444444444444444,
+    "sensitivity_ci95": [
+     0.8461149662083666,
+     0.9883932256200587
+    ],
+    "specificity": 0.13043478260869565,
+    "specificity_ci95": [
+     0.049407346573710056,
+     0.2625650161876269
+    ],
+    "accuracy": 0.57,
+    "balanced_accuracy": 0.53743961352657
+   }
+  },
+  "auc_difference_learned_minus_heuristic": 0.2300724637681159,
+  "auc_difference_ci95": [
+   0.07244363929146537,
+   0.3768317230273751
+  ],
+  "flags": []
+ },
+ "hypotheses": {
+  "H1_learned_auc_at_least_0.70_and_ci_above_0.5": true,
+  "H2_learned_auc_exceeds_heuristic_by_0.05": true,
+  "H3_learned_specificity_at_threshold_at_least_0.80": true
+ },
+ "decision": {
+  "annotate_heuristic_candidates_with_learned_probability": true
+ }
+}

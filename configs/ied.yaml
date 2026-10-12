@@ -7,7 +7,10 @@ model: configs/models/ied_gbm_v1.json
 threshold: 0.95
 max_events: 200
 apply_to_neonates: false
+# increment 16 (docs/increment16_report.md): learned probability as evidence on heuristic candidates
+annotate_candidates: true
 provenance:
   preregistration: docs/preregistration_increment15.md
   report: docs/increment15_report.md
+  external_validation: docs/increment16_report.md
   model_sha256: 2f9754f90be86e36cfb45ebea90d66e95da90d1c9b8419677eefa6c82fc47abf
