@@ -24,8 +24,9 @@ from ..datasets.nmt import AMPLITUDE_SCALE, NMTRecord
 def diagnostic_subset(records: list[NMTRecord], n_normal: int, n_abnormal: int, seed: int = 17) -> list[NMTRecord]:
     """Seeded random subset of the authors' *train* split (the eval split is never touched)."""
     rng = random.Random(seed)
-    tr_n = sorted((r for r in records if r.loc == "train" and not r.abnormal), key=lambda r: r.record_id)
-    tr_a = sorted((r for r in records if r.loc == "train" and r.abnormal), key=lambda r: r.record_id)
+    ok = [r for r in records if r.loc == "train" and not r.label_conflict]
+    tr_n = sorted((r for r in ok if not r.abnormal), key=lambda r: r.record_id)
+    tr_a = sorted((r for r in ok if r.abnormal), key=lambda r: r.record_id)
     return rng.sample(tr_n, min(n_normal, len(tr_n))) + rng.sample(tr_a, min(n_abnormal, len(tr_a)))
 
 
@@ -54,6 +55,10 @@ def run_record(path: Path, rec: NMTRecord, scale: float = AMPLITUDE_SCALE, cfg=N
         "robust_amplitude_uv": robust_amplitude_uv(out.signal),
         "flags": list(out.signal.quality.flags),
         "duration_s": float(f.duration_s),
+        "events": [{"code": e.code, "t_start": e.t_start, "t_end": e.t_end,
+                    "confidence": round(float(e.confidence), 3),
+                    "channels": list(e.localization.channels)[:20],
+                    "evidence": {ev.feature: ev.value for ev in e.evidence}} for e in out.detection.events],
     }
 
 

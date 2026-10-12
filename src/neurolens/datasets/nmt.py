@@ -40,6 +40,7 @@ class NMTRecord:
     age_years: Optional[float]
     gender: str
     loc: str  # authors' split: "train" | "eval"
+    label_conflict: bool = False  # Labels.csv and the zip directory disagree -> excluded
 
     @property
     def member(self) -> str:
@@ -76,6 +77,24 @@ class NMTClient(NMTEventsClient):
             return self.cache / parts[-3] / parts[-1]  # normal|abnormal / id.edf
         return self.cache / parts[-1]
 
+    def member_of(self, rec: NMTRecord) -> str:
+        """Zip member of a record; falls back to a search by file name (Labels.csv and
+        the directory layout disagree for a few records, e.g. 0001077)."""
+        idx = self.index()
+        if rec.member in idx:
+            return rec.member
+        name = f"{rec.record_id:07d}.edf"
+        hits = [m for m in idx if m.endswith("/" + name) and "/._" not in m]
+        if len(hits) != 1:
+            raise KeyError(rec.member)
+        return hits[0]
+
     def labels(self) -> list[NMTRecord]:
+        """Records from Labels.csv; ``label_conflict`` set where the file sits in the other
+        class's (or split's) directory - 30 records, all excluded from analyses."""
         p = self.fetch(f"{ROOT}/Labels.csv")
-        return parse_labels(p.read_text(encoding="utf-8-sig", errors="replace"))
+        recs = parse_labels(p.read_text(encoding="utf-8-sig", errors="replace"))
+        for r in recs:
+            parts = self.member_of(r).split("/")
+            r.label_conflict = (parts[1] == "abnormal") != r.abnormal or parts[2] != r.loc
+        return recs

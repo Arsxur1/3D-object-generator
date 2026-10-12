@@ -616,7 +616,7 @@ def _routine_one(item):
 
     c = NMTClient(cache)
     try:
-        return run_record(c.fetch(rec.member), rec)
+        return run_record(c.fetch(c.member_of(rec)), rec)
     except Exception as exc:  # one bad file must not sink the run
         return {"record_id": rec.record_id, "abnormal": rec.abnormal, "error": repr(exc)}
 
@@ -634,7 +634,7 @@ def _routine(args) -> int:
     if args.action == "diagnose":
         recs = R.diagnostic_subset(labels, args.n_normal, args.n_abnormal)
     else:
-        recs = [r for r in labels if r.loc == "eval"]
+        recs = [r for r in labels if r.loc == "eval" and not r.label_conflict]
     with ProcessPoolExecutor(args.workers) as ex:
         rows = list(ex.map(_routine_one, [(r, args.cache) for r in recs]))
     errors = [r for r in rows if "error" in r]
