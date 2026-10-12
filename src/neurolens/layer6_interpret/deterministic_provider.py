@@ -38,19 +38,21 @@ class DeterministicProvider(LLMProvider):
 
         # --- background ---
         bg = data.background
+        pdr_ru = f"~{bg['pdr_hz']} Гц" if bg["pdr_hz"] and bg["pdr_hz"] > 0 else "не выделен"
+        pdr_uz = f"~{bg['pdr_hz']} Hz" if bg["pdr_hz"] and bg["pdr_hz"] > 0 else "ajratilmadi"
         sections.append(
             ReportSection(
                 key="background",
                 text=Bilingual(
                     ru=(
-                        f"Фон: задний доминирующий ритм ~{bg['pdr_hz']} Гц; "
+                        f"Фон: задний доминирующий ритм {pdr_ru}; "
                         f"относительная мощность дельта {bg['global_rel_delta']}, "
                         f"тета {bg['global_rel_theta']}, альфа {bg['global_rel_alpha']}; "
                         f"межполушарная асимметрия {bg['global_asymmetry']}; "
                         f"непрерывность {bg['continuity']}."
                     ),
                     uz=(
-                        f"Fon: orqa dominant ritm ~{bg['pdr_hz']} Hz; nisbiy quvvat "
+                        f"Fon: orqa dominant ritm {pdr_uz}; nisbiy quvvat "
                         f"delta {bg['global_rel_delta']}, teta {bg['global_rel_theta']}, "
                         f"alfa {bg['global_rel_alpha']}; assimetriya {bg['global_asymmetry']}; "
                         f"uzluksizlik {bg['continuity']}."
@@ -224,10 +226,25 @@ class DeterministicProvider(LLMProvider):
                 uz="Xulosa: og‘ishlar manzarasi — " + "; ".join(sorted({n["label_uz"] for n in patho}))[:400] + ".",
             )
         else:
-            impression = Bilingual(
-                ru="Заключение: явных патологических паттернов не выделено (в пределах анализа).",
-                uz="Xulosa: aniq patologik patternlar ajratilmadi (tahlil doirasida).",
-            )
+            # increment 17: unvalidated candidates (heuristic spikes, low-confidence
+            # learned seizure events) are named for review instead of either deciding
+            # the impression or disappearing from it
+            unsure = [n for n in data.causal_nodes
+                      if n["physiology"] == "uncertain" and n.get("kind") == "event"]
+            if unsure:
+                impression = Bilingual(
+                    ru="Заключение: явных патологических паттернов не выделено (в пределах анализа); "
+                       "сомнительные находки, требующие просмотра врачом: "
+                       + "; ".join(sorted({n["label_ru"] for n in unsure}))[:400] + ".",
+                    uz="Xulosa: aniq patologik patternlar ajratilmadi (tahlil doirasida); shifokor "
+                       "ko‘rib chiqishi kerak bo‘lgan shubhali topilmalar: "
+                       + "; ".join(sorted({n["label_uz"] for n in unsure}))[:400] + ".",
+                )
+            else:
+                impression = Bilingual(
+                    ru="Заключение: явных патологических паттернов не выделено (в пределах анализа).",
+                    uz="Xulosa: aniq patologik patternlar ajratilmadi (tahlil doirasida).",
+                )
 
         mode_gate_passed = False
         escalation = None

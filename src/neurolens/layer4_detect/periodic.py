@@ -80,37 +80,55 @@ class PeriodicPatternDetector(Detector):
         ecg_channels = set(artifacts.ecg_contaminated_channels) if artifacts else set()
         hr = artifacts.heart_rate_hz if artifacts else None
 
-        periodic: dict[str, dict] = {}
+        # Discharges must be TIME-LOCKED across channels (a periodic discharge has a
+        # field): peaks of >= 2 channels within +-PD_LOCK_S form one discharge, and
+        # periodicity is judged on these consensus discharges - per hemisphere and
+        # over the whole scalp. (Increment 17: per-channel runs of 6 sharp peaks gave
+        # single-channel "LPDs" in 75% of normal routine EEGs.)
+        per_ch: dict[str, np.ndarray] = {}
         for i, n in enumerate(names):
             if not is_eeg_channel(n) or n in ecg_channels:
                 continue
-            times = _discharge_times(data[i], fs)
+            per_ch[n] = _discharge_times(data[i], fs)
+
+        def consensus_run(chans: list[str]):
+            disch = _consensus_discharges({c: per_ch[c] for c in chans if c in per_ch})
+            if len(disch) < thr.pd_min_discharges:
+                return None
+            times = np.array([d[0] for d in disch])
             run = _longest_periodic_run(times, thr.pd_freq_hz_min, thr.pd_freq_hz_max)
             if run is None or run["n"] < thr.pd_min_discharges or run["cv"] > thr.pd_isi_cv_max:
-                continue
-            # reject periodicity that coincides with the heart rate (ECG)
+                return None
             if hr is not None and abs(run["freq"] - hr) < 0.15:
-                continue
+                return None  # periodicity of the heart rate (ECG)
+            in_run = [d for d in disch if run["t0"] - 1e-6 <= d[0] <= run["t1"] + 1e-6]
+            counts: dict[str, int] = {}
+            for _, members in in_run:
+                for c in members:
+                    counts[c] = counts.get(c, 0) + 1
+            run["channels"] = sorted(c for c, k in counts.items() if k >= 0.5 * len(in_run))
+            return run
+
+        eeg = [n for n in names if is_eeg_channel(n) and n not in ecg_channels]
+        whole = consensus_run(eeg)
+        left_run = consensus_run([c for c in eeg if _side(c) in ("left", "midline")])
+        right_run = consensus_run([c for c in eeg if _side(c) in ("right", "midline")])
+        if whole is None and left_run is None and right_run is None:
+            return []
+        periodic: dict[str, dict] = {}
+        if whole is not None:
+            for c in whole["channels"]:
+                periodic[c] = whole
+        for run in (left_run, right_run):
+            if run is not None:
+                for c in run["channels"]:
+                    periodic.setdefault(c, run)
+        if len(periodic) < 2:
+            return []
+        for c, run in periodic.items():
             s0, s1 = int(run["t0"] * fs), int(run["t1"] * fs)
-            seg = data[i][s0:s1]
-            run["amp"] = float(np.percentile(np.abs(seg - np.median(seg)), 95)) if seg.size else 0.0
-            periodic[n] = run
-
-        if not periodic:
-            return []
-
-        # Amplitude prominence: keep channels where the discharge is genuinely
-        # prominent (>= 60% of the max), so average-reference leakage of a focal
-        # discharge into distant channels does not make it look generalized.
-        max_amp = max(r["amp"] for r in periodic.values())
-        dominant = max(periodic.values(), key=lambda r: r["amp"])
-        periodic = {
-            c: r for c, r in periodic.items()
-            if r["amp"] >= 0.6 * max_amp
-            and not (r["t1"] < dominant["t0"] or dominant["t1"] < r["t0"])  # overlaps in time
-        }
-        if not periodic:
-            return []
+            seg = data[names.index(c)][s0:s1]
+            periodic[c] = {**run, "amp": float(np.percentile(np.abs(seg - np.median(seg)), 95)) if seg.size else 0.0}
 
         n_eeg = sum(1 for n in names if is_eeg_channel(n))
         chans = list(periodic)
@@ -259,6 +277,27 @@ def _discharge_times(x: np.ndarray, fs: float, z_thr: float = 6.0, min_dist_s: f
     z = d2 / sd
     peaks, _ = find_peaks(z, height=z_thr, distance=max(1, int(min_dist_s * fs)))
     return peaks / fs
+
+
+PD_LOCK_S = 0.05
+
+
+def _consensus_discharges(times_by_ch: dict[str, np.ndarray], lock_s: float = PD_LOCK_S,
+                          min_channels: int = 2) -> list[tuple[float, list[str]]]:
+    """Group per-channel peak times into discharges seen on >= ``min_channels``
+    channels within +-``lock_s`` -> [(time, [channels])]."""
+    pts = sorted((float(t), c) for c, ts in times_by_ch.items() for t in ts)
+    out: list[tuple[float, list[str]]] = []
+    i = 0
+    while i < len(pts):
+        j = i
+        while j + 1 < len(pts) and pts[j + 1][0] - pts[i][0] <= 2 * lock_s:
+            j += 1
+        chans = sorted({c for _, c in pts[i:j + 1]})
+        if len(chans) >= min_channels:
+            out.append((float(np.median([t for t, _ in pts[i:j + 1]])), chans))
+        i = j + 1
+    return out
 
 
 def _longest_periodic_run(times: np.ndarray, fmin: float, fmax: float, tol: float = 0.3):

@@ -12,6 +12,9 @@ from ..layer3_features.feature_set import FeatureSet
 from .base import Detector
 
 
+_EXCLUDE_SLOWING = {"FP1", "FP2", "F7", "F8", "A1", "A2", "M1", "M2"}
+
+
 class DiffuseSlowingDetector(Detector):
     """Diffuse slowing: sustained excess of delta+theta across the scalp.
 
@@ -23,7 +26,12 @@ class DiffuseSlowingDetector(Detector):
 
     def detect(self, sig, features, thresholds, artifacts=None) -> list[Event]:
         dt = features.epoch_relpow["delta"] + features.epoch_relpow["theta"]
-        epoch_frac = dt.mean(axis=1)  # mean over channels per epoch
+        # increment 17: frontopolar/anterior-temporal channels carry eye-movement delta
+        # and ear electrodes are references - neither reflects cerebral slowing
+        keep = [i for i, c in enumerate(features.eeg_channels) if c.upper() not in _EXCLUDE_SLOWING]
+        if len(keep) >= 4:
+            dt = dt[:, keep]
+        epoch_frac = np.median(dt, axis=1)  # median over channels per epoch
         thr = thresholds.diffuse_slowing_delta_theta_ratio
         slow = epoch_frac >= thr
         if slow.mean() < 0.4:  # must dominate the record

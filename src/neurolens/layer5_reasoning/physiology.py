@@ -48,6 +48,10 @@ _DEFAULT_PHYSIOLOGY = {
 }
 
 
+LEARNED_IED_PATHOLOGIC = 0.95
+ICTAL_ML_PATHOLOGIC = 0.5
+
+
 class PhysiologyEngine:
     def __init__(self, norms: NormsEngine):
         self.norms = norms
@@ -55,6 +59,17 @@ class PhysiologyEngine:
     def label_event(self, event: Event, patient: PatientInfo) -> PhysiologyLabel:
         """Assign a physiology label, adjusting for age norms where relevant."""
         base = _DEFAULT_PHYSIOLOGY.get(event.code, PhysiologyLabel.UNCERTAIN)
+
+        # Unvalidated evidence is a candidate for review, not a finding (increment 17):
+        # heuristic spike candidates (increments 15-16: ~1,800 false labels/h on normal
+        # EEG) unless the learned model rates them >= 0.95, and learned seizure events
+        # whose calibrated probability is < 0.5.
+        if event.code == "spike" and not event.metadata.get("detector"):
+            p = event.metadata.get("ied_probability_learned")
+            if p is None or p < LEARNED_IED_PATHOLOGIC:
+                return PhysiologyLabel.UNCERTAIN
+        if event.code == "ictal_ml" and event.confidence < ICTAL_ML_PATHOLOGIC:
+            return PhysiologyLabel.UNCERTAIN
 
         # Neonatal background is physiologic iff appropriate for the PMA
         # (discontinuity is normal in a preterm, abnormal at term).
@@ -76,7 +91,7 @@ class PhysiologyEngine:
                 (e.value for e in event.evidence if e.feature == "pdr_hz" and e.value is not None),
                 None,
             )
-            if pdr is not None:
+            if pdr is not None and pdr > 0:  # 0 = no posterior rhythm identified
                 normal = self.norms.pdr_is_normal(pdr, patient)
                 if normal is True:
                     return PhysiologyLabel.UNCERTAIN  # PDR ok -> re-examine slowing claim
