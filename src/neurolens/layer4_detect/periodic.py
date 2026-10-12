@@ -174,63 +174,77 @@ class PeriodicPatternDetector(Detector):
 
     # -- rhythmic delta (GRDA/LRDA) --------------------------------------
     def _rhythmic_delta(self, sig, features, thr) -> list[Event]:
-        times = features.epoch_times
-        if times.size == 0:
-            return []
-        dt = float(np.median(np.diff(times))) if times.size > 1 else features.epoch_s
-        min_epochs = max(2, int(round(thr.rda_min_duration_s / max(dt, 1e-6))))
+        """ACNS rhythmic delta: channels whose delta-band autocorrelation shows a
+        repeating waveform (>= ``rda_autocorr_min`` at one period, 6 s windows) *at
+        the same time*. GRDA: >= ``generalized_channel_fraction`` of channels with
+        both hemispheres for >= ``grda_min_windows``; LRDA: >= 2 channels of one
+        hemisphere (and at least twice the other side) for >= ``lrda_min_windows``.
+        (Increment 17: the previous spectral test was met by ordinary 1/f
+        background, and per-channel runs from different minutes were combined.)"""
+        from ..layer3_features.rhythmicity import HOP_S, WIN_S, delta_rhythmicity_map
 
-        domf = features.epoch_domfreq
-        conc = features.epoch_band_conc
-        involved: dict[str, tuple[int, int, float]] = {}
-        for ci, chan in enumerate(features.eeg_channels):
-            in_delta = (domf[:, ci] >= 0.5) & (domf[:, ci] <= 4.0)
-            active = in_delta & (conc[:, ci] >= thr.rda_rhythmicity)
+        fs = sig.sampling_rate_hz
+        idx = [i for i, n in enumerate(sig.channel_names) if is_eeg_channel(n)]
+        if len(idx) < 4:
+            return []
+        names = [sig.channel_names[i] for i in idx]
+        t, freq, rho, _ = delta_rhythmicity_map(sig.signal[idx], fs)
+        if t.size == 0:
+            return []
+        active = rho >= thr.rda_autocorr_min                         # (C, W)
+        side = np.array([_side(n) for n in names])
+        left, right = active[side == "left"], active[side == "right"]
+        frac = active.mean(axis=0)
+        gen = (frac >= thr.generalized_channel_fraction) & left.any(axis=0) & right.any(axis=0)
+        nl, nr = left.sum(axis=0), right.sum(axis=0)
+        lat = ~gen & (((nl >= 2) & (nl >= 2 * nr)) | ((nr >= 2) & (nr >= 2 * nl)))
+
+        def longest(mask, min_w):
             best = None
-            for a, b in _runs(active):
-                if (b - a) >= min_epochs:
-                    if best is None or (b - a) > (best[1] - best[0]):
-                        best = (a, b)
-            if best is not None:
-                a, b = best
-                involved[chan] = (a, b, float(np.median(domf[a:b, ci])))
+            for a, b in _runs(mask):
+                if b - a >= min_w and (best is None or b - a > best[1] - best[0]):
+                    best = (a, b)
+            return best
 
-        if not involved:
-            return []
-
-        n_eeg = len(features.eeg_channels)
-        chans = list(involved)
-        frac = len(chans) / max(1, n_eeg)
-        left = [c for c in chans if _side(c) == "left"]
-        right = [c for c in chans if _side(c) == "right"]
-        generalized = frac >= thr.generalized_channel_fraction and left and right
-        code = "grda" if generalized else "lrda"
-        lat = "generalized" if generalized else ("left" if len(left) >= len(right) else "right")
-
-        a0 = min(v[0] for v in involved.values())
-        b0 = max(v[1] for v in involved.values())
-        frequency = float(np.median([v[2] for v in involved.values()]))
-        ru, uz = self.labels(code)
-        return [
-            Event(
-                code=code,
-                label_ru=ru,
-                label_uz=uz,
-                group=self.group,
-                localization=Localization(channels=sorted(chans),
-                                          region="generalized" if generalized else "hemispheric",
-                                          lateralization=lat),
-                t_start=round(float(times[a0]), 1),
-                t_end=round(float(times[min(b0, len(times)) - 1]), 1),
-                confidence=float(np.clip(0.5 + 0.3 * frac, 0.5, 0.85)),
+        for code, mask, min_w in (("grda", gen, thr.grda_min_windows), ("lrda", lat, thr.lrda_min_windows)):
+            run = longest(mask, min_w)
+            if run is None:
+                continue
+            a, b = run
+            sub = active[:, a:b]
+            involved = [n for n, k in zip(names, sub.mean(axis=1)) if k >= 0.5]
+            if code == "lrda":
+                left_n = int(nl[a:b].sum())
+                lateral = "left" if left_n >= int(nr[a:b].sum()) else "right"
+                involved = [n for n in involved if _side(n) == lateral] or involved
+            else:
+                lateral = "generalized"
+            f = freq[:, a:b][sub]
+            frequency = float(np.median(f)) if f.size else 0.0
+            t0 = float(t[a] - WIN_S / 2)
+            t1 = float(t[b - 1] + WIN_S / 2)
+            ch_frac = len(involved) / len(names)
+            ru, uz = self.labels(code)
+            return [Event(
+                code=code, label_ru=ru, label_uz=uz, group=self.group,
+                localization=Localization(channels=sorted(involved),
+                                          region="generalized" if code == "grda" else "hemispheric",
+                                          lateralization=lateral),
+                t_start=round(max(0.0, t0), 1), t_end=round(t1, 1),
+                confidence=float(np.clip(0.5 + 0.3 * ch_frac, 0.5, 0.85)),
                 acns=AcnsModifiers(frequency_hz=round(frequency, 2)),
                 evidence=[
                     EventEvidence(feature="rda_frequency_hz", value=round(frequency, 2), unit="Hz",
                                   reference="0.5-4 Hz (delta)"),
-                    EventEvidence(feature="rda_channel_fraction", value=round(frac, 3)),
+                    EventEvidence(feature="rda_channel_fraction", value=round(ch_frac, 3)),
+                    EventEvidence(feature="rda_autocorr_median",
+                                  value=round(float(np.median(rho[:, a:b][sub])), 3),
+                                  reference=f">= {thr.rda_autocorr_min}"),
+                    EventEvidence(feature="rda_duration_s", value=round(t1 - t0, 1), unit="s",
+                                  reference=f">= {WIN_S + HOP_S * (min_w - 1):.0f} s"),
                 ],
-            )
-        ]
+            )]
+        return []
 
 
 def _discharge_times(x: np.ndarray, fs: float, z_thr: float = 6.0, min_dist_s: float = 0.25) -> np.ndarray:

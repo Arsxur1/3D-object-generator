@@ -135,3 +135,55 @@ def _min_run(mask: np.ndarray, min_len: int) -> np.ndarray:
         if (b - a) >= max(1, min_len):
             out[a:b] = True
     return out
+
+
+# ---------------------------------------------------------------------------
+# ACNS-conformant suppression (increment 17)
+# ---------------------------------------------------------------------------
+# ACNS 2021: suppression = all activity < 10 µV (peak-to-trough). The legacy
+# ``_envelope`` above is the mean |x| over 0.2 s (~0.32 x peak-to-trough for a
+# sinusoid), so "< 10 µV" accepted ~30 µV activity - ordinary low-voltage EEG
+# (found on routine EEG: burst-suppression in 67% of normal recordings).
+
+def ptp_envelope(x: np.ndarray, fs: float, win_s: float = 0.3) -> np.ndarray:
+    """Peak-to-trough amplitude in a centred sliding window (µV)."""
+    from scipy.ndimage import maximum_filter1d, minimum_filter1d
+
+    w = max(1, int(round(win_s * fs)))
+    x = np.asarray(x, dtype=np.float64)
+    return maximum_filter1d(x, w, mode="nearest") - minimum_filter1d(x, w, mode="nearest")
+
+
+def generalized_suppressed_mask(channels: np.ndarray, fs: float, amp_thresh_uv: float = 10.0,
+                                min_dur_s: float = 0.5, quantile: float = 0.5) -> np.ndarray:
+    """Samples where the ``quantile`` (default median) channel's peak-to-trough
+    amplitude is below the threshold for at least ``min_dur_s``."""
+    env = np.stack([ptp_envelope(channels[i], fs) for i in range(channels.shape[0])], axis=0)
+    level = np.quantile(env, quantile, axis=0)
+    return _min_run(level < amp_thresh_uv, int(min_dur_s * fs))
+
+
+def suppression_regions_acns(channels: np.ndarray, fs: float, amp_thresh_uv: float = 10.0,
+                             win_s: float = 8.0, frac_thresh: float = 0.5,
+                             min_region_s: float = 12.0) -> list[tuple[float, float]]:
+    """Generalized burst-suppression regions on the ACNS peak-to-trough definition."""
+    if channels.ndim != 2 or channels.shape[0] == 0:
+        return []
+    suppressed = generalized_suppressed_mask(channels, fs, amp_thresh_uv)
+    win = max(1, int(win_s * fs))
+    local = np.convolve(suppressed.astype(float), np.ones(win) / win, mode="same")
+    return [(a / fs, b / fs) for a, b in _runs(local >= frac_thresh)
+            if (b - a) >= int(min_region_s * fs)]
+
+
+def burst_suppression_acns(channels: np.ndarray, fs: float, amp_thresh_uv: float = 10.0,
+                           min_dur_s: float = 0.5) -> BurstSuppression:
+    """Quantify an episode from the per-channel suppression masks (not the mean of
+    channels, which is ~0 after average referencing)."""
+    suppressed = generalized_suppressed_mask(channels, fs, amp_thresh_uv, min_dur_s)
+    sr = float(np.mean(suppressed)) if suppressed.size else 0.0
+    bursts = [(a / fs, b / fs) for a, b in _runs(~suppressed) if (b - a) >= int(min_dur_s * fs)]
+    ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
+    return BurstSuppression(suppression_ratio=sr, n_bursts=len(bursts),
+                            mean_ibi_s=float(np.mean(ibis)) if ibis else 0.0,
+                            burst_intervals_s=bursts)

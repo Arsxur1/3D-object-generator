@@ -29,7 +29,12 @@ pd_plus_fast_ratio: 0.15           # beta+gamma power fraction during discharges
 
 # Rhythmic delta activity (GRDA/LRDA)
 rda_min_duration_s: 6.0
-rda_rhythmicity: 0.4
+rda_rhythmicity: 0.4                # legacy spectral concentration (FIRDA/triphasic only)
+# increment 17: rhythmic = delta-band autocorrelation >= this at one period in 6 s
+# windows (hop 2 s); GRDA >= 60% of channels of both hemispheres simultaneously
+rda_autocorr_min: 0.7
+grda_min_windows: 2                 # 8 s
+lrda_min_windows: 3                 # 10 s, >= 2 channels of one hemisphere
 
 # Ictal-interictal continuum
 iic_freq_hz_min: 1.5

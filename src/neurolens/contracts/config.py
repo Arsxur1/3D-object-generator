@@ -96,6 +96,12 @@ class Thresholds(BaseModel):
     # Rhythmic delta (GRDA/LRDA)
     rda_min_duration_s: float = Field(default=6.0, gt=0)
     rda_rhythmicity: float = Field(default=0.4, ge=0, le=1)
+    rda_autocorr_min: float = Field(
+        default=0.7, ge=0, le=1,
+        description="Delta-band autocorrelation at one period (6 s windows) for a channel to "
+                    "count as rhythmic (increment 17; replaces the spectral-concentration test).")
+    grda_min_windows: int = Field(default=2, ge=1, description="Consecutive 6 s windows (hop 2 s): 2 = 8 s.")
+    lrda_min_windows: int = Field(default=3, ge=1, description="Consecutive 6 s windows (hop 2 s): 3 = 10 s.")
     # Ictal-interictal continuum
     iic_freq_hz_min: float = Field(default=1.5, gt=0)
     iic_freq_hz_max: float = Field(default=2.5, gt=0)

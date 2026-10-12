@@ -12,7 +12,7 @@ import numpy as np
 
 from ..contracts.events import Event, EventEvidence, Localization
 from ..layer1_ingest.electrodes import is_eeg_channel
-from ..layer3_features.suppression import burst_suppression, suppression_regions_multichannel
+from ..layer3_features.suppression import burst_suppression_acns, suppression_regions_acns
 from .base import Detector
 
 
@@ -28,17 +28,18 @@ class BurstSuppressionDetector(Detector):
         eeg_data = sig.signal[eeg_idx].astype(np.float64)
 
         # Generalized burst-suppression: suppression must be across channels.
-        regions = suppression_regions_multichannel(
+        # ACNS: suppression = activity < 10 µV peak-to-trough on (most of) the scalp
+        regions = suppression_regions_acns(
             eeg_data, fs,
             amp_thresh_uv=thresholds.suppression_amplitude_uv,
             frac_thresh=thresholds.burst_suppression_ratio,
         )
         if not regions:
             return []
-        # take the longest episode; quantify on the mean of channels within it
+        # take the longest episode; quantify it from the per-channel masks
         t0, t1 = max(regions, key=lambda r: r[1] - r[0])
-        seg = eeg_data[:, int(t0 * fs):int(t1 * fs)].mean(axis=0)
-        bs = burst_suppression(seg, fs, amp_thresh_uv=thresholds.suppression_amplitude_uv)
+        bs = burst_suppression_acns(eeg_data[:, int(t0 * fs):int(t1 * fs)], fs,
+                                    amp_thresh_uv=thresholds.suppression_amplitude_uv)
         rep = features.representative_channel
 
         ru, uz = self.labels(self.code)
