@@ -1,0 +1,59 @@
+{
+ "new": {
+  "n_normal": 95,
+  "n_abnormal": 90,
+  "tn": 56,
+  "tp": 76,
+  "specificity": 0.5894736842105263,
+  "specificity_ci95": [
+   0.4838079585179963,
+   0.6894047662001774
+  ],
+  "sensitivity": 0.8444444444444444,
+  "sensitivity_ci95": [
+   0.7527974198544842,
+   0.9122641353838176
+  ],
+  "balanced_accuracy": 0.7169590643274854
+ },
+ "old": {
+  "n_normal": 95,
+  "n_abnormal": 90,
+  "tn": 0,
+  "tp": 90,
+  "specificity": 0.0,
+  "specificity_ci95": [
+   0.0,
+   0.03808607757001057
+  ],
+  "sensitivity": 1.0,
+  "sensitivity_ci95": [
+   0.9598410803842253,
+   1.0
+  ],
+  "balanced_accuracy": 0.5
+ },
+ "normal_detector_rate": {
+  "burst_suppression": 0.0,
+  "grda": 0.010526315789473684,
+  "lpds": 0.09473684210526316,
+  "triphasic_waves": 0.0,
+  "firda": 0.0
+ },
+ "detector_limits": {
+  "burst_suppression": 0.05,
+  "grda": 0.05,
+  "lpds": 0.15,
+  "triphasic_waves": 0.05,
+  "firda": 0.15
+ },
+ "hypotheses": {
+  "H1_specificity_at_least_0.45": true,
+  "H2_specificity_gain_at_least_0.30": true,
+  "H3_sensitivity_at_least_0.70": true,
+  "H4_detector_false_firing_within_limits": true
+ },
+ "decision": {
+  "routine_impression_validated": true
+ }
+}

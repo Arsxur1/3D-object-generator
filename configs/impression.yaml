@@ -1,6 +1,9 @@
 # What the report may claim about its own normal/abnormal conclusion on routine EEG.
 # Written by evaluation/prereg17.apply_decision (docs/preregistration_increment17.md).
-# Not validated: the impression carries a caveat and mode B is blocked.
-routine_validated: false
+# NMT evaluation split: specificity 0.589, sensitivity 0.844 (docs/increment17_report.md).
+routine_validated: true
+specificity: 0.589
+sensitivity: 0.844
 provenance:
   preregistration: docs/preregistration_increment17.md
+  report: docs/increment17_report.md
