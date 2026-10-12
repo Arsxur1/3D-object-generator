@@ -102,9 +102,18 @@ class DeterministicProvider(LLMProvider):
                 )
             else:
                 regions = sorted({e["localization"].get("region") or "?" for e in ied})
+                # Increment 15: neither IED detector met the pre-registered criteria on
+                # expert-annotated EEG (docs/increment15_report.md) - the count is a list of
+                # places to look at, never a finding.
                 txt = Bilingual(
-                    ru=f"Эпилептиформные разряды (спайки/острые волны): {len(ied)}; локализация: {', '.join(regions)}.",
-                    uz=f"Epileptiform razryadlar (spike/o‘tkir to‘lqin): {len(ied)}; lokalizatsiya: {', '.join(regions)}.",
+                    ru=f"Кандидаты в эпилептиформные разряды (спайки/острые волны), автоматическая "
+                       f"разметка: {len(ied)}; локализация: {', '.join(regions)}. Детектор разрядов не прошёл "
+                       "проверку на размеченной ЭЭГ (много ложных меток, в том числе на нормальной ЭЭГ) — "
+                       "наличие разрядов устанавливается только визуальной оценкой врача.",
+                    uz=f"Epileptiform razryad nomzodlari (spike/o‘tkir to‘lqin), avtomatik belgilash: "
+                       f"{len(ied)}; lokalizatsiya: {', '.join(regions)}. Razryad detektori belgilangan EEG "
+                       "tekshiruvidan o‘tmadi (ko‘p soxta belgilar, shu jumladan normal EEGda) — razryadlar "
+                       "faqat shifokorning vizual bahosi bilan aniqlanadi.",
                 )
             sections.append(
                 ReportSection(key="epileptiform", text=txt, grounding_refs=["spike", "ecg_artifact"])
