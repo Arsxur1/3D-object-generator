@@ -158,7 +158,7 @@ def split_by_rule(record_id: int, normal: bool) -> Optional[str]:
 class HttpRangeFile(io.RawIOBase):
     """Read-only, seekable view of a remote file through HTTP range requests."""
 
-    def __init__(self, url: str, size: int, retries: int = 5, timeout: float = 120.0):
+    def __init__(self, url: str, size: int, retries: int = 8, timeout: float = 120.0):
         self.url, self.size, self.pos = url, size, 0
         self.retries, self.timeout = retries, timeout
 
@@ -190,7 +190,7 @@ class HttpRangeFile(io.RawIOBase):
             except Exception:
                 if attempt == self.retries - 1:
                     raise
-                time.sleep(2 ** (attempt + 1))
+                time.sleep(min(60, 2 ** (attempt + 1)))
         b[: len(data)] = data
         self.pos += len(data)
         return len(data)
