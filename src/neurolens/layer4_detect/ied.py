@@ -59,7 +59,7 @@ class SpikeDetector(Detector):
                         label_uz=uz,
                         group=self.group,
                         localization=Localization(channels=[n], region=_region_of(n)),
-                        t_start=round(t - 0.05, 3),
+                        t_start=round(max(0.0, t - 0.05), 3),  # peak in the first 50 ms
                         t_end=round(t + 0.05, 3),
                         confidence=float(np.clip(0.4 + 0.05 * (z[pk] - self.sharpness_z), 0.4, 0.8)),
                         is_artifact_hypothesis=False,

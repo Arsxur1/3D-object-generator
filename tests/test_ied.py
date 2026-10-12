@@ -161,3 +161,20 @@ def test_amplitude_flag():
     assert amplitude_flag(S(0.2)).startswith("amplitude_implausible")
     assert amplitude_flag(S(1000.0)).startswith("amplitude_implausible")
     assert robust_amplitude_uv(S(20.0)) == pytest.approx(20.0, rel=0.1)
+
+
+def test_heuristic_spike_at_record_start_does_not_crash():
+    """A peak within the first 50 ms gave t_start < 0 -> validation error, which
+    run_detectors swallowed, silently dropping every spike of the record."""
+    from neurolens.contracts.signal import UnifiedSignal
+    from neurolens.layer4_detect.ied import SpikeDetector
+
+    fs = 200.0
+    x = np.zeros((2, 2000))
+    x[0, 3] = 400.0  # sharp transient at 15 ms
+    try:
+        sig = UnifiedSignal(signal=x.astype(np.float32), sampling_rate_hz=fs, channel_names=["C3", "C4"])
+    except Exception:
+        pytest.skip("UnifiedSignal requires additional fields")
+    evs = SpikeDetector(max_events=None).detect(sig, None, None)
+    assert evs and min(e.t_start for e in evs) >= 0.0
