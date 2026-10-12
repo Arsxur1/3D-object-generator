@@ -143,14 +143,24 @@ class RulesEngine:
     ) -> None:
         # anchor cause on the first present triggering event node
         trigger_codes = list(rule.when.any_event) + list(rule.when.all_events)
-        cause_id = next(
-            (code_to_nodes[c][0] for c in trigger_codes if c in code_to_nodes), None
-        )
-        if cause_id is None:
+        trigger_ids = [nid for c in trigger_codes for nid in code_to_nodes.get(c, [])]
+        if not trigger_ids:
             return
+        by_id = {n.id: n for n in nodes}
+        # prefer a pathologic trigger as the cause
+        cause_id = next((i for i in trigger_ids if by_id[i].physiology == PhysiologyLabel.PATHOLOGIC),
+                        trigger_ids[0])
 
         mech_id = f"mech:{rule.id}"
         phys = _PHYS.get(rule.physiology, PhysiologyLabel.UNCERTAIN)
+        # A mechanism is never more certain than the events that trigger it (increment
+        # 17: "diffuse slowing -> encephalopathy" stayed pathologic after the slowing
+        # itself had been judged normal for age, and decided 29 of 120 normal impressions).
+        if phys == PhysiologyLabel.PATHOLOGIC and not any(
+                by_id[i].physiology == PhysiologyLabel.PATHOLOGIC for i in trigger_ids):
+            phys = (PhysiologyLabel.UNCERTAIN
+                    if any(by_id[i].physiology == PhysiologyLabel.UNCERTAIN for i in trigger_ids)
+                    else by_id[cause_id].physiology)
         effect_ru, effect_uz = rule.effect_ru, rule.effect_uz
         note = None
 
@@ -183,7 +193,7 @@ class RulesEngine:
                 confidence=rule.confidence,
             )
         )
-        if rule.critical:
+        if rule.critical and phys == PhysiologyLabel.PATHOLOGIC:
             critical_flags.append(f"{rule.id}: {effect_ru}")
 
     def _apply_artifact_resolution(

@@ -135,3 +135,20 @@ def test_triphasic_dropped_without_gpds(configs, monkeypatch):
     gp = _ev("gpds", conf=0.8, group="periodic")
     res = registry.run_detectors(Sig(), None, configs.thresholds, None, detectors=[Fixed([tri, gp])])
     assert [e for e in res.events if e.code == "triphasic_waves"]
+
+
+def test_mechanism_never_more_certain_than_its_trigger(configs):
+    """'diffuse slowing -> encephalopathy' must not stay pathologic when the slowing
+    itself is judged normal for age."""
+    from neurolens.contracts.signal import ClinicalContext
+    from neurolens.layer4_detect.registry import DetectionResult
+    from neurolens.layer5_reasoning.rules_engine import RulesEngine
+
+    eng = RulesEngine(configs.rule_base, PhysiologyEngine(NormsEngine(configs.norms)))
+    ds = _ev("diffuse_slowing", conf=0.8, group="background",
+             evidence=[EventEvidence(feature="pdr_hz", value=6.5)])
+    g = eng.build(DetectionResult(events=[ds]), ClinicalContext(), PatientInfo(age_years=0.5))
+    mech = [n for n in g.nodes if n.id.startswith("mech:")]
+    assert mech and all(n.physiology.value != "pathologic" for n in mech)
+    g2 = eng.build(DetectionResult(events=[ds]), ClinicalContext(), PatientInfo(age_years=40))
+    assert any(n.physiology.value == "pathologic" for n in g2.nodes if n.id.startswith("mech:"))
