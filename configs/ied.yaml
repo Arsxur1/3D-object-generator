@@ -9,6 +9,10 @@ max_events: 200
 apply_to_neonates: false
 # increment 16 (docs/increment16_report.md): learned probability as evidence on heuristic candidates
 annotate_candidates: true
+# increment 19: spike candidates are pathologic only with >= recurrent_min_count separate
+# learned detections at recurrent_threshold over the whole record (set by prereg19)
+recurrent_threshold: 0.98
+recurrent_min_count: 2
 provenance:
   preregistration: docs/preregistration_increment15.md
   report: docs/increment15_report.md

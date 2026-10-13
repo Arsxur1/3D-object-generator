@@ -65,9 +65,15 @@ class PhysiologyEngine:
         # EEG) unless the learned model rates them >= 0.95, and learned seizure events
         # whose calibrated probability is < 0.5.
         if event.code == "spike" and not event.metadata.get("detector"):
-            p = event.metadata.get("ied_probability_learned")
-            if p is None or p < LEARNED_IED_PATHOLOGIC:
-                return PhysiologyLabel.UNCERTAIN
+            n_rec = event.metadata.get("learned_ied_recurrent_count")
+            if n_rec is not None:
+                # increment 19: recurrence over the whole record, not one candidate's score
+                if n_rec < event.metadata.get("learned_ied_recurrent_min", 2):
+                    return PhysiologyLabel.UNCERTAIN
+            else:
+                p = event.metadata.get("ied_probability_learned")
+                if p is None or p < LEARNED_IED_PATHOLOGIC:
+                    return PhysiologyLabel.UNCERTAIN
         if event.code == "ictal_ml" and event.confidence < ICTAL_ML_PATHOLOGIC:
             return PhysiologyLabel.UNCERTAIN
         # periodic pattern matching an ECG / ocular mimic (increment 18): kept, for review

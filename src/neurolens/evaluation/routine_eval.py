@@ -31,10 +31,13 @@ def diagnostic_subset(records: list[NMTRecord], n_normal: int, n_abnormal: int, 
 
 
 def fresh_subset(records: list[NMTRecord], n_normal: int, n_abnormal: int, seed: int = 18,
-                 dev_seed: int = 17, dev_sizes: tuple[int, int] = (120, 80)) -> list[NMTRecord]:
+                 dev_seed: int = 17, dev_sizes: tuple[int, int] = (120, 80),
+                 exclude: Optional[set[int]] = None) -> list[NMTRecord]:
     """Seeded subset of the authors' train split that excludes the development subset
-    (``diagnostic_subset`` with ``dev_seed``) - records never run before (increment 18)."""
+    (``diagnostic_subset`` with ``dev_seed``) and any ``exclude`` ids (earlier test sets)
+    - records never run before (increments 18-19)."""
     dev = {r.record_id for r in diagnostic_subset(records, *dev_sizes, seed=dev_seed)}
+    dev |= set(exclude or ())
     rest = [r for r in records if r.record_id not in dev]
     return diagnostic_subset(rest, n_normal, n_abnormal, seed=seed)
 

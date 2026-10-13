@@ -264,7 +264,11 @@ class Pipeline:
             from ..layer4_detect.ml_ictal import load_model
 
             annotate_candidates(load_model(cfg.ml_model_path(ied_cfg.model)), analysis,
-                                detection.events, ied_cfg.threshold)
+                                detection.events, ied_cfg.threshold,
+                                recurrent_threshold=ied_cfg.recurrent_threshold)
+            for e in detection.events:
+                if e.code == "spike" and "learned_ied_recurrent_count" in e.metadata:
+                    e.metadata["learned_ied_recurrent_min"] = ied_cfg.recurrent_min_count
         if analysis.patient.postmenstrual_age_weeks is not None:
             from ..layer4_detect.neonatal import discontinuity_abnormal_for_age
 

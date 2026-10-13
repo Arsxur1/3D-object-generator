@@ -272,6 +272,13 @@ class IEDConfig(BaseModel):
                                    "model's probability to every heuristic spike candidate "
                                    "(evidence only; the candidates themselves are unchanged). "
                                    "Set only by a pre-registered decision (increment 16).")
+    recurrent_threshold: Optional[float] = Field(
+        default=0.98, ge=0, le=1,
+        description="Learned-model detections at this probability over the whole record count as "
+                    "recurrent IED evidence (increment 19).")
+    recurrent_min_count: int = Field(
+        default=2, ge=1, description="Spike candidates are pathologic only when the record has at "
+                                     "least this many recurrent learned detections.")
     provenance: dict = Field(default_factory=dict)
 
 

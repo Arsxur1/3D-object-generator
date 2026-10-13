@@ -112,11 +112,21 @@ class DeterministicProvider(LLMProvider):
                     # increment 16: the ranking separates epileptiform from benign sharp
                     # transients (AUC 0.72), but at 0.95 only 4% of epileptiform ones are
                     # flagged - a low value must never read as "not epileptiform"
-                    extra_ru = (f" Обученная модель оценивает как вероятно эпилептиформные {hi} из "
+                    rec = next((e["metadata"].get("learned_ied_recurrent_count") for e in ied
+                                if "learned_ied_recurrent_count" in (e.get("metadata") or {})), None)
+                    if rec is not None:
+                        extra_ru_rec = (f" Во всей записи обученная модель находит {rec} отдельных "
+                                        "эпилептиформно-подобных событий (вероятность ≥ 0.98); повторяющимися "
+                                        "считаются при ≥ 2.")
+                        extra_uz_rec = (f" Butun yozuvda o‘qitilgan model {rec} ta alohida epileptiformga "
+                                        "o‘xshash hodisa topadi (ehtimollik ≥ 0.98); ≥ 2 bo‘lsa takrorlanuvchi.")
+                    else:
+                        extra_ru_rec = extra_uz_rec = ""
+                    extra_ru = extra_ru_rec + (f" Обученная модель оценивает как вероятно эпилептиформные {hi} из "
                                 f"{len(rated)} (вероятность ≥ 0.95) — порядок просмотра, не вывод; "
                                 "низкая оценка разряд НЕ исключает (на внешней проверке порог 0.95 "
                                 "достигнут лишь у 4% эпилептиформных транзиентов).")
-                    extra_uz = (f" O‘qitilgan model {len(rated)} tadan {hi} tasini ehtimoliy epileptiform "
+                    extra_uz = extra_uz_rec + (f" O‘qitilgan model {len(rated)} tadan {hi} tasini ehtimoliy epileptiform "
                                 "deb baholaydi (ehtimollik ≥ 0.95) — ko‘rib chiqish tartibi, xulosa emas; "
                                 "past baho razryadni ISTISNO QILMAYDI (tashqi tekshiruvda 0.95 chegarasiga "
                                 "epileptiform tranzientlarning atigi 4% i yetgan).")

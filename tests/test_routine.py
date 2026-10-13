@@ -243,3 +243,39 @@ def test_prereg18_rule_and_apply(tmp_path):
     assert "pd_mimic_uncertain: false" in thr.read_text()
     with pytest.raises(ValueError):
         prereg18.assess(rows(100, 78), _rows(85, 150, 80, 100))
+
+
+def test_spike_pathologic_only_with_recurrent_learned_detections(configs):
+    eng = PhysiologyEngine(NormsEngine(configs.norms))
+    adult = PatientInfo(age_years=40)
+    lone = _ev("spike", group="ied", meta={"ied_probability_learned": 0.99,
+                                           "learned_ied_recurrent_count": 1, "learned_ied_recurrent_min": 2})
+    assert eng.label_event(lone, adult).value == "uncertain"
+    rec = _ev("spike", group="ied", meta={"ied_probability_learned": 0.2,
+                                          "learned_ied_recurrent_count": 3, "learned_ied_recurrent_min": 2})
+    assert eng.label_event(rec, adult).value == "pathologic"
+
+
+def test_prereg19_rule_and_apply(tmp_path):
+    import yaml
+
+    from neurolens.contracts.config import IEDConfig
+    from neurolens.evaluation import prereg19
+
+    def rows(tn, tp):
+        r = _rows(tn, 150, tp, 100)
+        for i, x in enumerate(r["records"]):
+            x["record_id"] = i
+        return r
+
+    ied, imp = tmp_path / "ied.yaml", tmp_path / "impression.yaml"
+    ied.write_text("enabled: false\nrecurrent_threshold: 0.98\nrecurrent_min_count: 2\n")
+    ok = prereg19.assess(rows(96, 84), rows(96, 78))
+    assert ok["decision"]["keep_recurrence_rule"]
+    assert "подтверждена" in prereg19.markdown_report(ok)
+    prereg19.apply_decision(ok, str(ied), str(imp))
+    assert "specificity: 0.640" in imp.read_text()
+    bad = prereg19.assess(rows(85, 84), rows(96, 78))  # specificity drops 0.073
+    assert not bad["decision"]["keep_recurrence_rule"]
+    prereg19.apply_decision(bad, str(ied), str(imp))
+    assert IEDConfig(**yaml.safe_load(ied.read_text())).recurrent_threshold is None

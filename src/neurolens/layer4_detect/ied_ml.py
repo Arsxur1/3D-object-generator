@@ -181,7 +181,8 @@ def probability_events(t0: np.ndarray, p: np.ndarray, threshold: float,
     return out
 
 
-def annotate_candidates(model, sig, events, threshold: float, half_window_s: float = 0.5) -> int:
+def annotate_candidates(model, sig, events, threshold: float, half_window_s: float = 0.5,
+                        recurrent_threshold: Optional[float] = None) -> int:
     """Attach the learned IED probability to heuristic spike candidates (in place).
 
     The probability is the maximum over windows overlapping the candidate +- half_window_s.
@@ -193,8 +194,12 @@ def annotate_candidates(model, sig, events, threshold: float, half_window_s: flo
     if X.shape[0] == 0:
         return 0
     p = model.predict_proba(X)
+    # record-level recurrence (increment 19): number of separate learned detections
+    n_rec = len(probability_events(t0, p, recurrent_threshold)) if recurrent_threshold is not None else None
     high = 0
     for e in spikes:
+        if n_rec is not None:
+            e.metadata["learned_ied_recurrent_count"] = n_rec
         lo, hi = e.t_start - half_window_s, e.t_end + half_window_s
         near = (t0 < hi) & (t0 + WIN_S > lo)
         prob = float(p[near].max()) if near.any() else 0.0
