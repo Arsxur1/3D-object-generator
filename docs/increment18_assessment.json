@@ -1,0 +1,44 @@
+{
+ "new": {
+  "n_normal": 150,
+  "n_abnormal": 100,
+  "tn": 96,
+  "tp": 78,
+  "specificity": 0.64,
+  "specificity_ci95": [
+   0.557679397402274,
+   0.7166703878109575
+  ],
+  "sensitivity": 0.78,
+  "sensitivity_ci95": [
+   0.686080346213682,
+   0.8566964232501856
+  ],
+  "balanced_accuracy": 0.71
+ },
+ "old": {
+  "n_normal": 150,
+  "n_abnormal": 100,
+  "tn": 83,
+  "tp": 79,
+  "specificity": 0.5533333333333333,
+  "specificity_ci95": [
+   0.47006534612706324,
+   0.6344526531092491
+  ],
+  "sensitivity": 0.79,
+  "sensitivity_ci95": [
+   0.6970846206494593,
+   0.8650563042946708
+  ],
+  "balanced_accuracy": 0.6716666666666666
+ },
+ "hypotheses": {
+  "H1_specificity_gain_at_least_0.05": true,
+  "H2_sensitivity_not_lower_by_more_than_0.05": true,
+  "H3_specificity_at_least_0.55": true
+ },
+ "decision": {
+  "keep_increment18_rules": true
+ }
+}

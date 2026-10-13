@@ -1,9 +1,11 @@
 # What the report may claim about its own normal/abnormal conclusion on routine EEG.
-# Written by evaluation/prereg17.apply_decision (docs/preregistration_increment17.md).
-# NMT evaluation split: specificity 0.589, sensitivity 0.844 (docs/increment17_report.md).
+# Written by evaluation/prereg18.apply_decision (docs/preregistration_increment18.md).
+# Fresh NMT subset (150 normal, 100 abnormal): specificity 0.640, sensitivity 0.780 (docs/increment18_report.md);
+# increment 17 (NMT evaluation split): 0.589 / 0.844.
 routine_validated: true
-specificity: 0.589
-sensitivity: 0.844
+specificity: 0.640
+sensitivity: 0.780
 provenance:
-  preregistration: docs/preregistration_increment17.md
-  report: docs/increment17_report.md
+  preregistration: docs/preregistration_increment18.md
+  report: docs/increment18_report.md
+  previous: docs/increment17_report.md
