@@ -178,7 +178,9 @@ class PeriodicPatternDetector(Detector):
         cv_mean = float(np.mean([periodic[c]["cv"] for c in chans]))
         dominant = max(chans, key=lambda c: periodic[c]["amp"])
         mimic = None
-        if thr.pd_ecg_freq_hz[0] <= frequency <= thr.pd_ecg_freq_hz[1] and cv_mean < thr.pd_ecg_isi_cv_max:
+        if not thr.pd_mimic_uncertain:
+            pass
+        elif thr.pd_ecg_freq_hz[0] <= frequency <= thr.pd_ecg_freq_hz[1] and cv_mean < thr.pd_ecg_isi_cv_max:
             mimic = "ecg"
         elif dominant.upper() in _OCULAR:
             mimic = "ocular"

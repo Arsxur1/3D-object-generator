@@ -217,3 +217,29 @@ def test_fresh_subset_is_disjoint_from_dev():
     dev = {r.record_id for r in diagnostic_subset(recs, 120, 80)}
     fresh = fresh_subset(recs, 150, 100)
     assert len(fresh) == 250 and not dev & {r.record_id for r in fresh}
+
+
+def test_prereg18_rule_and_apply(tmp_path):
+    import yaml
+
+    from neurolens.contracts.config import ImpressionConfig
+    from neurolens.evaluation import prereg18
+
+    def rows(tn, tp):
+        r = _rows(tn, 150, tp, 100)
+        for i, x in enumerate(r["records"]):
+            x["record_id"] = i
+        return r
+
+    imp, thr = tmp_path / "impression.yaml", tmp_path / "thresholds.yaml"
+    thr.write_text("pd_mimic_uncertain: true\n")
+    ok = prereg18.assess(rows(100, 78), rows(85, 80))
+    assert ok["decision"]["keep_increment18_rules"]
+    prereg18.apply_decision(ok, str(imp), str(thr))
+    assert ImpressionConfig(**yaml.safe_load(imp.read_text())).specificity == pytest.approx(100 / 150, abs=1e-3)
+    bad = prereg18.assess(rows(100, 70), rows(85, 80))  # sensitivity drops 0.10
+    assert not bad["hypotheses"]["H2_sensitivity_not_lower_by_more_than_0.05"]
+    prereg18.apply_decision(bad, str(imp), str(thr))
+    assert "pd_mimic_uncertain: false" in thr.read_text()
+    with pytest.raises(ValueError):
+        prereg18.assess(rows(100, 78), _rows(85, 150, 80, 100))

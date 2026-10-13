@@ -28,7 +28,9 @@ pd_freq_hz_min: 0.5
 pd_freq_hz_max: 3.0
 pd_plus_fast_ratio: 0.15
 pd_min_duration_s: 10.0
-# increment 18: ECG mimic = cardiac rate with almost perfect regularity
+# increment 18: ECG mimic = cardiac rate with almost perfect regularity; ocular = Fp/F7/F8
+# dominant. Set by evaluation/prereg18.apply_decision.
+pd_mimic_uncertain: true
 pd_ecg_freq_hz: [0.75, 2.0]
 pd_ecg_isi_cv_max: 0.05            # increment 17: ACNS "very brief" (< 10 s) not reported           # beta+gamma power fraction during discharges -> +F
 
