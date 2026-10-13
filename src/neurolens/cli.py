@@ -633,6 +633,8 @@ def _routine(args) -> int:
     labels = client.labels()
     if args.action == "diagnose":
         recs = R.diagnostic_subset(labels, args.n_normal, args.n_abnormal)
+    elif args.action == "fresh":
+        recs = R.fresh_subset(labels, args.n_normal, args.n_abnormal, seed=args.seed)
     else:
         recs = [r for r in labels if r.loc == "eval" and not r.label_conflict]
     with ProcessPoolExecutor(args.workers) as ex:
@@ -774,8 +776,10 @@ def build_parser() -> argparse.ArgumentParser:
     ie.set_defaults(func=_ied)
 
     ro = sub.add_parser("routine", help="NMT: routine-EEG specificity of the offline pipeline.")
-    ro.add_argument("action", choices=["diagnose", "eval"],
-                    help="diagnose: seeded subset of the authors' train split; eval: their eval split")
+    ro.add_argument("action", choices=["diagnose", "eval", "fresh"],
+                    help="diagnose: seeded dev subset of the authors' train split; eval: their eval "
+                         "split; fresh: a seeded train-split subset disjoint from the dev subset")
+    ro.add_argument("--seed", type=int, default=18)
     ro.add_argument("--cache", default="data/nmt")
     ro.add_argument("--n-normal", type=int, default=120, dest="n_normal")
     ro.add_argument("--n-abnormal", type=int, default=80, dest="n_abnormal")

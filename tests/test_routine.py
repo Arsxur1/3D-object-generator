@@ -207,3 +207,13 @@ def test_pd_mimics_are_uncertain(configs):
         ev = _ev("lpds", group="periodic", meta={"artifact_hypothesis": mimic})
         assert eng.label_event(ev, adult).value == "uncertain"
     assert eng.label_event(_ev("lpds", group="periodic"), adult).value == "pathologic"
+
+
+def test_fresh_subset_is_disjoint_from_dev():
+    from neurolens.datasets.nmt import NMTRecord
+    from neurolens.evaluation.routine_eval import diagnostic_subset, fresh_subset
+
+    recs = [NMTRecord(i, i % 3 == 0, 30.0, "male", "train") for i in range(1000)]
+    dev = {r.record_id for r in diagnostic_subset(recs, 120, 80)}
+    fresh = fresh_subset(recs, 150, 100)
+    assert len(fresh) == 250 and not dev & {r.record_id for r in fresh}
