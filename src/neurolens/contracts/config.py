@@ -100,6 +100,11 @@ class Thresholds(BaseModel):
         default=0.7, ge=0, le=1,
         description="Delta-band autocorrelation at one period (6 s windows) for a channel to "
                     "count as rhythmic (increment 17; replaces the spectral-concentration test).")
+    pd_ecg_freq_hz: tuple[float, float] = Field(
+        default=(0.75, 2.0), description="Cardiac rate range (45-120 /min) for the ECG-mimic check.")
+    pd_ecg_isi_cv_max: float = Field(
+        default=0.05, ge=0, description="Below this inter-discharge CV at cardiac rate the pattern is "
+                                        "an ECG-artefact hypothesis (increment 18).")
     pd_min_duration_s: float = Field(default=10.0, gt=0, description="ACNS: < 10 s = very brief.")
     focal_slowing_min_diff: float = Field(
         default=0.25, ge=0, le=1,

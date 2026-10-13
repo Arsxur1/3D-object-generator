@@ -21,6 +21,8 @@ from ..layer1_ingest.electrodes import is_eeg_channel
 from .base import Detector
 
 _MIDLINE = {"Fz", "Cz", "Pz"}
+_EAR = {"A1", "A2", "M1", "M2"}
+_OCULAR = {"FP1", "FP2", "F7", "F8"}
 
 
 def _side(channel: str) -> str:
@@ -109,7 +111,10 @@ class PeriodicPatternDetector(Detector):
             run["channels"] = sorted(c for c, k in counts.items() if k >= 0.5 * len(in_run))
             return run
 
-        eeg = [n for n in names if is_eeg_channel(n) and n not in ecg_channels]
+        # ear/mastoid electrodes are reference sites (and carry the ECG field most
+        # strongly), not scalp locations of a periodic pattern
+        eeg = [n for n in names if is_eeg_channel(n) and n not in ecg_channels
+               and n.upper() not in _EAR]
         whole = consensus_run(eeg)
         left_run = consensus_run([c for c in eeg if _side(c) in ("left", "midline")])
         right_run = consensus_run([c for c in eeg if _side(c) in ("right", "midline")])
@@ -133,7 +138,7 @@ class PeriodicPatternDetector(Detector):
             seg = data[names.index(c)][s0:s1]
             periodic[c] = {**run, "amp": float(np.percentile(np.abs(seg - np.median(seg)), 95)) if seg.size else 0.0}
 
-        n_eeg = sum(1 for n in names if is_eeg_channel(n))
+        n_eeg = sum(1 for n in names if is_eeg_channel(n) and n.upper() not in _EAR)
         chans = list(periodic)
         left = [c for c in chans if _side(c) == "left"]
         right = [c for c in chans if _side(c) == "right"]
@@ -167,6 +172,17 @@ class PeriodicPatternDetector(Detector):
             plus.append("+F")
         iic = (thr.iic_freq_hz_min <= frequency <= thr.iic_freq_hz_max) or ("+F" in plus)
 
+        # Increment 18: the two classic mimics of periodic discharges on routine EEG -
+        # ECG (cardiac-rate, almost perfectly regular) and eye movements (maximal at
+        # Fp/anterior-temporal electrodes) - make the pattern an artefact hypothesis.
+        cv_mean = float(np.mean([periodic[c]["cv"] for c in chans]))
+        dominant = max(chans, key=lambda c: periodic[c]["amp"])
+        mimic = None
+        if thr.pd_ecg_freq_hz[0] <= frequency <= thr.pd_ecg_freq_hz[1] and cv_mean < thr.pd_ecg_isi_cv_max:
+            mimic = "ecg"
+        elif dominant.upper() in _OCULAR:
+            mimic = "ocular"
+
         ru, uz = self.labels(code)
         return [
             Event(
@@ -190,8 +206,12 @@ class PeriodicPatternDetector(Detector):
                     EventEvidence(feature="pd_channel_fraction", value=round(frac, 3)),
                     EventEvidence(feature="fast_power_fraction", value=round(fast, 3),
                                   reference=f"+F if >= {thr.pd_plus_fast_ratio}"),
+                    EventEvidence(feature="pd_dominant_channel_amp_uv",
+                                  value=round(periodic[dominant]["amp"], 1), unit="uV",
+                                  channels=[dominant]),
                 ],
-                metadata={"prevalence": prevalence, "iic": iic},
+                metadata={"prevalence": prevalence, "iic": iic, "dominant_channel": dominant,
+                          **({"artifact_hypothesis": mimic} if mimic else {})},
             )
         ]
 

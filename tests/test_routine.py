@@ -190,3 +190,20 @@ def test_impression_caveat(configs):
     assert "не прошло проверку" in _impression_with_validation(imp, ImpressionConfig()).ru
     v = _impression_with_validation(imp, ImpressionConfig(routine_validated=True, specificity=0.6, sensitivity=0.75))
     assert "специфичность 0.60" in v.ru and "sezgirlik 0.75" in v.uz
+
+
+def test_fast_pdr_is_not_evidence_of_slowing(configs):
+    eng = PhysiologyEngine(NormsEngine(configs.norms))
+    fast_infant = _ev("diffuse_slowing", evidence=[EventEvidence(feature="pdr_hz", value=7.75)])
+    assert eng.label_event(fast_infant, PatientInfo(age_years=0)).value == "uncertain"
+    slow_adult = _ev("diffuse_slowing", evidence=[EventEvidence(feature="pdr_hz", value=6.0)])
+    assert eng.label_event(slow_adult, PatientInfo(age_years=40)).value == "pathologic"
+
+
+def test_pd_mimics_are_uncertain(configs):
+    eng = PhysiologyEngine(NormsEngine(configs.norms))
+    adult = PatientInfo(age_years=40)
+    for mimic in ("ecg", "ocular"):
+        ev = _ev("lpds", group="periodic", meta={"artifact_hypothesis": mimic})
+        assert eng.label_event(ev, adult).value == "uncertain"
+    assert eng.label_event(_ev("lpds", group="periodic"), adult).value == "pathologic"

@@ -70,6 +70,9 @@ class PhysiologyEngine:
                 return PhysiologyLabel.UNCERTAIN
         if event.code == "ictal_ml" and event.confidence < ICTAL_ML_PATHOLOGIC:
             return PhysiologyLabel.UNCERTAIN
+        # periodic pattern matching an ECG / ocular mimic (increment 18): kept, for review
+        if event.metadata.get("artifact_hypothesis") in ("ecg", "ocular"):
+            return PhysiologyLabel.UNCERTAIN
 
         # Neonatal background is physiologic iff appropriate for the PMA
         # (discontinuity is normal in a preterm, abnormal at term).
@@ -96,9 +99,11 @@ class PhysiologyEngine:
                 # posterior rhythm, relative slow power alone cannot establish slowing
                 return PhysiologyLabel.UNCERTAIN
             if pdr is not None and pdr > 0:  # 0 = no posterior rhythm identified
-                normal = self.norms.pdr_is_normal(pdr, patient)
-                if normal is True:
-                    return PhysiologyLabel.UNCERTAIN  # PDR ok -> re-examine slowing claim
+                rng = self.norms.pdr_expected_range(patient)
+                # only a PDR *below* the age range supports slowing (increment 18: a faster
+                # rhythm - e.g. 7.75 Hz in an infant - was read as evidence of slowing)
+                if rng is not None and pdr >= rng[0]:
+                    return PhysiologyLabel.UNCERTAIN  # PDR not slow -> re-examine slowing claim
         return base
 
     def variant_hint(self, event: Event) -> str | None:
