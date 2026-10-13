@@ -11,7 +11,7 @@ apply_to_neonates: false
 annotate_candidates: true
 # increment 19: spike candidates are pathologic only with >= recurrent_min_count separate
 # learned detections at recurrent_threshold over the whole record (set by prereg19)
-recurrent_threshold: 0.98
+recurrent_threshold: null
 recurrent_min_count: 2
 provenance:
   preregistration: docs/preregistration_increment15.md

@@ -1,0 +1,44 @@
+{
+ "new": {
+  "n_normal": 150,
+  "n_abnormal": 100,
+  "tn": 97,
+  "tp": 72,
+  "specificity": 0.6466666666666666,
+  "specificity_ci95": [
+   0.5645247450850535,
+   0.7228880546887881
+  ],
+  "sensitivity": 0.72,
+  "sensitivity_ci95": [
+   0.6213329952827327,
+   0.8052063725088184
+  ],
+  "balanced_accuracy": 0.6833333333333333
+ },
+ "old": {
+  "n_normal": 150,
+  "n_abnormal": 100,
+  "tn": 96,
+  "tp": 75,
+  "specificity": 0.64,
+  "specificity_ci95": [
+   0.557679397402274,
+   0.7166703878109575
+  ],
+  "sensitivity": 0.75,
+  "sensitivity_ci95": [
+   0.6534475042411916,
+   0.8312202619006582
+  ],
+  "balanced_accuracy": 0.6950000000000001
+ },
+ "hypotheses": {
+  "H1_sensitivity_gain_at_least_0.03": false,
+  "H2_specificity_not_lower_by_more_than_0.03": true,
+  "H3_specificity_at_least_0.55": true
+ },
+ "decision": {
+  "keep_recurrence_rule": false
+ }
+}
